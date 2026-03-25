@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS = {
   playbackMode: "interactive",
   betweenScenesMs: 1800,
   waitForIframeReadyTimeoutMs: 8000,
+  presentControlsPosition: "bottom",
   startDelayMs: 0,
   endCardDurationMs: 0,
 };

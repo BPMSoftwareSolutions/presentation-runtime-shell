@@ -8,6 +8,11 @@ function getDeckTotal(runtime) {
   return runtime.getDeck()?.scenes?.length ?? 0;
 }
 
+function getControlsPosition(presentation) {
+  const raw = presentation?.settings?.presentControlsPosition;
+  return raw === "top" ? "top" : "bottom";
+}
+
 function createNotFound(rootEl) {
   rootEl.innerHTML = `<div class="ps-not-found">Presentation not found.</div>`;
   return {
@@ -23,8 +28,13 @@ function createPresentSession({ id, store, rootEl }) {
     return createNotFound(rootEl);
   }
 
+  const controlsPosition = getControlsPosition(presentation);
+  const positionClass = controlsPosition === "top"
+    ? "ps-player--controls-top"
+    : "ps-player--controls-bottom";
+
   rootEl.innerHTML = `
-    <div class="ps-player" id="ps-player">
+    <div class="ps-player ${positionClass}" id="ps-player">
       <div class="ps-header">
         <span class="ps-title" id="ps-title"></span>
         <span class="ps-counter" id="ps-counter">— / —</span>

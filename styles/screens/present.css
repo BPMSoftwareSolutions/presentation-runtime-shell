@@ -74,6 +74,16 @@
   transition: opacity 180ms ease;
 }
 
+.ps-player--controls-top .ps-controls {
+  top: 56px;
+  bottom: auto;
+}
+
+.ps-player--controls-bottom .ps-controls {
+  top: auto;
+  bottom: 14px;
+}
+
 .controls-visible .ps-controls {
   opacity: 1;
   pointer-events: auto;
@@ -170,6 +180,16 @@
     gap: 8px;
     width: calc(100vw - 20px);
     justify-content: center;
+  }
+
+  .ps-player--controls-top .ps-controls {
+    top: 52px;
+    bottom: auto;
+  }
+
+  .ps-player--controls-bottom .ps-controls {
+    top: auto;
+    bottom: 10px;
   }
 
   .ps-scene-label {

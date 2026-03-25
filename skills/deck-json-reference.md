@@ -54,6 +54,7 @@ Complete reference for the presentation contract JSON format. Files live in `src
   "playbackMode": "interactive",
   "betweenScenesMs": 1800,
   "waitForIframeReadyTimeoutMs": 8000,
+  "presentControlsPosition": "bottom",
   "startDelayMs": 0,
   "endCardDurationMs": 0
 }
@@ -65,6 +66,7 @@ Complete reference for the presentation contract JSON format. Files live in `src
 | `playbackMode` | `"interactive"` \| `"autoplay"` \| `"capture"` | `"interactive"` | Default playback mode. Can be overridden at runtime in the inspector. |
 | `betweenScenesMs` | number | `1800` | Auto-advance delay used in `autoplay` and `capture` modes, and for scenes with `advance.type: "auto"`. |
 | `waitForIframeReadyTimeoutMs` | number | `8000` | How long to wait for an `iframe:ready` event before giving up and continuing. |
+| `presentControlsPosition` | `"bottom"` \| `"top"` | `"bottom"` | Link-only mode transport position. Use `"top"` when bottom-of-screen scene controls would conflict with presentation content. |
 | `startDelayMs` | number | `0` | Pause before the first scene. Useful when recording — gives time to position the recorder. |
 | `endCardDurationMs` | number | `0` | Hold the last scene for N ms before the runtime marks itself complete. |
 

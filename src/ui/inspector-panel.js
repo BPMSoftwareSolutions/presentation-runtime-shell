@@ -29,6 +29,11 @@ const PLAYBACK_MODES = [
   { value: "capture",     label: "Capture (deterministic)" },
 ];
 
+const PRESENT_CONTROLS_POSITIONS = [
+  { value: "bottom", label: "Bottom" },
+  { value: "top",    label: "Top" },
+];
+
 function esc(str) {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -174,6 +179,16 @@ export function createInspectorPanel({
         />
       </div>
 
+      <div class="ws-inspector-section">
+        <label class="ws-inspector-label" for="ws-insp-present-controls">Link-only controls position</label>
+        <select id="ws-insp-present-controls" class="ws-inspector-select" aria-label="Link-only controls position">
+          ${PRESENT_CONTROLS_POSITIONS.map(
+            ({ value, label }) =>
+              `<option value="${value}" ${(settings.presentControlsPosition || "bottom") === value ? "selected" : ""}>${label}</option>`
+          ).join("")}
+        </select>
+      </div>
+
       <div class="ws-inspector-divider"></div>
 
       <div class="ws-inspector-section">
@@ -266,6 +281,11 @@ export function createInspectorPanel({
       saveSettings({ typingSpeedMs: Math.max(0, parseInt(typingInput.value, 10) || 0) });
     });
     typingInput.addEventListener("keydown", (e) => { if (e.key === "Enter") typingInput.blur(); });
+
+    el.querySelector("#ws-insp-present-controls").addEventListener("change", (e) => {
+      const value = e.target.value === "top" ? "top" : "bottom";
+      saveSettings({ presentControlsPosition: value });
+    });
 
     // ── Actions ───────────────────────────────────────────────────────────
 
