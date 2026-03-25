@@ -1,0 +1,159 @@
+{
+  "id": "iep-scheduling-demo-v2",
+  "title": "AI-Assisted IEP Scheduling",
+  "status": "ready",
+  "theme": { "shell": "dark", "accent": "violet", "presenterPosition": "left" },
+  "settings": {
+    "typingSpeedMs": 22,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1200,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "iep-s01",
+      "title": "Welcome — Student Roster",
+      "type": "title",
+      "editIntent": "Quick welcome scene. Student roster fades in showing 5 students (Emma, Liam, Sophia, Ava, Noah) with grade and service minutes. Right panel shows total load and time slots. Single narration line. No operator action. System displays and auto-advances after 8-10 seconds.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Let's build your schedule from the students you already support.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-01-welcome/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "roster:displayed" }
+    },
+    {
+      "id": "iep-s02",
+      "title": "Load Your Students",
+      "type": "narrative",
+      "editIntent": "Data import setup. Split-screen: left shows messy text input area (simulated), right shows live preview cards that populate as animation runs. Line-by-line transformation from unstructured text to parsed student records. Narration explains the frictionless import. Button click triggers animation, then auto-advances. Shows Molly that data ingestion is effortless.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Just paste your student list — even if it's messy. I'll structure everything for you.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-02-load/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "students:loaded" }
+    },
+    {
+      "id": "iep-s03",
+      "title": "Generate Groups",
+      "type": "narrative",
+      "editIntent": "Operator action #1. Student cards shown. Prominent Generate Groups button. Clicking triggers processing spinner, groups are revealed (Group A: 2 Grade-3 students, Group B: 1 Grade-4, 1:1 Required: 2 students). System auto-advances after groups appear.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Five students. Mixed grades and constraints.", "pauseMs": 600 },
+          { "text": " Click Generate Groups — the system takes it from there.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-03-grouping/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "group:generated" }
+    },
+    {
+      "id": "iep-s04",
+      "title": "Build Weekly Schedule",
+      "type": "narrative",
+      "editIntent": "Operator action #2. Groups displayed on left. Build Weekly Schedule button prominent at bottom. Clicking triggers processing and reveals a full 5-day schedule grid. Status indicators confirm all minutes satisfied and no conflicts.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Groups locked in.", "pauseMs": 600 },
+          { "text": " Click Build Schedule — watch a full week appear.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-04-schedule/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "schedule:built" }
+    },
+    {
+      "id": "iep-s05",
+      "title": "Add Student — Quick Confirm",
+      "type": "narrative",
+      "editIntent": "Operator action #3. New student Mason shown as a display-only confirmation card (Grade 3, 120 min/wk, Can group: Yes). Alert banner reads New Student Enrollment. No form fields — this feels like approval, not data entry. Click Add to Schedule triggers processing and signals the shell.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "New student incoming.", "pauseMs": 700 },
+          { "text": " Grade three. Can group. One-twenty a week.", "pauseMs": 700 },
+          { "text": " Click Add to Schedule — and watch what doesn't break.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-05-disruption/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "student:added" }
+    },
+    {
+      "id": "iep-s06",
+      "title": "Automatic Rebalance — Hero Moment",
+      "type": "narrative",
+      "editIntent": "THE HERO MOMENT. Zero operator action. 3-beat choreography: Beat 1 — Detect (new constraint message, 1.5s). Beat 2 — Adjust (Mason slides into Group A, schedule blocks glow green, 3-4s). Beat 3 — Confirm (header settles to Rebalanced, all constraints maintained message, 1-2s). Fully automatic. This is the sell.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "No rebuild.", "pauseMs": 800 },
+          { "text": " Mason absorbed. All constraints still met.", "pauseMs": 700 },
+          { "text": " This is what it was built for.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-06-rebalance/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "rebalance:complete" }
+    },
+    {
+      "id": "iep-s07",
+      "title": "Before vs After — The Relief",
+      "type": "closing",
+      "editIntent": "Side-by-side relief contrast. Without Help: starting over, conflicts, guesswork. With Scheduler: adjusts on the fly, prevents conflicts, validates in seconds. Focus is emotional — relief, not metrics. Three points each, progressive fade-in. Narration: No starting over. No conflicts. No guesswork.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "No starting over.", "pauseMs": 600 },
+          { "text": " No conflicts.", "pauseMs": 600 },
+          { "text": " No guesswork.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-07-compare/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "waitForEvent", "event": "comparison:displayed" }
+    },
+    {
+      "id": "iep-s08",
+      "title": "Close — The Kind of Relief Educators Need",
+      "type": "closing",
+      "editIntent": "Final emotional anchor. Centered hero headline with gradient text: This is the kind of relief busy educators need. Glowing orb background. Subheading: Add a student. Press a button. Move on with your day. Restart Demo and Close CTAs. Manual advance — presenter holds here.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "This is the kind of relief busy educators need.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/iep-scheduling/scene-08-close/index.html",
+        "reloadOnEnter": true
+      },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

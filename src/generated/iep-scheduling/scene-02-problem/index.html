@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Problem</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    .scene { position: relative; height: 100%; width: 100%; padding: 22px 28px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Topbar */
+    .topbar {
+      display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 18px;
+      background: rgba(255,255,255,0.035); backdrop-filter: blur(18px);
+      opacity: 0; animation: reveal 0.6s 0.1s ease forwards;
+    }
+    .topbar-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: #ff6a6a; font-weight: 800;
+    }
+    .topbar-title { font-size: 13px; font-weight: 700; color: #edf4ff; }
+    .spacer { flex: 1; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    }
+    .badge--red { border: 1px solid rgba(255,106,106,0.30); background: rgba(255,106,106,0.10); color: #ff6a6a; }
+
+    /* Main grid */
+    .main-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      backdrop-filter: blur(18px); overflow: hidden;
+      opacity: 0; animation: reveal 0.6s ease forwards;
+    }
+    .panel-header {
+      display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.025);
+    }
+    .panel-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800; }
+    .panel-title--amber { color: #f5b94c; }
+    .panel-title--red { color: #ff6a6a; }
+    .panel-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+    .stat-row {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      border-radius: 13px; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-amber { background: #f5b94c; box-shadow: 0 0 8px rgba(245,185,76,0.5); }
+    .dot-red   { background: #ff6a6a; box-shadow: 0 0 8px rgba(255,106,106,0.5); }
+    .dot-violet{ background: #a78bfa; box-shadow: 0 0 8px rgba(167,139,250,0.5); }
+    .stat-label { font-size: 13px; font-weight: 700; color: #edf4ff; }
+    .stat-note  { margin-left: auto; font-size: 12px; color: #70819a; }
+    .stat-note--warn { color: #f5b94c; }
+    .stat-note--red  { color: #ff6a6a; }
+
+    /* Footer */
+    .footer {
+      padding: 14px 18px; border: 1px solid rgba(255,106,106,0.18); border-radius: 14px;
+      background: rgba(255,106,106,0.06); text-align: center;
+      font-size: 14px; font-weight: 700; color: #ff8f8f; letter-spacing: 0.01em;
+      opacity: 0; animation: reveal 0.6s 0.55s ease forwards;
+    }
+
+    @keyframes reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="topbar-label">Problem</span>
+      <span class="topbar-title">Scheduling Keeps Breaking</span>
+      <div class="spacer"></div>
+      <span class="badge badge--red">Manual Process</span>
+    </div>
+
+    <div class="main-grid">
+      <div class="panel" style="animation-delay:0.2s">
+        <div class="panel-header">
+          <span class="panel-title panel-title--amber">Student Load</span>
+        </div>
+        <div class="panel-body">
+          <div class="stat-row">
+            <div class="stat-dot dot-amber"></div>
+            <span class="stat-label">18 students</span>
+            <span class="stat-note stat-note--warn">+5 added last 2 months</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-dot dot-amber"></div>
+            <span class="stat-label">3 grade levels</span>
+            <span class="stat-note">Different schedules per grade</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-dot dot-violet"></div>
+            <span class="stat-label">Mixed needs</span>
+            <span class="stat-note">Some 1:1, some groupable</span>
+          </div>
+          <div class="stat-row" style="margin-top:6px; border-color: rgba(245,185,76,0.15); background: rgba(245,185,76,0.04);">
+            <div class="stat-dot dot-amber"></div>
+            <span class="stat-label">Required minutes</span>
+            <span class="stat-note stat-note--warn">120 / 90 / 150 min/week</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="animation-delay:0.3s">
+        <div class="panel-header">
+          <span class="panel-title panel-title--red">Reality</span>
+        </div>
+        <div class="panel-body">
+          <div class="stat-row">
+            <div class="stat-dot dot-red"></div>
+            <span class="stat-label">Lunch conflicts</span>
+            <span class="stat-note stat-note--red">Every new student</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-dot dot-red"></div>
+            <span class="stat-label">Teacher availability</span>
+            <span class="stat-note stat-note--red">Shifts constantly</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-dot dot-red"></div>
+            <span class="stat-label">Pull-out vs in-class</span>
+            <span class="stat-note stat-note--red">Hard to balance</span>
+          </div>
+          <div class="stat-row" style="margin-top:6px; border-color: rgba(255,106,106,0.15); background: rgba(255,106,106,0.04);">
+            <div class="stat-dot dot-red"></div>
+            <span class="stat-label">Every change</span>
+            <span class="stat-note stat-note--red">Full schedule rebuild</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer"><span id="fnarr"></span></div>
+  </div>
+  <script>
+    (async () => {
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(1100);
+      const el = document.getElementById('fnarr');
+      for (const ch of '"Every change forces a full schedule rebuild."') { el.textContent += ch; await sleep(22); }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Action Playbook</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0; font-size: 11px;
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .topbar-title { font-weight: 700; font-size: 11px; letter-spacing: 0.1em; color: #10b981; }
+    .topbar-meta { color: #94a3b8; }
+    .topbar-meta strong { color: #eef2ff; }
+    .mode-badge { margin-left: auto; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 99px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+
+    /* Narration bar */
+    .narration-bar {
+      display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+      background: rgba(16,185,129,0.04); border-bottom: 1px solid rgba(16,185,129,0.1);
+      font-size: 12px; color: #94a3b8; flex-shrink: 0;
+      opacity: 0; animation: reveal-in 0.5s 0.15s ease forwards;
+    }
+    .narr-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #10b981; border: 1px solid rgba(16,185,129,0.3); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #10b981; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Three-panel body */
+    .body { flex: 1; display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .panel { background: #08101d; padding: 14px 16px; overflow: hidden; }
+    .panel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: #818cf8; margin-bottom: 12px; font-weight: 600; }
+
+    /* Playbook card */
+    .playbook-header {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      border: 1px solid rgba(16,185,129,0.2); border-radius: 8px 8px 0 0;
+      background: rgba(16,185,129,0.04); border-bottom: none;
+    }
+    .pb-tag { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: #475569; }
+    .pb-name { font-size: 13px; font-weight: 600; color: #10b981; font-family: monospace; }
+
+    .playbook-body { border: 1px solid rgba(16,185,129,0.15); border-radius: 0 0 8px 8px; padding: 10px 14px; margin-bottom: 14px; }
+
+    .step {
+      display: flex; align-items: flex-start; gap: 10px; padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px;
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);
+      color: #10b981; font-size: 10px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .step-text { color: #94a3b8; line-height: 1.5; }
+    .step-text strong { color: #eef2ff; }
+
+    /* Outcome cards (center) */
+    .outcome-card {
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
+    }
+    .outcome-card--pos { border: 1px solid rgba(16,185,129,0.25); background: rgba(16,185,129,0.05); }
+    .outcome-card--neutral { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+    .oc-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #475569; margin-bottom: 5px; }
+    .oc-value { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .oc-value--green { color: #10b981; }
+    .oc-sub { font-size: 10px; color: #475569; margin-top: 3px; }
+
+    /* Before / After (right) */
+    .ba-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+    }
+    .ba-card {
+      border-radius: 7px; padding: 10px 12px;
+    }
+    .ba-card--before { border: 1px solid rgba(239,68,68,0.2); background: rgba(239,68,68,0.04); }
+    .ba-card--after  { border: 1px solid rgba(16,185,129,0.2); background: rgba(16,185,129,0.04); }
+    .ba-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 8px; }
+    .ba-label--before { color: #ef4444; }
+    .ba-label--after  { color: #10b981; }
+    .ba-metric { font-size: 11px; color: #94a3b8; padding: 2px 0; }
+    .ba-metric strong { display: block; font-size: 13px; font-weight: 700; }
+    .ba-metric--before strong { color: #ef4444; }
+    .ba-metric--after  strong { color: #10b981; }
+
+    .conf-block { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 12px; }
+    .conf-arc  { width: 44px; height: 44px; flex-shrink: 0; }
+    .conf-text { display: flex; flex-direction: column; gap: 3px; }
+    .conf-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #475569; }
+    .conf-val   { font-family: monospace; color: #10b981; font-weight: 700; font-size: 13px; }
+    .conf-sub   { font-size: 9px; color: #475569; }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.35s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="topbar-title">ACTION PLAYBOOK</span>
+      <span class="topbar-meta">Playbook: <strong>margin-recovery</strong> &nbsp;·&nbsp; Segment: <strong>Retail</strong></span>
+      <span class="mode-badge">Recovery</span>
+    </div>
+
+    <div class="narration-bar">
+      <span class="narr-label">AI Analyst</span>
+      <span id="narr"></span><span class="cursor"></span>
+    </div>
+
+    <div class="body">
+      <!-- Left: Playbook steps -->
+      <div class="panel">
+        <div class="panel-label">Recommended Actions</div>
+
+        <div class="playbook-header" data-reveal>
+          <span class="pb-tag">PLAYBOOK</span>
+          <span class="pb-name">margin-recovery</span>
+        </div>
+        <div class="playbook-body">
+          <div class="step" data-reveal>
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Reduce discounting by 2%</strong> — tighten pricing discipline, particularly in the Northeast region</div>
+          </div>
+          <div class="step" data-reveal>
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Shift sales mix toward high-margin services</strong> — prioritize Consulting and Managed Ops over Staffing</div>
+          </div>
+          <div class="step" data-reveal>
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Reallocate labor to top-yield accounts</strong> — optimize labor allocation across client portfolio</div>
+          </div>
+          <div class="step" data-reveal>
+            <div class="step-num">4</div>
+            <div class="step-text"><strong>Tighten pricing discipline in weak regions</strong> — enforce floor pricing in accounts with sub-30% margin</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Projected outcome -->
+      <div class="panel">
+        <div class="panel-label">Projected Outcome</div>
+
+        <div class="outcome-card outcome-card--pos" data-reveal>
+          <div class="oc-label">Margin Recovery</div>
+          <div class="oc-value oc-value--green">+1.4 pts</div>
+          <div class="oc-sub">33.8% → est. 35.2%</div>
+        </div>
+
+        <div class="outcome-card outcome-card--pos" data-reveal>
+          <div class="oc-label">Operating Profit Uplift</div>
+          <div class="oc-value oc-value--green">+$95K</div>
+          <div class="oc-sub">$0.81M → est. $0.905M</div>
+        </div>
+
+        <div class="outcome-card outcome-card--neutral" data-reveal>
+          <div class="oc-label">Revenue Impact</div>
+          <div class="oc-value" style="color:#eef2ff;font-size:16px;">Neutral to slight +</div>
+          <div class="oc-sub">no material revenue risk from actions</div>
+        </div>
+
+        <div class="conf-block" data-reveal>
+          <svg class="conf-arc" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/>
+            <circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.2"
+                    stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="72"/>
+          </svg>
+          <div class="conf-text">
+            <div class="conf-label">Projection Confidence</div>
+            <div class="conf-val">medium-high</div>
+            <div class="conf-sub">72% confidence score</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Before / After -->
+      <div class="panel">
+        <div class="panel-label">Before / After</div>
+
+        <div class="ba-row" data-reveal>
+          <div class="ba-card ba-card--before">
+            <div class="ba-label ba-label--before">Current State</div>
+            <div class="ba-metric ba-metric--before">
+              <strong>33.8%</strong>
+              Gross Margin
+            </div>
+          </div>
+          <div class="ba-card ba-card--after">
+            <div class="ba-label ba-label--after">Projected</div>
+            <div class="ba-metric ba-metric--after">
+              <strong>35.2%</strong>
+              Gross Margin
+            </div>
+          </div>
+        </div>
+
+        <div class="ba-row" data-reveal>
+          <div class="ba-card ba-card--before">
+            <div class="ba-metric ba-metric--before">
+              <strong>$0.81M</strong>
+              Op Profit
+            </div>
+          </div>
+          <div class="ba-card ba-card--after">
+            <div class="ba-metric ba-metric--after">
+              <strong>$0.905M</strong>
+              Op Profit
+            </div>
+          </div>
+        </div>
+
+        <div class="ba-row" data-reveal>
+          <div class="ba-card ba-card--before">
+            <div class="ba-metric ba-metric--before">
+              <strong>elevated</strong>
+              Discounts
+            </div>
+          </div>
+          <div class="ba-card ba-card--after">
+            <div class="ba-metric ba-metric--after">
+              <strong>normalized</strong>
+              Discounts
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.1}s`;
+    });
+
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Four actions. Specific, measurable, immediately executable.", pauseMs: 700 },
+        { text: " Margin recovers 1.4 points.", pauseMs: 700 },
+        { text: " Operating profit up $95K — without touching revenue targets.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    // Arc gauge animations
+    document.querySelectorAll('.arc-fill[data-pct]').forEach(el => {
+      const pct = parseFloat(el.dataset.pct);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0');
+      const start = performance.now() + (revealDelay + 0.4) * 1000;
+      const duration = 1000;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.setAttribute('stroke-dasharray', `${(pct * eased).toFixed(2)} 100`);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.setAttribute('stroke-dasharray', `${pct} 100`);
+      })(performance.now());
+    });
+
+    // Count-up projected values
+    document.querySelectorAll(".oc-value").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+      const raw = textNode.textContent.trim();
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+      const [, prefix, num, suffix] = match;
+      const endVal = parseFloat(num);
+      const decimals = num.includes('.') ? num.split('.')[1].length : 0;
+      if (isNaN(endVal)) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const start = performance.now() + (revealDelay + 0.3) * 1000;
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / 800, 1);
+        const e = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + (endVal * e).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>

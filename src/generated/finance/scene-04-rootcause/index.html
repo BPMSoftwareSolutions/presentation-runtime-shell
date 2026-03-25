@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Root Cause Analysis</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0; font-size: 11px;
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .topbar-title { font-weight: 700; font-size: 11px; letter-spacing: 0.1em; color: #a78bfa; }
+    .topbar-meta { color: #94a3b8; }
+    .topbar-meta strong { color: #eef2ff; }
+    .mode-badge { margin-left: auto; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 99px; background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; }
+
+    /* Narration bar */
+    .narration-bar {
+      display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+      background: rgba(167,139,250,0.04); border-bottom: 1px solid rgba(167,139,250,0.1);
+      font-size: 12px; color: #94a3b8; flex-shrink: 0;
+      opacity: 0; animation: reveal-in 0.5s 0.15s ease forwards;
+    }
+    .narr-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d28d9; border: 1px solid rgba(109,40,217,0.3); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #a78bfa; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Two-panel body */
+    .body { flex: 1; display: grid; grid-template-columns: 1.2fr 1fr; gap: 1px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .panel { background: #08101d; padding: 14px 16px; overflow: hidden; }
+    .panel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: #a78bfa; margin-bottom: 12px; font-weight: 600; }
+
+    /* Primary driver headline */
+    .primary-signal {
+      border: 1px solid rgba(239,68,68,0.3); border-radius: 8px;
+      background: rgba(239,68,68,0.05); padding: 12px 16px; margin-bottom: 16px;
+    }
+    .primary-signal-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: #ef4444; margin-bottom: 8px; }
+    .primary-signal-text { font-size: 15px; font-weight: 600; color: #eef2ff; line-height: 1.4; }
+    .primary-signal-sub { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+
+    /* Driver list */
+    .driver-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px;
+    }
+    .driver-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .driver-text { color: #94a3b8; line-height: 1.5; flex: 1; }
+    .driver-text strong { color: #eef2ff; }
+
+    /* Supporting data */
+    .support-block {
+      margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 12px; display: flex; flex-direction: column; gap: 5px;
+    }
+    .support-row { display: flex; justify-content: space-between; font-size: 11px; }
+    .support-key { color: #475569; }
+    .support-val { font-family: monospace; color: #eef2ff; }
+    .support-val--red { color: #ef4444; }
+
+    /* AI notes (right panel) */
+    .terminal { font-family: monospace; font-size: 11px; line-height: 1.9; }
+    .t-line       { color: #94a3b8; }
+    .t-line--dim  { color: #475569; }
+    .t-line--alert { color: #f59e0b; }
+    .t-line--ok   { color: #10b981; }
+    .t-line--violet { color: #a78bfa; }
+    .t-prompt     { color: #4b5563; }
+
+    .confidence-gauge {
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .conf-arc  { width: 44px; height: 44px; flex-shrink: 0; }
+    .conf-text { display: flex; flex-direction: column; gap: 3px; }
+    .conf-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #475569; }
+    .conf-val   { font-family: monospace; color: #a78bfa; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+    .conf-sub   { font-size: 9px; color: #475569; }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.35s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="topbar-title">ROOT CAUSE ANALYSIS</span>
+      <span class="topbar-meta">Segment: <strong>Retail</strong></span>
+      <span class="mode-badge">Diagnosis</span>
+    </div>
+
+    <div class="narration-bar">
+      <span class="narr-label">AI Analyst</span>
+      <span id="narr"></span><span class="cursor"></span>
+    </div>
+
+    <div class="body">
+      <!-- Left: Driver breakdown -->
+      <div class="panel">
+        <div class="panel-label">Primary Performance Driver</div>
+
+        <div class="primary-signal" data-reveal>
+          <div class="primary-signal-label">Headline Signal</div>
+          <div class="primary-signal-text">Gross Margin ↓ -2.1 pts vs Last Year</div>
+          <div class="primary-signal-sub">Decline is primarily driven by labor inflation and a shift toward lower-margin offerings.</div>
+        </div>
+
+        <div class="panel-label" style="margin-bottom:8px;">Driver Breakdown</div>
+
+        <div class="driver-item" data-reveal>
+          <div class="driver-num">1</div>
+          <div class="driver-text"><strong>Labor cost +8%</strong> — rising faster than revenue growth, compressing per-unit margin</div>
+        </div>
+        <div class="driver-item" data-reveal>
+          <div class="driver-num">2</div>
+          <div class="driver-text"><strong>Mix shift toward lower-margin offerings</strong> — Staffing Services share fell from 42% to 39%</div>
+        </div>
+        <div class="driver-item" data-reveal>
+          <div class="driver-num">3</div>
+          <div class="driver-text"><strong>Discounting increased in Northeast region</strong> — avg discount rate up 1.1 pts to 4.2%</div>
+        </div>
+        <div class="driver-item" data-reveal>
+          <div class="driver-num">4</div>
+          <div class="driver-text"><strong>Volume growth insufficient to offset</strong> — top-line expansion did not cover cost increases</div>
+        </div>
+
+        <div class="support-block" data-reveal>
+          <div class="support-row">
+            <span class="support-key">Margin last year</span>
+            <span class="support-val">35.9%</span>
+          </div>
+          <div class="support-row">
+            <span class="support-key">Margin current</span>
+            <span class="support-val support-val--red">33.8%</span>
+          </div>
+          <div class="support-row">
+            <span class="support-key">Compression</span>
+            <span class="support-val support-val--red">-2.1 pts</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: AI Analyst Notes -->
+      <div class="panel">
+        <div class="panel-label">AI Analyst Notes</div>
+        <div class="terminal">
+          <div class="t-line t-line--dim"    data-reveal><span class="t-prompt">&gt; </span>variance confirmed: MARGIN-2026-03</div>
+          <div class="t-line t-line--alert"  data-reveal><span class="t-prompt">&gt; </span>labor rising faster than revenue</div>
+          <div class="t-line t-line--alert"  data-reveal><span class="t-prompt">&gt; </span>mix shift explains margin dilution</div>
+          <div class="t-line"               data-reveal><span class="t-prompt">&gt; </span>discounting isolated to NE region</div>
+          <div class="t-line"               data-reveal><span class="t-prompt">&gt; </span>revenue growth real but not enough</div>
+          <div class="t-line t-line--violet" data-reveal><span class="t-prompt">&gt; </span>recommendation generation available</div>
+          <div class="t-line t-line--ok"    data-reveal><span class="t-prompt">&gt; </span>playbook: margin-recovery</div>
+        </div>
+
+        <div class="confidence-gauge" data-reveal>
+          <svg class="conf-arc" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/>
+            <circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#a78bfa" stroke-width="3.2"
+                    stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="87"/>
+          </svg>
+          <div class="conf-text">
+            <div class="conf-label">Diagnosis Confidence</div>
+            <div class="conf-val">0.87</div>
+            <div class="conf-sub">high confidence</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.1}s`;
+    });
+
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Three drivers. Labor, mix, and discounting.", pauseMs: 700 },
+        { text: " Labor is rising faster than revenue.", pauseMs: 700 },
+        { text: " The mix shift explains the rest.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    // Arc gauge animations
+    document.querySelectorAll('.arc-fill[data-pct]').forEach(el => {
+      const pct = parseFloat(el.dataset.pct);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0');
+      const start = performance.now() + (revealDelay + 0.4) * 1000;
+      const duration = 1000;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.setAttribute('stroke-dasharray', `${(pct * eased).toFixed(2)} 100`);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.setAttribute('stroke-dasharray', `${pct} 100`);
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>

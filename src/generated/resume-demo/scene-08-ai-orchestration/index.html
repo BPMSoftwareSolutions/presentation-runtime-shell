@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Orchestration</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #08101d; --surface: rgba(255,255,255,0.04); --surface-2: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.08); --text: #eef2ff; --muted: #94a3b8; --dim: #64748b; --violet: #a78bfa; --indigo: #818cf8; --amber: #f59e0b; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+    .scene { position: relative; height: 100%; padding: 34px 38px; display: flex; flex-direction: column; gap: 18px; }
+    .grid-lines { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 48px 48px; }
+    .orb { position: absolute; width: 440px; height: 440px; top: -130px; right: -110px; border-radius: 50%; filter: blur(100px); background: radial-gradient(circle, rgba(129,140,248,0.16), transparent 70%); }
+    .topbar { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: end; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--violet); margin-bottom: 6px; }
+    .scene-title { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; }
+    .scene-subtitle { margin-top: 7px; color: var(--muted); font-size: 14px; }
+    .badge { padding: 8px 12px; border-radius: 999px; font-size: 12px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.22); color: #fde68a; }
+    .content { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .panel-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim); margin-bottom: 14px; }
+    .stack { display: grid; gap: 12px; justify-items: center; align-content: center; height: calc(100% - 30px); }
+    .stack-box { min-width: 260px; padding: 15px 18px; border-radius: 18px; background: rgba(129,140,248,0.08); border: 1px solid rgba(129,140,248,0.24); text-align: center; }
+    .stack-box strong { display: block; margin-bottom: 6px; }
+    .stack-box span { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .stack-arrow { font-size: 20px; color: var(--dim); }
+    .list { display: grid; gap: 11px; }
+    .list-item { padding: 12px 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid rgba(255,255,255,0.08); font-size: 14px; line-height: 1.45; }
+    .quote { margin-top: 16px; padding: 15px 16px; border-radius: 16px; border: 1px solid rgba(245,158,11,0.18); background: rgba(245,158,11,0.06); color: #fde68a; font-size: 14px; line-height: 1.55; }
+    .footer { position: relative; z-index: 1; padding: 13px 16px; border-radius: 16px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.18); color: #fde68a; font-size: 14px; }
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+    <div class="orb"></div>
+    <header class="topbar" data-reveal>
+      <div>
+        <div class="eyebrow">RenderX • Orchestration Model</div>
+        <div class="scene-title">AI Orchestration Platform</div>
+        <div class="scene-subtitle">JSON-based plugin architecture driven by event orchestration and system composition.</div>
+      </div>
+      <div class="badge">Meta-System</div>
+    </header>
+    <main class="content">
+      <section class="panel" data-reveal>
+        <div class="panel-title">Core Model</div>
+        <div class="stack">
+          <div class="stack-box"><strong>Domain</strong><span>Problem space and context boundaries</span></div>
+          <div class="stack-arrow">↓</div>
+          <div class="stack-box"><strong>System</strong><span>Primary runtime behavior and coordination rules</span></div>
+          <div class="stack-arrow">↓</div>
+          <div class="stack-box"><strong>Subsystem</strong><span>Composable modules with structured ownership</span></div>
+          <div class="stack-arrow">↓</div>
+          <div class="stack-box"><strong>Meta-System</strong><span>Plugins, orchestration, and output composition</span></div>
+        </div>
+      </section>
+      <section class="panel" data-reveal>
+        <div class="panel-title">Event Flow + Insight</div>
+        <div class="list">
+          <div class="list-item">Events moved through handlers into orchestration pipelines and then into structured outputs.</div>
+          <div class="list-item">Plugins extended analytics, automation, and orchestration without changing the core engine.</div>
+          <div class="list-item">The architecture was self-documenting enough to attract contributors and demo extensibility directly.</div>
+          <div class="list-item">It also exposed a failure mode: too many layers can turn structure into accidental complexity.</div>
+        </div>
+        <div class="quote">Systems do not only fail from lack of structure. They also fail when the structure becomes the thing you are managing.</div>
+      </section>
+    </main>
+    <footer class="footer" data-reveal>event → handler → orchestration → output</footer>
+  </div>
+  <script>
+    document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+      el.style.animationDelay = `${0.12 + i * 0.14}s`;
+    });
+    window.parent.postMessage({ type: 'iframe:ready' }, '*');
+  </script>
+</body>
+</html>

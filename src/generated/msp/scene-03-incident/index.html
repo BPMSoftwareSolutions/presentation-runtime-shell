@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Incident Detected</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0; font-size: 11px;
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .topbar-title { font-weight: 700; font-size: 12px; letter-spacing: 0.08em; color: #a78bfa; }
+    .topbar-tenant { color: #a8b3cf; }
+    .topbar-tenant strong { color: #eef2ff; }
+    .mode-badge { margin-left: auto; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 99px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; animation: pulse-badge 1.5s ease-in-out infinite; }
+    @keyframes pulse-badge { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+    /* Impact metrics strip */
+    .metrics-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+    }
+    .strip-stat { background: rgba(8,16,29,0.95); padding: 9px 14px; display: flex; flex-direction: column; gap: 3px; }
+    .strip-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: #475569; }
+    .strip-value { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+    .strip-value--warn   { color: #f59e0b; }
+    .strip-value--alert  { color: #ef4444; }
+    .strip-value--violet { color: #a78bfa; }
+    .strip-sub { font-size: 9px; color: #334155; }
+
+    /* 4-panel grid */
+    .grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .panel { background: #08101d; padding: 14px 16px; overflow: hidden; }
+    .panel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: #a78bfa; margin-bottom: 10px; font-weight: 600; }
+
+    .incident-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 12px; }
+    .incident-row--active { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+    .inc-id { font-family: monospace; font-size: 11px; color: #818cf8; min-width: 120px; }
+    .inc-status { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+    .inc-status--active   { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .inc-status--resolved { background: rgba(16,185,129,0.12); color: #10b981; }
+    .inc-tenant { color: #a8b3cf; font-size: 11px; margin-left: auto; }
+
+    .msg-row { display: flex; gap: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: monospace; font-size: 11px; color: #a8b3cf; }
+    .msg-row--alert { color: #ef4444; font-weight: 600; }
+    .msg-time { color: #475569; min-width: 60px; }
+    .msg-src  { min-width: 130px; }
+
+    .node-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .node-left { display: flex; align-items: center; gap: 8px; width: 148px; flex-shrink: 0; }
+    .node-name { color: #a8b3cf; }
+    .node-row--down .node-name { color: #ef4444; font-weight: 600; }
+    .node-traffic { font-size: 10px; font-family: monospace; color: #475569; width: 96px; text-align: right; flex-shrink: 0; }
+    .node-traffic--warn { color: #f59e0b; }
+    .node-traffic--red  { color: #ef4444; }
+    .node-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .dot--ok       { background: #10b981; box-shadow: 0 0 5px rgba(16,185,129,0.6); }
+    .dot--degraded { background: #f59e0b; box-shadow: 0 0 5px rgba(245,158,11,0.6); }
+    .dot--down     { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,0.6); animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .terminal { font-family: monospace; font-size: 11px; line-height: 1.8; }
+    .t-line { color: #a8b3cf; }
+    .t-line--dim   { color: #475569; }
+    .t-line--alert { color: #f59e0b; }
+    .t-line--ok    { color: #10b981; }
+    .t-prompt { color: #4b5563; }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.35s ease forwards; }
+
+    .narration-bar {
+      display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+      background: rgba(139,92,246,0.04); border-bottom: 1px solid rgba(139,92,246,0.1);
+      font-size: 12px; color: #94a3b8; flex-shrink: 0;
+      opacity: 0; animation: reveal-in 0.5s 0.15s ease forwards;
+    }
+    .narr-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d28d9; border: 1px solid rgba(109,40,217,0.3); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #a78bfa; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .traffic-bar-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; justify-content: flex-end; }
+    .traffic-track { width: 72px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .traffic-fill { height: 100%; border-radius: 2px; width: 0; }
+    .traffic-fill--ok   { background: #10b981; }
+    .traffic-fill--warn { background: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="topbar-title">MSP COMMAND CENTER</span>
+      <span class="topbar-tenant">Tenant: <strong>Beta Retail</strong></span>
+      <span class="mode-badge">⚠ Incident Active</span>
+    </div>
+
+    <div class="narration-bar">
+      <span class="narr-label">AI</span>
+      <span id="narr"></span><span class="cursor"></span>
+    </div>
+
+    <div class="metrics-strip">
+      <div class="strip-stat" data-reveal>
+        <div class="strip-label">Affected locations</div>
+        <div class="strip-value strip-value--warn">23</div>
+        <div class="strip-sub">of 86 stores impacted</div>
+      </div>
+      <div class="strip-stat" data-reveal>
+        <div class="strip-label">Checkout latency</div>
+        <div class="strip-value strip-value--warn">4.2s</div>
+        <div class="strip-sub">↑ from 320ms baseline</div>
+      </div>
+      <div class="strip-stat" data-reveal>
+        <div class="strip-label">Revenue at risk</div>
+        <div class="strip-value strip-value--alert">$8.4k</div>
+        <div class="strip-sub">per minute, estimated</div>
+      </div>
+      <div class="strip-stat" data-reveal>
+        <div class="strip-label">Detection time</div>
+        <div class="strip-value strip-value--violet">2.1s</div>
+        <div class="strip-sub">from first anomaly signal</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-label">Incidents</div>
+        <div class="incident-row incident-row--active" data-reveal>
+          <span class="inc-id">INV-2024-0312</span>
+          <span class="inc-status inc-status--active">Active</span>
+          <span class="inc-tenant">Beta Retail</span>
+        </div>
+        <div class="incident-row" data-reveal>
+          <span class="inc-id">PAY-2024-0315</span>
+          <span class="inc-status inc-status--resolved">Resolved</span>
+          <span class="inc-tenant">Acme Corp</span>
+        </div>
+        <div class="incident-row" data-reveal>
+          <span class="inc-id">CFG-2024-0316</span>
+          <span class="inc-status inc-status--active">Active</span>
+          <span class="inc-tenant">Gamma Health</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-label">Message / Event Stream</div>
+        <div class="msg-row" data-reveal><span class="msg-time">12:01:05</span><span class="msg-src">cart-ui</span><span>cart.item_added.v1</span></div>
+        <div class="msg-row" data-reveal><span class="msg-time">12:01:05</span><span class="msg-src">checkout-service</span><span>checkout.session_started.v1</span></div>
+        <div class="msg-row msg-row--alert" data-reveal><span class="msg-time">12:01:06</span><span class="msg-src">inventory-service</span><span>NODE-2003 ← DOWN</span></div>
+        <div class="msg-row" data-reveal><span class="msg-time">12:01:06</span><span class="msg-src">acn-monitor</span><span>incident:opened INV-2024-0312</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-label">Node / Service Status</div>
+        <div class="node-row" data-reveal>
+          <div class="node-left"><span class="node-dot dot--ok"></span><span class="node-name">cart-ui</span></div>
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill traffic-fill--ok" data-target="100"></div></div><span class="node-traffic">1.2k/m</span></div>
+        </div>
+        <div class="node-row" data-reveal>
+          <div class="node-left"><span class="node-dot dot--degraded"></span><span class="node-name">checkout-service</span></div>
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill traffic-fill--warn" data-target="70"></div></div><span class="node-traffic node-traffic--warn">842/m ↓34%</span></div>
+        </div>
+        <div class="node-row" data-reveal>
+          <div class="node-left"><span class="node-dot dot--ok"></span><span class="node-name">payments-service</span></div>
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill traffic-fill--ok" data-target="88"></div></div><span class="node-traffic">stable</span></div>
+        </div>
+        <div class="node-row node-row--down" data-reveal>
+          <div class="node-left"><span class="node-dot dot--down"></span><span class="node-name">inventory-service</span></div>
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill" data-target="0"></div></div><span class="node-traffic node-traffic--red">0/m · 2.1k queued</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-label">AI Operator Terminal</div>
+        <div class="terminal">
+          <div class="t-line t-line--dim"   data-reveal><span class="t-prompt">&gt; </span>switching context: Beta Retail</div>
+          <div class="t-line t-line--alert"  data-reveal><span class="t-prompt">&gt; </span>incident detected: INV-2024-0312</div>
+          <div class="t-line"               data-reveal><span class="t-prompt">&gt; </span>root cause: inventory-service unavailable</div>
+          <div class="t-line"               data-reveal><span class="t-prompt">&gt; </span>impact: checkout degraded, payments unaffected</div>
+          <div class="t-line t-line--ok"    data-reveal><span class="t-prompt">&gt; </span>recommended action: restart inventory-service</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Beta Retail just triggered an incident.", pauseMs: 700 },
+        { text: " Inventory service went down.", pauseMs: 600 },
+        { text: " The ACN detected it in 2.1 seconds — before any human noticed.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.09}s`;
+    });
+
+    // Traffic bar animations
+    document.querySelectorAll('.traffic-fill[data-target]').forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      if (target === 0) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const delay = parseFloat(revealEl.style.animationDelay || '0') + 0.3;
+      setTimeout(() => {
+        el.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.width = target + '%';
+      }, delay * 1000);
+    });
+
+    document.querySelectorAll(".strip-value").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+      const raw = textNode.textContent.trim();
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+      const prefix = match[1], endVal = parseFloat(match[2]), suffix = match[3];
+      const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
+      if (isNaN(endVal)) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const countStart = performance.now() + (revealDelay + 0.25) * 1000;
+      const duration = 900;
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+      (function tick(now) {
+        if (now < countStart) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - countStart) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + (endVal * eased).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>

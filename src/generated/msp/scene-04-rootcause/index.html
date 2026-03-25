@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Root Cause</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 28px 32px; position: relative; }
+
+    .grid-lines {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .card {
+      position: relative; z-index: 1; width: 100%; max-width: 580px;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+      background: rgba(255,255,255,0.02); overflow: hidden;
+    }
+    .card--signal { border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.04); }
+    .card--action { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.04); }
+
+    .card-header { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 600; color: #a78bfa; }
+    .card--signal .card-header { color: #ef4444; border-bottom-color: rgba(239,68,68,0.15); }
+    .card--action .card-header { color: #10b981; border-bottom-color: rgba(16,185,129,0.15); }
+
+    .card-body { padding: 12px 16px; }
+
+    /* Meta rows */
+    .meta { display: flex; gap: 20px; flex-wrap: wrap; }
+    .meta + .meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .meta-item { display: flex; gap: 8px; align-items: baseline; }
+    .meta-key { color: #4b5563; font-size: 11px; }
+    .meta-val { color: #a8b3cf; font-size: 11px; }
+    .meta-val strong { color: #eef2ff; }
+    .meta-val--alert  { color: #ef4444; }
+    .meta-val--green  { color: #10b981; }
+    .meta-val--violet { color: #a78bfa; }
+
+    /* Root signal */
+    .root-signal { font-family: monospace; font-size: 13px; color: #ef4444; }
+    .root-code { color: #f87171; font-weight: 700; }
+
+    /* Impact list */
+    .impact-list { display: flex; flex-direction: column; gap: 6px; }
+    .impact-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .impact-svc { color: #a8b3cf; min-width: 160px; }
+    .impact-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+    .badge--degraded { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+    .badge--ok       { background: rgba(16,185,129,0.1);  color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+
+    /* Action steps */
+    .steps { display: flex; flex-direction: column; gap: 6px; }
+    .step { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #a8b3cf; }
+    .step-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.5s ease forwards; }
+
+    .narration {
+      position: relative; z-index: 1; width: 100%; max-width: 580px;
+      padding: 14px 20px; border: 1px solid rgba(139,92,246,0.18); border-radius: 10px;
+      background: rgba(139,92,246,0.04);
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .narration-eyebrow { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d28d9; margin-bottom: 8px; }
+    .narration-text { font-size: 13px; line-height: 1.7; color: #94a3b8; min-height: 22px; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #a78bfa; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .gauge-wrap { display: flex; align-items: center; gap: 6px; }
+    .arc-gauge { flex-shrink: 0; }
+    .ratio-bar-wrap { display: flex; align-items: center; gap: 6px; }
+    .ratio-track { width: 60px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .ratio-fill { height: 100%; border-radius: 2px; width: 0; }
+    .ratio-fill--warn { background: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+
+    <div class="narration">
+      <div class="narration-eyebrow">AI Operator</div>
+      <div class="narration-text"><span id="narr"></span><span class="cursor"></span></div>
+    </div>
+
+    <!-- Incident summary with detection metrics -->
+    <div class="card" data-reveal>
+      <div class="card-header">Incident</div>
+      <div class="card-body">
+        <div class="meta">
+          <div class="meta-item"><span class="meta-key">ID</span><span class="meta-val"><strong>INV-2024-0312</strong></span></div>
+          <div class="meta-item"><span class="meta-key">Tenant</span><span class="meta-val">Beta Retail</span></div>
+          <div class="meta-item"><span class="meta-key">Status</span><span class="meta-val meta-val--alert">Active</span></div>
+          <div class="meta-item"><span class="meta-key">Severity</span><span class="meta-val meta-val--alert">High</span></div>
+        </div>
+        <div class="meta">
+          <div class="meta-item"><span class="meta-key">Detected in</span><span class="meta-val meta-val--violet">2.1s</span></div>
+          <div class="meta-item"><span class="meta-key">Correlations</span><span class="meta-val">847</span></div>
+          <div class="meta-item"><span class="meta-key">Confidence</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36" style="width:20px;height:20px"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="98.4"/></svg><span class="meta-val meta-val--green">98.4%</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Root signal -->
+    <div class="card card--signal" data-reveal>
+      <div class="card-header">Root Signal</div>
+      <div class="card-body">
+        <div class="root-signal"><span class="root-code">NODE-2003</span> &nbsp;inventory-service DOWN</div>
+      </div>
+    </div>
+
+    <!-- Impact with blast radius -->
+    <div class="card" data-reveal>
+      <div class="card-header">Impact</div>
+      <div class="card-body">
+        <div class="impact-list">
+          <div class="impact-row"><span class="impact-svc">checkout-service</span><span class="impact-badge badge--degraded">Degraded</span></div>
+          <div class="impact-row"><span class="impact-svc">payments-service</span><span class="impact-badge badge--ok">Normal</span></div>
+          <div class="impact-row"><span class="impact-svc">customer symptom</span><span style="font-size:11px;color:#64748b">delayed fulfillment / partial checkout degradation</span></div>
+        </div>
+        <div class="meta" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05)">
+          <div class="meta-item"><span class="meta-key">Blast radius</span><div class="ratio-bar-wrap"><div class="ratio-track"><div class="ratio-fill ratio-fill--warn" data-target="26.7"></div></div><span class="meta-val">23 of 86</span></div></div>
+          <div class="meta-item"><span class="meta-key">Affected tx</span><span class="meta-val">1.2k/min</span></div>
+          <div class="meta-item"><span class="meta-key">Contained</span><span class="meta-val meta-val--green">yes — no cascade</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommended action -->
+    <div class="card card--action" data-reveal>
+      <div class="card-header">Recommended Action</div>
+      <div class="card-body steps">
+        <div class="step"><div class="step-num">1</div><span>Check inventory-service health endpoint</span></div>
+        <div class="step"><div class="step-num">2</div><span>Restart inventory-service</span></div>
+        <div class="step"><div class="step-num">3</div><span>Verify message flow resumes</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Root cause: NODE-2003.", pauseMs: 600 },
+        { text: " Inventory service unavailable.", pauseMs: 700 },
+        { text: " Checkout is degraded. Payments unaffected. The failure is contained.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.28}s`;
+    });
+
+    function animateArc(el) {
+      const pct = parseFloat(el.dataset.pct);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const start = performance.now() + (revealDelay + 0.35) * 1000;
+      const duration = 1000;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.setAttribute('stroke-dasharray', `${(pct * eased).toFixed(2)} 100`);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.setAttribute('stroke-dasharray', `${pct} 100`);
+      })(performance.now());
+    }
+    document.querySelectorAll('.arc-fill[data-pct]').forEach(animateArc);
+
+    document.querySelectorAll('.ratio-fill[data-target]').forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const delay = parseFloat(revealEl.style.animationDelay || '0.2') + 0.35;
+      setTimeout(() => {
+        el.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.width = target + '%';
+      }, delay * 1000);
+    });
+
+    document.querySelectorAll(".meta-val, .meta-val--violet, .meta-val--green").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+      const raw = textNode.textContent.trim();
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+      const prefix = match[1], endVal = parseFloat(match[2]), suffix = match[3];
+      const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
+      if (isNaN(endVal)) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const countStart = performance.now() + (revealDelay + 0.25) * 1000;
+      const duration = 900;
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+      (function tick(now) {
+        if (now < countStart) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - countStart) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + (endVal * eased).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>

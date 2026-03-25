@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opening</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        height: 100%;
+        background: #08101d;
+        color: #eef2ff;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+      }
+
+      .scene {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        position: relative;
+      }
+
+      /* Background orbs */
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0;
+        animation: orb-in 2s ease forwards;
+      }
+
+      .orb-1 {
+        width: 420px;
+        height: 420px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.28), transparent 70%);
+        top: -80px;
+        left: -100px;
+        animation-delay: 0.2s;
+      }
+
+      .orb-2 {
+        width: 340px;
+        height: 340px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.22), transparent 70%);
+        bottom: -60px;
+        right: -80px;
+        animation-delay: 0.5s;
+      }
+
+      .orb-3 {
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(167, 139, 250, 0.18), transparent 70%);
+        top: 50%;
+        right: 10%;
+        animation-delay: 0.8s;
+      }
+
+      @keyframes orb-in {
+        to { opacity: 1; }
+      }
+
+      /* Grid lines */
+      .grid-lines {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0;
+        animation: fade-in 1.5s 0.3s ease forwards;
+      }
+
+      @keyframes fade-in {
+        to { opacity: 1; }
+      }
+
+      /* Content */
+      .content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 40px;
+        max-width: 600px;
+      }
+
+      .eyebrow {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #a78bfa;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: slide-up 0.8s 0.6s ease forwards;
+      }
+
+      .title {
+        font-size: clamp(28px, 5vw, 48px);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #eef2ff 0%, #a78bfa 60%, #818cf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        opacity: 0;
+        animation: slide-up 0.9s 0.8s ease forwards;
+      }
+
+      .divider {
+        width: 48px;
+        height: 2px;
+        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+        border-radius: 2px;
+        margin: 24px auto;
+        opacity: 0;
+        animation: slide-up 0.7s 1.0s ease forwards;
+      }
+
+      .subtitle {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #a8b3cf;
+        opacity: 0;
+        animation: slide-up 0.8s 1.1s ease forwards;
+      }
+
+      .badge-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 32px;
+        flex-wrap: wrap;
+        opacity: 0;
+        animation: slide-up 0.7s 1.3s ease forwards;
+      }
+
+      .badge {
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: 99px;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        background: rgba(139, 92, 246, 0.08);
+        color: #a78bfa;
+        letter-spacing: 0.04em;
+      }
+
+      @keyframes slide-up {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Pulse ring */
+      .pulse-ring {
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        border: 1px solid rgba(139, 92, 246, 0.15);
+        animation: pulse 4s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      .pulse-ring:nth-child(2) { animation-delay: 1.3s; }
+      .pulse-ring:nth-child(3) { animation-delay: 2.6s; }
+
+      @keyframes pulse {
+        0%   { transform: scale(0.8); opacity: 0; }
+        50%  { opacity: 1; }
+        100% { transform: scale(1.6); opacity: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scene">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="grid-lines"></div>
+
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+
+      <div class="content">
+        <p class="eyebrow">Presentation Runtime Shell &nbsp;·&nbsp; v1</p>
+        <h1 class="title">AI Presentation System</h1>
+        <div class="divider"></div>
+        <p class="subtitle">
+          A narrative shell for generated experiences.<br />
+          The presenter speaks. The frame proves it.
+        </p>
+        <div class="badge-row">
+          <span class="badge">Typed narration</span>
+          <span class="badge">Live iframe</span>
+          <span class="badge">JSON contract</span>
+          <span class="badge">postMessage sync</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Signal ready to parent shell
+      window.addEventListener("load", () => {
+        window.parent.postMessage({ type: "iframe:ready", sceneId: "scene-01" }, "*");
+      });
+
+      // Listen for commands from shell
+      window.addEventListener("message", (event) => {
+        const { type, payload } = event.data || {};
+        if (type === "scene:init") {
+          // Could apply variant styling here
+        }
+      });
+    </script>
+  </body>
+</html>

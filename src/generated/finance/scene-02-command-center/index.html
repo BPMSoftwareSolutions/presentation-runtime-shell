@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Command Center</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* TopBar */
+    .topbar {
+      display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0; font-size: 11px;
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .topbar-title { font-weight: 700; font-size: 11px; letter-spacing: 0.1em; color: #818cf8; }
+    .topbar-company { color: #94a3b8; margin-left: 4px; }
+    .topbar-company strong { color: #eef2ff; }
+    .segment-tabs { display: flex; gap: 5px; margin-left: 6px; }
+    .tab { font-size: 10px; padding: 2px 9px; border-radius: 99px; color: #475569; border: 1px solid transparent; }
+    .tab--warn { color: #f59e0b; background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); }
+    .tab--ok   { color: #10b981; background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.2); }
+    .tab--dim  { color: #94a3b8; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+    .mode-badge { margin-left: auto; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 99px; background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.3); color: #818cf8; }
+
+    /* KPI Strip */
+    .kpi-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+    }
+    .kpi-card { background: rgba(8,16,29,0.95); padding: 9px 14px; display: flex; align-items: flex-end; gap: 10px; }
+    .kpi-main { flex: 1; min-width: 0; }
+    .kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: #475569; margin-bottom: 3px; }
+    .kpi-value { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; color: #eef2ff; margin-bottom: 2px; }
+    .kpi-delta { font-size: 10px; }
+    .kpi-delta--pos   { color: #10b981; }
+    .kpi-delta--neg   { color: #ef4444; }
+    .kpi-delta--muted { color: #475569; }
+    .kpi-bars { display: flex; align-items: flex-end; gap: 3px; height: 38px; flex-shrink: 0; padding-bottom: 1px; }
+    .yoy-bar { width: 7px; border-radius: 2px 2px 0 0; height: 0; }
+    .yoy-bar--ly  { background: rgba(129,140,248,0.28); }
+    .yoy-bar--pos { background: #10b981; }
+    .yoy-bar--neg { background: #ef4444; }
+    .yoy-bar--dim { background: rgba(129,140,248,0.5); }
+
+    /* Narration bar */
+    .narration-bar {
+      display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+      background: rgba(129,140,248,0.04); border-bottom: 1px solid rgba(129,140,248,0.1);
+      font-size: 12px; color: #94a3b8; flex-shrink: 0;
+      opacity: 0; animation: reveal-in 0.5s 0.15s ease forwards;
+    }
+    .narr-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #475569; border: 1px solid rgba(129,140,248,0.25); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #818cf8; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* 3-column body */
+    .body { flex: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .panel { background: #08101d; padding: 12px 14px; overflow: hidden; }
+    .panel-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: #818cf8; margin-bottom: 10px; font-weight: 600; }
+
+    /* Segment cards in left panel */
+    .segment { border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); overflow: hidden; margin-bottom: 8px; }
+    .segment--warn  { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.02); }
+    .segment--ok    { border-color: rgba(16,185,129,0.2); }
+    .segment--stable{ border-color: rgba(129,140,248,0.2); }
+    .segment-header { padding: 8px 11px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .segment--warn .segment-header { background: rgba(245,158,11,0.04); border-bottom-color: rgba(245,158,11,0.12); }
+    .segment--ok   .segment-header { background: rgba(16,185,129,0.04); }
+    .segment-name { font-size: 11px; font-weight: 700; color: #eef2ff; }
+    .seg-badge { font-size: 9px; padding: 1px 7px; border-radius: 99px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .badge--warn    { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .badge--healthy { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+    .badge--stable  { background: rgba(129,140,248,0.12); color: #818cf8; border: 1px solid rgba(129,140,248,0.25); }
+    .seg-metrics { padding: 7px 11px; display: flex; flex-direction: column; gap: 4px; }
+    .m-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+    .m-key { color: #475569; }
+    .m-val { font-weight: 600; color: #94a3b8; }
+    .m-val--green { color: #10b981; }
+    .m-val--red   { color: #ef4444; }
+    .m-val--amber { color: #f59e0b; }
+    .gauge-wrap { display: flex; align-items: center; gap: 5px; }
+    .arc-gauge  { width: 22px; height: 22px; flex-shrink: 0; }
+
+    /* Variance summary (center) */
+    .variance-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 6px; margin-bottom: 5px; font-size: 11px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); }
+    .variance-row--alert { border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.04); }
+    .variance-row--warn  { border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.04); }
+    .var-driver { color: #94a3b8; }
+    .var-delta { font-family: monospace; font-size: 10px; }
+    .var-pos { color: #10b981; }
+    .var-neg { color: #ef4444; }
+    .var-warn { color: #f59e0b; }
+
+    /* AI Terminal (right) */
+    .terminal { font-family: monospace; font-size: 11px; line-height: 1.85; }
+    .t-line       { color: #94a3b8; }
+    .t-line--dim  { color: #475569; }
+    .t-line--alert { color: #f59e0b; }
+    .t-line--ok   { color: #10b981; }
+    .t-prompt     { color: #4b5563; }
+
+    /* Footer */
+    .footer {
+      padding: 8px 16px; font-size: 11px; color: #475569;
+      background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0;
+      opacity: 0; animation: reveal-in 0.5s 1.2s ease forwards;
+    }
+    .footer strong { color: #94a3b8; }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.35s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="topbar-title">FINANCIAL COMMAND CENTER</span>
+      <span class="topbar-company">Company: <strong>Acme Corp</strong></span>
+      <div class="segment-tabs">
+        <span class="tab tab--warn">Retail</span>
+        <span class="tab tab--ok">Enterprise</span>
+        <span class="tab tab--dim">Online</span>
+      </div>
+      <span class="mode-badge">Analysis</span>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi-card" data-reveal>
+        <div class="kpi-main">
+          <div class="kpi-label">Revenue</div>
+          <div class="kpi-value">$4.82M</div>
+          <div class="kpi-delta kpi-delta--pos">+$270K vs LY (+5.9%)</div>
+        </div>
+        <div class="kpi-bars">
+          <div class="yoy-bar yoy-bar--ly"  data-bar-h="34"></div>
+          <div class="yoy-bar yoy-bar--pos" data-bar-h="38"></div>
+        </div>
+      </div>
+      <div class="kpi-card" data-reveal>
+        <div class="kpi-main">
+          <div class="kpi-label">Gross Margin</div>
+          <div class="kpi-value">33.8%</div>
+          <div class="kpi-delta kpi-delta--neg">-2.1 pts vs LY</div>
+        </div>
+        <div class="kpi-bars">
+          <div class="yoy-bar yoy-bar--ly"  data-bar-h="38"></div>
+          <div class="yoy-bar yoy-bar--neg" data-bar-h="34"></div>
+        </div>
+      </div>
+      <div class="kpi-card" data-reveal>
+        <div class="kpi-main">
+          <div class="kpi-label">Operating Profit</div>
+          <div class="kpi-value">$0.81M</div>
+          <div class="kpi-delta kpi-delta--neg">-$120K vs LY</div>
+        </div>
+        <div class="kpi-bars">
+          <div class="yoy-bar yoy-bar--ly"  data-bar-h="38"></div>
+          <div class="yoy-bar yoy-bar--neg" data-bar-h="31"></div>
+        </div>
+      </div>
+      <div class="kpi-card" data-reveal>
+        <div class="kpi-main">
+          <div class="kpi-label">YoY Growth</div>
+          <div class="kpi-value">+5.9%</div>
+          <div class="kpi-delta kpi-delta--muted">vs prior year</div>
+        </div>
+        <div class="kpi-bars">
+          <div class="yoy-bar yoy-bar--ly"  data-bar-h="8"></div>
+          <div class="yoy-bar yoy-bar--dim" data-bar-h="21"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="narration-bar">
+      <span class="narr-label">AI Analyst</span>
+      <span id="narr"></span><span class="cursor"></span>
+    </div>
+
+    <div class="body">
+      <!-- Left: Segment Status -->
+      <div class="panel">
+        <div class="panel-label">Segment Status</div>
+
+        <div class="segment segment--warn" data-reveal>
+          <div class="segment-header">
+            <span class="segment-name">Retail</span>
+            <span class="seg-badge badge--warn">At Risk</span>
+          </div>
+          <div class="seg-metrics">
+            <div class="m-row"><span class="m-key">Revenue</span><span class="m-val">$1.92M</span></div>
+            <div class="m-row"><span class="m-key">Margin</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="28.4"/></svg><span class="m-val m-val--red">28.4%</span></div></div>
+            <div class="m-row"><span class="m-key">vs LY</span><span class="m-val m-val--red">-3.2 pts</span></div>
+          </div>
+        </div>
+
+        <div class="segment segment--ok" data-reveal>
+          <div class="segment-header">
+            <span class="segment-name">Enterprise</span>
+            <span class="seg-badge badge--healthy">Healthy</span>
+          </div>
+          <div class="seg-metrics">
+            <div class="m-row"><span class="m-key">Revenue</span><span class="m-val">$1.75M</span></div>
+            <div class="m-row"><span class="m-key">Margin</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="39.6"/></svg><span class="m-val m-val--green">39.6%</span></div></div>
+            <div class="m-row"><span class="m-key">vs LY</span><span class="m-val m-val--green">+0.5 pts</span></div>
+          </div>
+        </div>
+
+        <div class="segment segment--stable" data-reveal>
+          <div class="segment-header">
+            <span class="segment-name">Online</span>
+            <span class="seg-badge badge--stable">Stable</span>
+          </div>
+          <div class="seg-metrics">
+            <div class="m-row"><span class="m-key">Revenue</span><span class="m-val">$1.15M</span></div>
+            <div class="m-row"><span class="m-key">Margin</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#818cf8" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="31.2"/></svg><span class="m-val">31.2%</span></div></div>
+            <div class="m-row"><span class="m-key">vs LY</span><span class="m-val m-val--green">+0.4 pts</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Variance Summary -->
+      <div class="panel">
+        <div class="panel-label">Variance Summary — Retail</div>
+
+        <div class="variance-row" data-reveal>
+          <span class="var-driver">Price impact</span>
+          <span class="var-delta var-pos">+$270K</span>
+        </div>
+        <div class="variance-row" data-reveal>
+          <span class="var-driver">Volume impact</span>
+          <span class="var-delta var-pos">+$170K</span>
+        </div>
+        <div class="variance-row variance-row--alert" data-reveal>
+          <span class="var-driver">Labor cost increase</span>
+          <span class="var-delta var-neg">-$140K</span>
+        </div>
+        <div class="variance-row variance-row--warn" data-reveal>
+          <span class="var-driver">Mix effect</span>
+          <span class="var-delta var-neg">-$60K</span>
+        </div>
+        <div class="variance-row variance-row--warn" data-reveal>
+          <span class="var-driver">Discounting increase</span>
+          <span class="var-delta var-neg">-$35K</span>
+        </div>
+        <div class="variance-row variance-row--alert" style="margin-top:8px; border-color:rgba(239,68,68,0.3)" data-reveal>
+          <span class="var-driver" style="color:#ef4444;font-weight:600">Net operating impact</span>
+          <span class="var-delta var-neg" style="font-weight:700">-$120K</span>
+        </div>
+      </div>
+
+      <!-- Right: AI Analyst Terminal -->
+      <div class="panel">
+        <div class="panel-label">AI Analyst Terminal</div>
+        <div class="terminal">
+          <div class="t-line t-line--dim"   data-reveal><span class="t-prompt">&gt; </span>loading financial context...</div>
+          <div class="t-line t-line--dim"   data-reveal><span class="t-prompt">&gt; </span>company: Acme Corp</div>
+          <div class="t-line t-line--dim"   data-reveal><span class="t-prompt">&gt; </span>period: Mar 2026</div>
+          <div class="t-line t-line--alert" data-reveal><span class="t-prompt">&gt; </span>variance detected: margin decline</div>
+          <div class="t-line"               data-reveal><span class="t-prompt">&gt; </span>segment: Retail · severity: HIGH</div>
+          <div class="t-line"               data-reveal><span class="t-prompt">&gt; </span>drivers: labor + mix + discounting</div>
+          <div class="t-line t-line--ok"    data-reveal><span class="t-prompt">&gt; </span>action ready: margin-recovery playbook</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Executive takeaway:</strong> Revenue is up 5.9%, but profitability is under pressure from labor inflation and an unfavorable mix shift. Retail requires immediate attention.
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.25 + i * 0.1}s`;
+    });
+
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Acme Corp. Three business segments.", pauseMs: 700 },
+        { text: " Revenue is up. But margin is under pressure.", pauseMs: 800 },
+        { text: " Retail is the problem. The system already knows.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    // Arc gauge animations
+    document.querySelectorAll('.arc-fill[data-pct]').forEach(el => {
+      const pct = parseFloat(el.dataset.pct);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0');
+      const start = performance.now() + (revealDelay + 0.4) * 1000;
+      const duration = 1000;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.setAttribute('stroke-dasharray', `${(pct * eased).toFixed(2)} 100`);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.setAttribute('stroke-dasharray', `${pct} 100`);
+      })(performance.now());
+    });
+
+    // YoY bar animations
+    document.querySelectorAll('.yoy-bar[data-bar-h]').forEach(el => {
+      const h = parseFloat(el.dataset.barH);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const delay = parseFloat(revealEl.style.animationDelay || '0.25') + 0.35;
+      setTimeout(() => {
+        el.style.transition = 'height 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.height = h + 'px';
+      }, delay * 1000);
+    });
+
+    // Count-up for KPI values
+    document.querySelectorAll(".kpi-value").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+      const raw = textNode.textContent.trim();
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+      const [, prefix, num, suffix] = match;
+      const endVal = parseFloat(num);
+      const decimals = num.includes('.') ? num.split('.')[1].length : 0;
+      if (isNaN(endVal)) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const start = performance.now() + (revealDelay + 0.25) * 1000;
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / 900, 1);
+        const e = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + (endVal * e).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>

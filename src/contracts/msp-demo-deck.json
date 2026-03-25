@@ -1,0 +1,103 @@
+{
+  "id": "msp-demo-deck",
+  "title": "MSP Command Center Demo",
+  "status": "ready",
+  "theme": { "shell": "dark", "accent": "violet", "presenterPosition": "left" },
+  "settings": {
+    "typingSpeedMs": 22,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1800,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "msp-01", "title": "Opening", "type": "title",
+      "editIntent": "Title card. Set the stage: MSPs manage dozens of customers across chaotic, fragmented environments. Incidents don't wait. The ACN is the answer to reactive operations — this is the promise before the demo.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "MSPs manage dozens of customers.", "pauseMs": 700 },
+        { "text": "Incidents don't wait for shift change.", "pauseMs": 800 },
+        { "text": "This is what full visibility looks like.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-01-title/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-02", "title": "Healthy Tenants", "type": "narrative",
+      "editIntent": "Portfolio overview at rest. Three managed tenants (Acme Corp, Beta Retail, Gamma Health) with live health metrics, SLA risk gauges, and margin bars. The baseline — everything looks normal before the incident hits. Sets up the contrast for scene 03.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Three managed tenants.", "pauseMs": 600 },
+        { "text": "Acme Corp. Beta Retail. Gamma Health.", "pauseMs": 800 },
+        { "text": "Everything is green.", "pauseMs": 400 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-02-tenants/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-03", "title": "Incident Detected", "type": "narrative",
+      "editIntent": "The incident breaks. Inventory service goes down at Beta Retail. The ACN detects it in 2.1 seconds before any human notices. Full command center view: active incident list, message stream, node/service status bars, and AI terminal output.",
+      "presenter": { "mode": "impact", "blocks": [
+        { "text": "Beta Retail just triggered an incident.", "pauseMs": 700 },
+        { "text": "Inventory service went down.", "pauseMs": 600 },
+        { "text": "The ACN detected it in 2.1 seconds — before any human noticed.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-03-incident/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-04", "title": "Root Cause", "type": "narrative",
+      "editIntent": "The AI operator's diagnosis. NODE-2003 is the root cause. Blast radius is scoped — checkout degraded, payments unaffected, no cascade. 98.4% confidence. Shows the AI doing what would take a human 45 minutes to piece together.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Root cause: NODE-2003.", "pauseMs": 600 },
+        { "text": "Inventory service unavailable.", "pauseMs": 700 },
+        { "text": "Checkout is degraded. Payments unaffected. The failure is contained.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-04-rootcause/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-05", "title": "Trace Path", "type": "chart",
+      "editIntent": "Correlation trace across the service graph. cart-ui → checkout-service → inventory-service. The failure boundary is exact: inventory is down, checkout is degraded, payments are isolated. No guessing, no manual log diving.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Here is the correlation trace.", "pauseMs": 700 },
+        { "text": "The failure boundary is exact.", "pauseMs": 600 },
+        { "text": "No cascade. No guessing.", "pauseMs": 400 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-05-trace/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-06", "title": "Playbook Execution", "type": "narrative",
+      "editIntent": "Recovery in action. The playbook executes: health check fails → restart inventory-service → verify event flow → incident resolved. MTTD 2.1s, MTTR 47s, 1.2k transactions/min recovered. The operator didn't need to think — just approve.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "The operator runs the recovery playbook.", "pauseMs": 700 },
+        { "text": "Restart inventory-service.", "pauseMs": 600 },
+        { "text": "Message flow resumes. Incident resolved.", "pauseMs": 400 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-06-playbook/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-07", "title": "Time Saved", "type": "chart",
+      "editIntent": "The impact numbers. 2.1s detection, 4.8s diagnosis — versus 45 minutes of manual triage across 5 tools. YoY chart shows triage time collapsing: 2023 (45 min, tall red bar) vs 2024 (<1 min, tiny green sliver). ↓98% headline.",
+      "presenter": { "mode": "impact", "blocks": [
+        { "text": "Detection in 2.1 seconds.", "pauseMs": 700 },
+        { "text": "Full diagnosis in 4.8 seconds.", "pauseMs": 700 },
+        { "text": "That would have been 45 minutes of manual triage.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-07-metrics/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "msp-08", "title": "Before vs After", "type": "closing",
+      "editIntent": "The closing argument. Before: 5 tools, manual correlation, guessing, reactive. After: one view, one operator, instant action, proactive. Land the transformation — you are not debugging systems anymore, you are operating them.",
+      "presenter": { "mode": "impact", "blocks": [
+        { "text": "This is the difference.", "pauseMs": 800 },
+        { "text": "Not five tools. One view.", "pauseMs": 700 },
+        { "text": "You are not debugging systems anymore. You are operating them.", "pauseMs": 400 }
+      ]},
+      "content": { "route": "./src/generated/msp/scene-08-compare/index.html" },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

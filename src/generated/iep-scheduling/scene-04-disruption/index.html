@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Student & Rebalance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    .bg-orb {
+      position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      filter: blur(100px); pointer-events: none;
+      background: radial-gradient(circle, rgba(32,201,151,0.10), transparent 70%);
+      bottom: -120px; right: -80px; opacity: 0; transition: opacity 1.2s ease;
+    }
+    .bg-orb.active { opacity: 1; }
+
+    .scene { position: relative; height: 100%; display: flex; flex-direction: column; padding: 20px 24px; gap: 14px; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+      border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      opacity: 0; animation: reveal 0.5s 0.1s ease forwards;
+    }
+    .header-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #56d8ff; box-shadow: 0 0 8px rgba(86,216,255,0.6);
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+    .header-dot.rebalancing { background: #f5b94c; box-shadow: 0 0 10px rgba(245,185,76,0.7); animation: pulse-dot 0.9s ease-in-out infinite; }
+    .header-dot.done        { background: #20c997; box-shadow: 0 0 10px rgba(32,201,151,0.7); animation: none; }
+    @keyframes pulse-dot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5)} }
+
+    .header-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800; color: #56d8ff; transition: color 0.4s; }
+    .header-title.rebalancing { color: #f5b94c; }
+    .header-title.done        { color: #20c997; }
+    .spacer { flex: 1; }
+    .status-badge {
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(32,201,151,0.30); background: rgba(32,201,151,0.09); color: #20c997;
+      transition: all 0.4s;
+    }
+    .status-badge.warn { border-color: rgba(245,185,76,0.30); background: rgba(245,185,76,0.09); color: #f5b94c; }
+    .status-badge.done { border-color: rgba(32,201,151,0.40); background: rgba(32,201,151,0.12); color: #20c997; }
+
+    /* Main layout */
+    .main {
+      flex: 1; min-height: 0; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 14px;
+      transition: grid-template-columns 0.4s ease;
+    }
+    .main.drawer-open { grid-template-columns: 1fr 0.85fr; }
+
+    /* Left: Groups */
+    .groups-panel {
+      border: 1px solid rgba(32,201,151,0.20); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(32,201,151,0.06), rgba(32,201,151,0.02));
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; animation: reveal 0.6s 0.2s ease forwards;
+    }
+    .panel-header {
+      display: flex; align-items: center; gap: 9px; padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02);
+    }
+    .ph-dot { width: 7px; height: 7px; border-radius: 50%; background: #20c997; box-shadow: 0 0 7px rgba(32,201,151,0.55); }
+    .ph-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.13em; font-weight: 800; color: #20c997; }
+    .ph-count { margin-left: auto; font-size: 11px; color: #4d5f77; transition: all 0.3s; }
+    .panel-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+    .group-section-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800;
+      padding: 0 2px; margin-bottom: 2px; margin-top: 4px;
+    }
+    .group-section-label:first-child { margin-top: 0; }
+    .label-green  { color: #20c997; }
+    .label-cyan   { color: #56d8ff; }
+    .label-violet { color: #a78bfa; }
+
+    .member-row {
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      border-radius: 11px; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+    .member-row--new {
+      border-color: rgba(86,216,255,0.40); background: rgba(86,216,255,0.08);
+      opacity: 0; transform: translateX(-10px);
+      transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, background 0.3s;
+    }
+    .member-row--new.visible { opacity: 1; transform: translateX(0); }
+    .member-row--new.settled { border-color: rgba(32,201,151,0.28); background: rgba(32,201,151,0.05); }
+
+    .av {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+    }
+    .av-b  { background: rgba(86,216,255,0.14);  color: #56d8ff;  border: 1px solid rgba(86,216,255,0.28); }
+    .av-v  { background: rgba(167,139,250,0.14); color: #a78bfa;  border: 1px solid rgba(167,139,250,0.28); }
+    .av-g  { background: rgba(32,201,151,0.14);  color: #20c997;  border: 1px solid rgba(32,201,151,0.28); }
+    .av-r  { background: rgba(255,125,184,0.14); color: #ff7db8;  border: 1px solid rgba(255,125,184,0.28); }
+    .av-am { background: rgba(245,185,76,0.14);  color: #f5b94c;  border: 1px solid rgba(245,185,76,0.28); }
+    .av-c  { background: rgba(86,216,255,0.20);  color: #56d8ff;  border: 2px solid rgba(86,216,255,0.50); }
+
+    .m-name { font-size: 12px; font-weight: 700; }
+    .m-meta { margin-left: auto; font-size: 10px; color: #4d5f77; }
+    .new-pill {
+      margin-left: auto; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 800;
+      border: 1px solid rgba(86,216,255,0.35); background: rgba(86,216,255,0.12); color: #56d8ff;
+    }
+
+    /* Right: Schedule / Drawer */
+    .right-area { position: relative; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+
+    .schedule-panel {
+      flex: 1; min-height: 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; animation: reveal 0.6s 0.27s ease forwards;
+      transition: opacity 0.3s ease;
+    }
+    .sched-header {
+      display: flex; align-items: center; gap: 9px; padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02);
+    }
+    .sh-dot { width: 7px; height: 7px; border-radius: 50%; background: #56d8ff; box-shadow: 0 0 7px rgba(86,216,255,0.55); }
+    .sh-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.13em; font-weight: 800; color: #56d8ff; }
+    .sched-body { padding: 12px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+
+    .sched-block {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 11px;
+      transition: border-color 0.5s, background 0.5s, box-shadow 0.5s;
+    }
+    .sb-a    { border: 1px solid rgba(32,201,151,0.25); background: rgba(32,201,151,0.06); }
+    .sb-noah { border: 1px solid rgba(245,185,76,0.22); background: rgba(245,185,76,0.05); }
+    .sb-b    { border: 1px solid rgba(86,216,255,0.22); background: rgba(86,216,255,0.05); }
+    .sb-ava  { border: 1px solid rgba(255,125,184,0.22); background: rgba(255,125,184,0.05); }
+    .sb-a.updated { border-color: rgba(32,201,151,0.55); background: rgba(32,201,151,0.12); box-shadow: 0 0 18px rgba(32,201,151,0.18); }
+
+    .sb-time { font-size: 11px; color: #4d5f77; font-weight: 600; width: 62px; flex-shrink: 0; }
+    .sb-name { font-size: 13px; font-weight: 700; }
+    .n-green  { color: #20c997; }
+    .n-amber  { color: #f5b94c; }
+    .n-cyan   { color: #56d8ff; }
+    .n-rose   { color: #ff7db8; }
+    .sb-tag {
+      margin-left: auto; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 700;
+      border: 1px solid rgba(32,201,151,0.30); background: rgba(32,201,151,0.10); color: #20c997;
+      opacity: 0; transition: opacity 0.4s;
+    }
+
+    /* Change log */
+    .change-log {
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;
+      background: rgba(255,255,255,0.025); padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+      opacity: 0; transition: opacity 0.5s ease;
+    }
+    .change-log.visible { opacity: 1; }
+    .cl-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: #4d5f77; font-weight: 700; margin-bottom: 2px; }
+    .cl-item { display: flex; align-items: center; gap: 8px; font-size: 12px; opacity: 0; transition: opacity 0.4s; }
+    .cl-item.visible { opacity: 1; }
+    .ci-plus  { color: #20c997; font-weight: 800; }
+    .ci-tilde { color: #56d8ff; font-weight: 800; }
+    .ci-check { color: #20c997; font-weight: 800; }
+    .ci-text  { color: #b8c7df; }
+
+    /* Add Student Drawer */
+    .drawer {
+      position: absolute; inset: 0; border-radius: 20px;
+      border: 1px solid rgba(86,216,255,0.28);
+      background: linear-gradient(180deg, #0c1d33, #091627);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+      display: flex; flex-direction: column; overflow: hidden;
+      transform: translateX(110%); opacity: 0;
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.38s ease;
+      pointer-events: none;
+    }
+    .drawer.open { transform: translateX(0); opacity: 1; pointer-events: all; }
+
+    .drawer-header {
+      display: flex; align-items: center; padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.025);
+    }
+    .drawer-title { font-size: 13px; font-weight: 800; color: #edf4ff; }
+    .drawer-close {
+      margin-left: auto; color: #4d5f77; font-size: 18px; cursor: pointer; line-height: 1;
+      transition: color 0.2s;
+    }
+    .drawer-close:hover { color: #b8c7df; }
+    .drawer-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: #4d5f77; font-weight: 700; }
+    .field-val {
+      padding: 10px 13px; border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.09); background: rgba(255,255,255,0.04);
+      font-size: 14px; font-weight: 700; color: #edf4ff;
+    }
+    .field-val--hi { border-color: rgba(86,216,255,0.28); background: rgba(86,216,255,0.07); color: #56d8ff; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .add-to-schedule-btn {
+      margin-top: auto; padding: 13px; border-radius: 13px;
+      font-size: 14px; font-weight: 800; cursor: pointer; text-align: center;
+      border: 1px solid rgba(32,201,151,0.38);
+      background: linear-gradient(135deg, rgba(32,201,151,0.18), rgba(86,216,255,0.10));
+      color: #20c997;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .add-to-schedule-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(32,201,151,0.25); }
+
+    /* Action bar */
+    .action-bar {
+      display: flex; align-items: center;
+      opacity: 0; animation: reveal 0.5s 0.3s ease forwards;
+    }
+    .add-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 13px; font-size: 13px; font-weight: 800; cursor: pointer;
+      border: 1px solid rgba(86,216,255,0.32);
+      background: linear-gradient(135deg, rgba(86,216,255,0.12), rgba(167,139,250,0.07));
+      color: #56d8ff; transition: transform 200ms ease, opacity 0.3s;
+    }
+    .add-btn:hover { transform: translateY(-2px); }
+    .add-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+
+    /* Narration bar */
+    .narration-bar {
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px;
+      border-radius: 14px; border: 1px solid rgba(167,139,250,0.18);
+      background: rgba(10,18,32,0.82); backdrop-filter: blur(20px);
+      opacity: 0; animation: reveal 0.5s 0.15s ease forwards;
+    }
+    .narr-orb {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.28);
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+    }
+    .narr-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d5fcf; font-weight: 800; margin-bottom: 5px; }
+    .narr-text { font-size: 13px; line-height: 1.6; color: #94a3b8; min-height: 38px; }
+    .cursor {
+      display: inline-block; width: 2px; height: 0.85em; background: #a78bfa;
+      margin-left: 1px; vertical-align: text-bottom;
+      animation: blink-cursor 0.75s step-end infinite;
+    }
+    @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes reveal { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+  <div class="bg-orb" id="bgOrb"></div>
+  <div class="scene">
+
+    <div class="header">
+      <div class="header-dot" id="hdrDot"></div>
+      <span class="header-title" id="hdrTitle">Current Schedule</span>
+      <div class="spacer"></div>
+      <span class="status-badge" id="statusBadge">5 Students</span>
+    </div>
+
+    <div class="main" id="mainGrid">
+
+      <!-- Left: Groups -->
+      <div class="groups-panel">
+        <div class="panel-header">
+          <div class="ph-dot"></div>
+          <span class="ph-title">Groups</span>
+          <span class="ph-count" id="groupCount">5 students</span>
+        </div>
+        <div class="panel-body">
+          <div class="group-section-label label-green">Group A — Grade 3</div>
+          <div class="member-row"><div class="av av-b">E</div><span class="m-name">Emma</span><span class="m-meta">120 min/wk</span></div>
+          <div class="member-row"><div class="av av-v">L</div><span class="m-name">Liam</span><span class="m-meta">120 min/wk</span></div>
+          <div class="member-row member-row--new" id="masonRow">
+            <div class="av av-c">M</div>
+            <span class="m-name">Mason</span>
+            <span class="new-pill">New</span>
+          </div>
+
+          <div class="group-section-label label-cyan" style="margin-top:6px;">Group B — Grade 4</div>
+          <div class="member-row"><div class="av av-g">S</div><span class="m-name">Sophia</span><span class="m-meta">120 min/wk</span></div>
+
+          <div class="group-section-label label-violet" style="margin-top:6px;">1:1 Required</div>
+          <div class="member-row"><div class="av av-r">A</div><span class="m-name">Ava</span><span class="m-meta">90 min/wk</span></div>
+          <div class="member-row"><div class="av av-am">N</div><span class="m-name">Noah</span><span class="m-meta">Afternoons</span></div>
+        </div>
+      </div>
+
+      <!-- Right: Schedule + Drawer -->
+      <div class="right-area">
+        <div class="schedule-panel">
+          <div class="sched-header">
+            <div class="sh-dot"></div>
+            <span class="sh-title">This Week — Mon</span>
+          </div>
+          <div class="sched-body">
+            <div class="sched-block sb-a" id="blockA">
+              <span class="sb-time">9:00</span>
+              <span class="sb-name n-green">Group A</span>
+              <span class="sb-tag" id="aTag">+Mason</span>
+            </div>
+            <div class="sched-block sb-noah">
+              <span class="sb-time">9:30</span>
+              <span class="sb-name n-amber">1:1 Noah</span>
+            </div>
+            <div class="sched-block sb-b">
+              <span class="sb-time">10:00</span>
+              <span class="sb-name n-cyan">Group B</span>
+            </div>
+            <div class="sched-block sb-ava">
+              <span class="sb-time">10:30</span>
+              <span class="sb-name n-rose">1:1 Ava</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="change-log" id="changeLog">
+          <div class="cl-title">Changes Applied</div>
+          <div class="cl-item" id="cl1"><span class="ci-plus">+</span><span class="ci-text">Mason added to Group A</span></div>
+          <div class="cl-item" id="cl2"><span class="ci-tilde">~</span><span class="ci-text">Time blocks redistributed</span></div>
+          <div class="cl-item" id="cl3"><span class="ci-check">✓</span><span class="ci-text">All constraints satisfied</span></div>
+          <div class="cl-item" id="cl4"><span class="ci-check">✓</span><span class="ci-text">No full rebuild required</span></div>
+        </div>
+
+        <!-- Drawer -->
+        <div class="drawer" id="drawer">
+          <div class="drawer-header">
+            <span class="drawer-title">New Student</span>
+            <span class="drawer-close" id="drawerClose">×</span>
+          </div>
+          <div class="drawer-body">
+            <div class="field">
+              <div class="field-label">Name</div>
+              <div class="field-val">Mason</div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label">Grade</div>
+                <div class="field-val">Grade 3</div>
+              </div>
+              <div class="field">
+                <div class="field-label">Minutes / Week</div>
+                <div class="field-val field-val--hi">120 min</div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label">Support</div>
+              <div class="field-val field-val--hi">Group if possible</div>
+            </div>
+            <button class="add-to-schedule-btn" id="addToScheduleBtn">Add to Schedule →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="add-btn" id="addBtn">+ Add Student</button>
+    </div>
+
+    <div class="narration-bar">
+      <div class="narr-orb">✦</div>
+      <div>
+        <div class="narr-label">AI Assistant</div>
+        <div class="narr-text"><span id="narr"></span><span class="cursor" id="cur"></span></div>
+      </div>
+    </div>
+
+  </div>
+  <script>
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let phase = 'idle'; // idle | drawer | rebalancing | done
+
+    async function typewrite(lines, speed = 20) {
+      const el = document.getElementById('narr');
+      el.textContent = '';
+      document.getElementById('cur').style.display = 'inline-block';
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(speed); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    }
+
+    function openDrawer() {
+      if (phase !== 'idle') return;
+      phase = 'drawer';
+      document.getElementById('drawer').classList.add('open');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      if (phase === 'drawer') phase = 'idle';
+    }
+
+    async function runRebalance() {
+      phase = 'rebalancing';
+
+      // Update header
+      const hdrDot   = document.getElementById('hdrDot');
+      const hdrTitle = document.getElementById('hdrTitle');
+      const badge    = document.getElementById('statusBadge');
+      hdrDot.className   = 'header-dot rebalancing';
+      hdrTitle.className = 'header-title rebalancing';
+      hdrTitle.textContent = 'Rebalancing…';
+      badge.className = 'status-badge warn';
+      badge.textContent = 'Integrating…';
+
+      // Disable add button
+      document.getElementById('addBtn').disabled = true;
+
+      // Brief narration
+      await typewrite([{ text: "New constraint detected. Integrating Mason…", pauseMs: 0 }], 22);
+      await sleep(700);
+
+      // Mason slides in
+      const masonRow = document.getElementById('masonRow');
+      masonRow.classList.add('visible');
+      document.getElementById('groupCount').textContent = '6 students';
+
+      await sleep(500);
+
+      // Group A schedule block glows
+      document.getElementById('blockA').classList.add('updated');
+      document.getElementById('aTag').style.opacity = '1';
+
+      await sleep(400);
+
+      // Change log appears
+      const log = document.getElementById('changeLog');
+      log.classList.add('visible');
+      for (const id of ['cl1','cl2','cl3','cl4']) {
+        await sleep(200);
+        document.getElementById(id).classList.add('visible');
+      }
+
+      await sleep(300);
+
+      // Mason row settles to green
+      masonRow.classList.add('settled');
+
+      // Header done
+      hdrDot.className   = 'header-dot done';
+      hdrTitle.className = 'header-title done';
+      hdrTitle.textContent = 'Schedule Updated';
+      badge.className = 'status-badge done';
+      badge.textContent = '✓ Rebalanced';
+      document.getElementById('bgOrb').classList.add('active');
+
+      // Final narration — slow and deliberate
+      await typewrite([
+        { text: "I've integrated Mason into an existing group.", pauseMs: 900 },
+        { text: " No full rebuild was required.", pauseMs: 900 },
+        { text: " All constraints are still satisfied.", pauseMs: 0 }
+      ], 28);
+
+      document.getElementById('cur').style.display = 'none';
+      phase = 'done';
+
+      await sleep(1600);
+      window.parent.postMessage({ type: "rebalance:complete" }, "*");
+    }
+
+    // Button wiring
+    document.getElementById('addBtn').addEventListener('click', openDrawer);
+    document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+    document.getElementById('addToScheduleBtn').addEventListener('click', () => {
+      closeDrawer();
+      runRebalance();
+    });
+
+    // Initial narration
+    (async () => {
+      await sleep(600);
+      await typewrite([
+        { text: "A new student is being enrolled.", pauseMs: 700 },
+        { text: " This is where manual systems break down.", pauseMs: 0 }
+      ]);
+      document.getElementById('cur').style.display = 'none';
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Automation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #08101d; --surface: rgba(255,255,255,0.04); --surface-2: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.08); --text: #eef2ff; --muted: #94a3b8; --dim: #64748b; --violet: #a78bfa; --green: #10b981; --amber: #f59e0b; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+    .scene { position: relative; height: 100%; padding: 34px 38px; display: flex; flex-direction: column; gap: 18px; }
+    .grid-lines { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 48px 48px; }
+    .orb { position: absolute; width: 420px; height: 420px; left: -110px; bottom: -100px; border-radius: 50%; filter: blur(100px); background: radial-gradient(circle, rgba(139,92,246,0.16), transparent 70%); }
+    .topbar { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: end; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--violet); margin-bottom: 6px; }
+    .scene-title { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; }
+    .scene-subtitle { margin-top: 7px; color: var(--muted); font-size: 14px; }
+    .badge { padding: 8px 12px; border-radius: 999px; font-size: 12px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.22); color: #bbf7d0; }
+    .content { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .panel-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim); margin-bottom: 14px; }
+    .flow { display: grid; gap: 12px; align-content: center; height: calc(100% - 30px); }
+    .flow-box { padding: 16px 18px; border-radius: 18px; background: rgba(129,140,248,0.08); border: 1px solid rgba(129,140,248,0.24); }
+    .flow-box strong { display: block; font-size: 16px; margin-bottom: 6px; }
+    .flow-box span { display: block; font-size: 13px; line-height: 1.5; color: var(--muted); }
+    .flow-arrow { text-align: center; color: var(--dim); font-size: 20px; }
+    .list { display: grid; gap: 11px; }
+    .list-item { padding: 12px 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid rgba(255,255,255,0.08); font-size: 14px; line-height: 1.45; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .chip { padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(245,158,11,0.24); background: rgba(245,158,11,0.08); color: #fde68a; font-size: 12px; }
+    .footer { position: relative; z-index: 1; padding: 13px 16px; border-radius: 16px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.18); color: #d1fae5; font-size: 14px; }
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+    <div class="orb"></div>
+    <header class="topbar" data-reveal>
+      <div>
+        <div class="eyebrow">BPM Software Solutions • 2017-2021</div>
+        <div class="scene-title">Financial Automation Platform</div>
+        <div class="scene-subtitle">Senior Software Architect / Engineering Lead</div>
+      </div>
+      <div class="badge">Automation System</div>
+    </header>
+    <main class="content">
+      <section class="panel" data-reveal>
+        <div class="panel-title">Operational Flow</div>
+        <div class="flow">
+          <div class="flow-box"><strong>Raw Inputs</strong><span>ERP exports, payroll data, SFTP payloads, claims feeds, PDFs, and client-side operational data.</span></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box"><strong>Normalization</strong><span>SQL-driven mapping, ETL processing, schema cleanup, and cross-system reconciliation.</span></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box"><strong>Automation Layer</strong><span>Azure Functions, Selenium RPA, AI-assisted validation, event-driven integrations, and reporting services.</span></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box"><strong>Business Output</strong><span>Unified reporting, payroll synchronization, compliance workflows, and faster decisions with less manual overhead.</span></div>
+        </div>
+      </section>
+      <section class="panel" data-reveal>
+        <div class="panel-title">Representative Systems</div>
+        <div class="list">
+          <div class="list-item">ClaimChoice Hub unified eligibility, payroll, and claims workflows while reducing manual operational drag.</div>
+          <div class="list-item">Tiding Health delivered high-traffic portals and integrations at multi-million-user scale.</div>
+          <div class="list-item">CloudWatch dashboards, ETL pipelines, and Python services made reporting and error tracking operational instead of forensic.</div>
+          <div class="list-item">LLM-assisted generation and orchestration pushed automation further up the stack.</div>
+        </div>
+        <div class="chip-row">
+          <span class="chip">ETL</span>
+          <span class="chip">Azure Functions</span>
+          <span class="chip">Python</span>
+          <span class="chip">AWS</span>
+          <span class="chip">RPA</span>
+          <span class="chip">LLM</span>
+        </div>
+      </section>
+    </main>
+    <footer class="footer" data-reveal>From manual reporting to automation that can actually be operated.</footer>
+  </div>
+  <script>
+    document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+      el.style.animationDelay = `${0.12 + i * 0.14}s`;
+    });
+    window.parent.postMessage({ type: 'iframe:ready' }, '*');
+  </script>
+</body>
+</html>

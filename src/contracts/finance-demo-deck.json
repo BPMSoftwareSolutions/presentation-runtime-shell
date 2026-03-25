@@ -1,0 +1,103 @@
+{
+  "id": "finance-demo-deck",
+  "title": "Financial Analytics Command Center",
+  "status": "ready",
+  "theme": { "shell": "dark", "accent": "violet", "presenterPosition": "left" },
+  "settings": {
+    "typingSpeedMs": 22,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1800,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "fin-01", "title": "Opening", "type": "title",
+      "editIntent": "Title card. Frame the category fast: finance, analytics, profitability, AI-assisted insight. The promise before the demo — static reports are the old world, operational financial intelligence is the new one.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Finance teams run on static reports.", "pauseMs": 700 },
+        { "text": " Variance analysis takes hours.", "pauseMs": 700 },
+        { "text": " This is what operational financial intelligence looks like.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-01-title/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-02", "title": "Command Center", "type": "narrative",
+      "editIntent": "The hero slide. Financial Command Center at rest: four KPI cards (Revenue up, Margin down, Operating Profit down, YoY +5.9%), three segment health cards (Retail AT RISK, Enterprise HEALTHY, Online STABLE), variance summary column, and the AI Analyst terminal bottom-right. Sets the complete picture before zooming into the problem.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Acme Corp. Three business segments.", "pauseMs": 700 },
+        { "text": " Revenue is up. But margin is under pressure.", "pauseMs": 800 },
+        { "text": " Retail is the problem. The system already knows.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-02-command-center/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-03", "title": "Variance Detected", "type": "narrative",
+      "editIntent": "The variance breaks. Gross Margin down 2.1 points vs last year. Operating Profit -$120K. The system detected it instantly and surfaces a full driver table: Price, Volume, Labor Cost, Mix Effect, Discounting — each with LY vs Current vs Delta. Severity: HIGH. This is the MSP incident equivalent.",
+      "presenter": { "mode": "impact", "blocks": [
+        { "text": "Gross margin just declined 2.1 points versus last year.", "pauseMs": 700 },
+        { "text": " Operating profit is down $120K.", "pauseMs": 700 },
+        { "text": " The system has already decomposed the drivers.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-03-variance/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-04", "title": "Root Cause", "type": "narrative",
+      "editIntent": "The AI analyst's diagnosis. Three primary drivers: labor cost inflation (+8%), product mix shift toward lower-margin offerings, discounting increase in NE region. Margin last year was 35.9%, now 33.8% — 2.1 point compression explained. AI notes panel on the right. This is the finance equivalent of MSP root cause.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Three drivers. Labor, mix, and discounting.", "pauseMs": 700 },
+        { "text": " Labor is rising faster than revenue.", "pauseMs": 700 },
+        { "text": " The mix shift explains the rest.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-04-rootcause/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-05", "title": "Profitability Mix", "type": "chart",
+      "editIntent": "Profitability mix analysis. Left: mix comparison table — four service categories, last period vs current share, margin quality rating. Staffing Services share fell from 42% to 39% (Low quality). Consulting rose 28→31% (High). Right: the driver tree — Revenue split into Price +140K, Volume +170K, Mix -60K, with the child node showing low-margin share increasing. This is the finance causality graph.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "The mix is the story.", "pauseMs": 700 },
+        { "text": " More revenue — from lower-margin work.", "pauseMs": 800 },
+        { "text": " That's what compressed the gross margin.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-05-mix/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-06", "title": "YoY Comparison", "type": "chart",
+      "editIntent": "Credibility slide. Year-over-year KPI table: Revenue +5.9%, Gross Margin -2.1 pts, Operating Profit -12.9%, Avg Discount Rate +1.1 pts. Below it: the profit bridge waterfall — starting from $0.93M last year, adding price and volume impacts, subtracting labor, mix shift, and discounting to land at $0.81M current. Horizontal bars animate left-to-right.",
+      "presenter": { "mode": "reveal", "blocks": [
+        { "text": "Revenue up. Profit down.", "pauseMs": 800 },
+        { "text": " The bridge shows exactly how we got here.", "pauseMs": 700 },
+        { "text": " Price and volume helped. Labor and mix hurt more.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-06-yoy/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-07", "title": "Action Playbook", "type": "narrative",
+      "editIntent": "Recovery in action. Four-step margin-recovery playbook: reduce discounting 2%, shift mix toward high-margin services, reallocate labor to top-yield accounts, tighten pricing discipline in weak regions. Projected outcome: Margin +1.4 pts, Operating Profit +$95K. Before/After comparison cards: Margin 33.8% → 35.2%, Op Profit $0.81M → $0.905M. This is the finance equivalent of MSP playbook execution.",
+      "presenter": { "mode": "thinking", "blocks": [
+        { "text": "Four actions. Specific, measurable, immediately executable.", "pauseMs": 700 },
+        { "text": " Margin recovers 1.4 points.", "pauseMs": 700 },
+        { "text": " Operating profit up $95K — without touching revenue targets.", "pauseMs": 500 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-07-playbook/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fin-08", "title": "Before vs After", "type": "closing",
+      "editIntent": "The closing argument. Before: static monthly reports, manual variance analysis, disconnected spreadsheets, lagging insight, hard to simulate. After: live diagnostic environment, instant driver identification, unified operating view, action-ready intelligence, built-in scenario modeling. Bottom tagline: Time to insight: Hours → Seconds. This is not reporting. This is financial operations.",
+      "presenter": { "mode": "impact", "blocks": [
+        { "text": "This is the difference.", "pauseMs": 800 },
+        { "text": " Not a better dashboard. A financial operator.", "pauseMs": 700 },
+        { "text": " You are not running reports anymore. You are running the business.", "pauseMs": 400 }
+      ]},
+      "content": { "route": "./src/generated/finance/scene-08-compare/index.html" },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

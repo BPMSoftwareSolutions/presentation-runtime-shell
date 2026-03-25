@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What This Resume Is</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+    .scene { position: relative; height: 100%; display: grid; place-items: center; padding: 40px; }
+    .grid-lines { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 48px 48px; opacity: 0; animation: fade-in 1.2s 0.2s ease forwards; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0; animation: fade-in 1.8s ease forwards; }
+    .orb-1 { width: 520px; height: 520px; left: -150px; top: -150px; background: radial-gradient(circle, rgba(139,92,246,0.2), transparent 70%); animation-delay: 0.15s; }
+    .orb-2 { width: 380px; height: 380px; right: -90px; bottom: -90px; background: radial-gradient(circle, rgba(16,185,129,0.14), transparent 70%); animation-delay: 0.45s; }
+    .content { position: relative; z-index: 1; width: min(980px, 100%); display: grid; gap: 20px; }
+    .eyebrow { text-align: center; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #a78bfa; opacity: 0; animation: slide-up 0.7s 0.55s ease forwards; }
+    .title { text-align: center; font-size: clamp(32px, 5.8vw, 64px); letter-spacing: -0.04em; line-height: 1.02; font-weight: 800; opacity: 0; animation: slide-up 0.8s 0.8s ease forwards; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .panel { padding: 22px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.05); opacity: 0; animation: slide-up 0.7s ease forwards; }
+    .panel:nth-child(1) { animation-delay: 1.05s; }
+    .panel:nth-child(2) { animation-delay: 1.18s; }
+    .panel-title { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #64748b; margin-bottom: 14px; }
+    .list { display: grid; gap: 10px; }
+    .list-item { padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); font-size: 15px; line-height: 1.45; }
+    .final-line { text-align: center; padding: 16px 18px; border-radius: 18px; border: 1px solid rgba(16,185,129,0.22); background: rgba(16,185,129,0.06); color: #d1fae5; font-size: 18px; opacity: 0; animation: slide-up 0.75s 1.3s ease forwards; }
+    @keyframes fade-in { to { opacity: 1; } }
+    @keyframes slide-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="content">
+      <div class="eyebrow">The Meta</div>
+      <h1 class="title">What This Resume Actually Is</h1>
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-title">Not</div>
+          <div class="list">
+            <div class="list-item">Job history</div>
+            <div class="list-item">Bullet-point summaries</div>
+            <div class="list-item">A static document asking for belief</div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">Instead</div>
+          <div class="list">
+            <div class="list-item">Systems</div>
+            <div class="list-item">Architectures</div>
+            <div class="list-item">Live demonstrations and runnable proof</div>
+          </div>
+        </section>
+      </div>
+      <div class="final-line">This is not what I say I built. This is how it actually works.</div>
+    </div>
+  </div>
+  <script>
+    window.parent.postMessage({ type: 'iframe:ready' }, '*');
+  </script>
+</body>
+</html>

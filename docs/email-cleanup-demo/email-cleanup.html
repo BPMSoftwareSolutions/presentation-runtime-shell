@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Cleanup Command Center</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-2: #10182d;
+      --panel: rgba(19, 29, 53, 0.92);
+      --panel-2: rgba(24, 35, 64, 0.95);
+      --line: rgba(164, 184, 255, 0.14);
+      --line-strong: rgba(164, 184, 255, 0.28);
+      --text: #e9efff;
+      --muted: #98a7cf;
+      --accent: #71b7ff;
+      --accent-2: #8c8cff;
+      --good: #5dd39e;
+      --warn: #ffd166;
+      --danger: #ff7b8d;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --gap: 18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(113, 183, 255, 0.18), transparent 26%),
+        radial-gradient(circle at top right, rgba(140, 140, 255, 0.18), transparent 24%),
+        linear-gradient(180deg, #09101d 0%, #0b1020 100%);
+      overflow: hidden;
+    }
+
+    button, input, select { font: inherit; }
+    button {
+      border: 0;
+      color: inherit;
+      background: none;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: var(--gap);
+      padding: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: rgba(10, 15, 28, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px 18px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar__brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 8px 22px rgba(113, 183, 255, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: auto auto 10px 10px;
+      width: 24px;
+      height: 3px;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 8px 0 rgba(255,255,255,0.65), 0 16px 0 rgba(255,255,255,0.45);
+      border-radius: 999px;
+    }
+
+    .brand-copy h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.1;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .topbar__actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 290px minmax(640px, 1fr) 280px;
+      gap: var(--gap);
+    }
+
+    .sidebar, .rightbar, .main-stage {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(24,35,64,0.88), rgba(15,22,42,0.96));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 16px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel__header h2 {
+      margin: 0;
+      font-size: 0.98rem;
+      letter-spacing: 0.01em;
+    }
+
+    .panel__footer {
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--line);
+      margin-top: auto;
+    }
+
+    .panel__footer--actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      transition: 160ms ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn--primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #08111f;
+      font-weight: 700;
+    }
+    .btn--secondary {
+      background: rgba(113, 183, 255, 0.12);
+      border-color: rgba(113, 183, 255, 0.24);
+      color: var(--text);
+    }
+    .btn--ghost {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--line);
+      color: var(--muted);
+    }
+    .btn--danger {
+      background: rgba(255, 123, 141, 0.15);
+      border-color: rgba(255, 123, 141, 0.25);
+      color: #ffdce2;
+    }
+
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--line);
+    }
+
+    .account-list, .step-list, .feed-list, .toggle-list, .stack-actions { padding: 14px; }
+    .account-list { display: grid; gap: 10px; }
+
+    .account-card {
+      width: 100%;
+      text-align: left;
+      padding: 14px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 6px;
+      transition: 160ms ease;
+    }
+    .account-card:hover { border-color: var(--line-strong); background: rgba(255,255,255,0.05); }
+    .account-card.is-active {
+      background: linear-gradient(180deg, rgba(113, 183, 255, 0.18), rgba(255,255,255,0.04));
+      border-color: rgba(113, 183, 255, 0.35);
+      box-shadow: inset 0 0 0 1px rgba(113,183,255,0.18);
+    }
+    .account-card__title { font-weight: 700; }
+    .account-card__meta { color: var(--muted); font-size: 0.88rem; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      border: 1px solid transparent;
+    }
+    .status--danger { color: #ffd8df; background: rgba(255,123,141,0.12); border-color: rgba(255,123,141,0.22); }
+    .status--warning { color: #ffecc2; background: rgba(255,209,102,0.12); border-color: rgba(255,209,102,0.22); }
+    .status--neutral { color: #d9e5ff; background: rgba(113,183,255,0.10); border-color: rgba(113,183,255,0.20); }
+    .status--good { color: #d7ffed; background: rgba(93,211,158,0.12); border-color: rgba(93,211,158,0.22); }
+
+    .metric-list { padding: 16px; display: grid; gap: 12px; }
+    .metric { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .metric dt { color: var(--muted); font-size: 0.9rem; }
+    .metric dd { margin: 0; font-size: 1.15rem; font-weight: 700; }
+
+    .step-list {
+      list-style: none; margin: 0; display: grid; gap: 8px;
+      counter-reset: step;
+    }
+    .step {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .step.is-current { color: var(--text); border-color: rgba(113,183,255,0.35); background: rgba(113,183,255,0.14); }
+    .step.is-complete { color: #d6f5e6; border-color: rgba(93,211,158,0.25); background: rgba(93,211,158,0.11); }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--gap);
+    }
+    .kpi-card {
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(24,35,64,0.92), rgba(15,22,42,0.98));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    .kpi-card h2 { margin: 0 0 10px; font-size: 0.88rem; color: var(--muted); font-weight: 600; }
+    .kpi-card__value { margin: 0; font-size: 1.5rem; font-weight: 800; }
+    .kpi-card__detail { margin: 7px 0 0; color: var(--muted); font-size: 0.88rem; }
+
+    .screen-tabs { display: flex; gap: 10px; padding: 12px 14px; overflow: auto; }
+    .tab {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      flex: 0 0 auto;
+    }
+    .tab.is-active { background: rgba(113,183,255,0.14); border-color: rgba(113,183,255,0.35); color: var(--text); }
+
+    .main-stage { overflow: hidden; }
+    .screen-stack { flex: 1; min-height: 0; position: relative; }
+    .screen {
+      display: none;
+      min-height: 0;
+      flex-direction: column;
+      gap: var(--gap);
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .screen.is-visible { display: flex; }
+
+    .content-grid { display: grid; gap: var(--gap); }
+    .content-grid--2col { grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr); }
+    .content-grid--3col { grid-template-columns: minmax(320px, 1.3fr) minmax(290px, 0.9fr) minmax(280px, 0.8fr); }
+
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 0.92rem;
+    }
+    .data-table th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .data-table tbody tr { transition: 140ms ease; }
+    .data-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+    .data-table tbody tr.is-selected { background: rgba(113,183,255,0.09); }
+
+    .ai-console {
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      min-height: 180px;
+      align-content: start;
+    }
+    .ai-console__message {
+      padding: 12px 13px;
+      border-radius: 13px;
+      background: rgba(6, 11, 22, 0.44);
+      border: 1px solid rgba(113,183,255,0.12);
+      color: #dce6ff;
+      line-height: 1.45;
+    }
+    .ai-console__message.is-highlight { border-color: rgba(113,183,255,0.28); background: rgba(113,183,255,0.08); }
+
+    .tree-view { padding: 12px 14px 18px; overflow: auto; }
+    .tree, .tree ul { list-style: none; padding-left: 18px; margin: 0; position: relative; }
+    .tree ul::before {
+      content: "";
+      position: absolute;
+      left: 7px; top: 0; bottom: 10px;
+      width: 1px; background: var(--line);
+    }
+    .tree li { position: relative; padding: 6px 0; }
+    .tree li::before {
+      content: "";
+      position: absolute;
+      left: -11px; top: 18px;
+      width: 12px; height: 1px; background: var(--line);
+    }
+    .tree > li::before, .before-after .tree > li::before { display: none; }
+    .tree-item {
+      width: 100%; text-align: left; padding: 10px 12px;
+      border-radius: 12px; border: 1px solid transparent;
+      color: var(--text); background: rgba(255,255,255,0.03);
+    }
+    .tree-item:hover { border-color: var(--line-strong); }
+    .tree-item.is-selected { background: rgba(113,183,255,0.15); border-color: rgba(113,183,255,0.35); }
+    .tree-item.is-flagged::after {
+      content: "Flagged"; float: right; font-size: 0.72rem; color: var(--warn);
+      background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.22);
+      padding: 4px 7px; border-radius: 999px;
+    }
+
+    .inspection-card { padding: 16px; display: grid; gap: 14px; }
+    .inspection-card__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .inspection-card__header h3 { margin: 0; font-size: 1.2rem; }
+
+    .inspection-meta { display: grid; gap: 10px; }
+    .inspection-meta div {
+      display: flex; justify-content: space-between; gap: 12px;
+      padding: 11px 12px; border-radius: 12px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+    }
+    .inspection-meta dt { color: var(--muted); }
+    .inspection-meta dd { margin: 0; text-align: right; }
+
+    .explanation-block {
+      margin: 16px;
+      padding: 14px 15px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      line-height: 1.5;
+    }
+    .explanation-block h3, .explanation-block h4 { margin: 0 0 8px; }
+    .explanation-block p { margin: 0; color: #dbe5ff; }
+
+    .action-group { padding: 0 16px 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .plan-block { padding: 16px; border-bottom: 1px solid var(--line); }
+    .plan-block h3 { margin: 0 0 12px; font-size: 0.96rem; }
+    .token-list, .check-list {
+      display: flex; gap: 8px; flex-wrap: wrap; padding: 0; margin: 0; list-style: none;
+    }
+    .token-list li, .check-list li {
+      padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+      font-size: 0.88rem;
+    }
+
+    .impact-summary { padding: 16px; }
+    .impact-summary h3 { margin: 0 0 10px; }
+    .impact-summary ul { margin: 0; padding-left: 18px; color: #dfe8ff; }
+    .impact-summary li { margin: 6px 0; }
+
+    .execution-status { padding: 16px; }
+    .progress {
+      height: 14px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden;
+      border: 1px solid var(--line); margin: 12px 0 8px;
+    }
+    .progress__bar {
+      height: 100%; width: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 400ms ease;
+    }
+    .progress__label { color: var(--muted); margin: 0; }
+
+    .operation-log {
+      margin: 0; padding: 0 16px 18px 36px; display: grid; gap: 10px;
+    }
+    .operation-log li { color: var(--muted); }
+    .operation-log li.is-complete { color: #d8ffeb; }
+    .operation-log li.is-current { color: #fff2c9; }
+
+    .before-after { padding: 16px; min-height: 320px; }
+    .before-after--before { background: linear-gradient(180deg, rgba(255,123,141,0.05), transparent); }
+    .before-after--after { background: linear-gradient(180deg, rgba(93,211,158,0.05), transparent); }
+
+    .metrics-grid {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .metric-card {
+      padding: 16px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,0.04);
+    }
+    .metric-card h3 { margin: 0 0 8px; font-size: 0.9rem; color: var(--muted); }
+    .metric-card p { margin: 0; font-size: 1.35rem; font-weight: 800; }
+
+    .feed-list {
+      margin: 0; padding-left: 28px; display: grid; gap: 8px; color: #dbe5ff;
+    }
+    .toggle-list {
+      display: grid; gap: 12px; color: #dbe5ff;
+    }
+    .toggle-list label {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--line);
+    }
+    .toggle-list input { accent-color: #8fbfff; }
+    .stack-actions { display: grid; gap: 10px; }
+
+    .hidden { display: none !important; }
+
+    .toast {
+      position: fixed;
+      bottom: 18px; left: 50%; transform: translateX(-50%) translateY(20px);
+      opacity: 0; pointer-events: none;
+      padding: 12px 16px; border-radius: 12px;
+      background: rgba(10, 15, 28, 0.92); border: 1px solid var(--line-strong);
+      box-shadow: var(--shadow);
+      transition: 180ms ease;
+      z-index: 50;
+    }
+    .toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 1350px) {
+      .workspace { grid-template-columns: 260px minmax(0, 1fr); }
+      .rightbar { display: none; }
+      .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .content-grid--3col { grid-template-columns: 1.2fr 1fr; }
+      .panel--operator { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 1000px) {
+      body { overflow: auto; }
+      .app-shell { height: auto; min-height: 100vh; }
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar, .rightbar { order: 2; }
+      .main-stage { order: 1; }
+      .kpi-row, .metrics-grid, .content-grid--2col, .content-grid--3col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app-shell" data-demo-step="overview">
+    <header class="topbar">
+      <div class="topbar__brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-copy">
+          <h1>Email Cleanup Command Center</h1>
+          <p>Navigate accounts, inspect folder sprawl, preview cleanup, and run safe operations live.</p>
+        </div>
+      </div>
+      <div class="topbar__actions">
+        <button type="button" class="btn btn--ghost">Demo Mode</button>
+        <button type="button" class="btn btn--ghost">Safe Mode: On</button>
+        <button type="button" class="btn btn--primary" data-action="scan">Scan All Accounts</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <section class="panel panel--accounts">
+          <div class="panel__header">
+            <h2>Accounts</h2>
+            <button type="button" class="icon-btn" aria-label="Add account">+</button>
+          </div>
+          <nav class="account-list" aria-label="Connected email accounts">
+            <button class="account-card is-active" data-account="gmail-personal" data-action="open-account">
+              <div class="account-card__title">Gmail Personal</div>
+              <div class="account-card__meta">142 folders · 31 stale · 9 duplicate patterns</div>
+              <div class="account-card__status status status--danger">Needs cleanup</div>
+            </button>
+            <button class="account-card" data-account="outlook-work" data-action="open-account">
+              <div class="account-card__title">Outlook Work</div>
+              <div class="account-card__meta">87 folders · 14 stale · 7 duplicate patterns</div>
+              <div class="account-card__status status status--warning">Needs review</div>
+            </button>
+            <button class="account-card" data-account="yahoo-backup" data-action="open-account">
+              <div class="account-card__title">Yahoo Backup</div>
+              <div class="account-card__meta">26 folders · 9 stale · 2 duplicate patterns</div>
+              <div class="account-card__status status status--neutral">Moderate</div>
+            </button>
+            <button class="account-card" data-account="icloud" data-action="open-account">
+              <div class="account-card__title">iCloud</div>
+              <div class="account-card__meta">41 folders · 6 stale · 5 duplicate patterns</div>
+              <div class="account-card__status status status--warning">Review</div>
+            </button>
+          </nav>
+        </section>
+
+        <section class="panel panel--summary">
+          <div class="panel__header"><h2>Portfolio Health</h2></div>
+          <dl class="metric-list">
+            <div class="metric"><dt>Connected accounts</dt><dd>4</dd></div>
+            <div class="metric"><dt>Total folders</dt><dd>296</dd></div>
+            <div class="metric"><dt>Stale folders</dt><dd>58</dd></div>
+            <div class="metric"><dt>Broken rules</dt><dd>11</dd></div>
+          </dl>
+        </section>
+
+        <section class="panel panel--flow">
+          <div class="panel__header"><h2>Demo Flow</h2></div>
+          <ol class="step-list" id="stepList">
+            <li class="step is-current" data-step="overview">1. Overview</li>
+            <li class="step" data-step="topology">2. Open account</li>
+            <li class="step" data-step="topology">3. Inspect topology</li>
+            <li class="step" data-step="findings">4. Review findings</li>
+            <li class="step" data-step="plan">5. Generate plan</li>
+            <li class="step" data-step="preview">6. Preview changes</li>
+            <li class="step" data-step="execution">7. Run cleanup</li>
+            <li class="step" data-step="results">8. Review results</li>
+          </ol>
+        </section>
+      </aside>
+
+      <main class="main-stage">
+        <section class="kpi-row" aria-label="Key findings overview">
+          <article class="kpi-card">
+            <h2>Folder Complexity</h2>
+            <p class="kpi-card__value">High</p>
+            <p class="kpi-card__detail">23 duplicate patterns · 14 over-nested paths</p>
+          </article>
+          <article class="kpi-card">
+            <h2>AI Findings</h2>
+            <p class="kpi-card__value">58</p>
+            <p class="kpi-card__detail">Stale folders identified</p>
+          </article>
+          <article class="kpi-card">
+            <h2>Automation Risk</h2>
+            <p class="kpi-card__value">11</p>
+            <p class="kpi-card__detail">Rules point to outdated or overlapping targets</p>
+          </article>
+          <article class="kpi-card">
+            <h2>Projected Reduction</h2>
+            <p class="kpi-card__value">296 → 158</p>
+            <p class="kpi-card__detail">Estimated folders after cleanup</p>
+          </article>
+        </section>
+
+        <section class="panel panel--screen-tabs">
+          <div class="screen-tabs" role="tablist" aria-label="Demo screens">
+            <button class="tab is-active" role="tab" data-screen="overview">Overview</button>
+            <button class="tab" role="tab" data-screen="topology">Topology</button>
+            <button class="tab" role="tab" data-screen="findings">Findings</button>
+            <button class="tab" role="tab" data-screen="plan">Plan</button>
+            <button class="tab" role="tab" data-screen="preview">Preview</button>
+            <button class="tab" role="tab" data-screen="execution">Execution</button>
+            <button class="tab" role="tab" data-screen="results">Results</button>
+          </div>
+        </section>
+
+        <div class="screen-stack">
+          <section class="screen is-visible" data-screen="overview">
+            <div class="content-grid content-grid--2col">
+              <section class="panel">
+                <div class="panel__header">
+                  <h2>Account Health Overview</h2>
+                  <div class="toolbar">
+                    <button type="button" class="btn btn--ghost">Filter</button>
+                    <button type="button" class="btn btn--ghost">Sort</button>
+                  </div>
+                </div>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Account</th><th>Folders</th><th>Unused</th><th>Duplicate intent</th><th>Status</th><th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Gmail Personal</td><td>142</td><td>31</td><td>9</td>
+                      <td><span class="status status--danger">High complexity</span></td>
+                      <td><button class="btn btn--primary" data-action="open-gmail">Open</button></td>
+                    </tr>
+                    <tr>
+                      <td>Outlook Work</td><td>87</td><td>14</td><td>7</td>
+                      <td><span class="status status--warning">Needs review</span></td>
+                      <td><button class="btn btn--secondary" data-action="open-account-row">Open</button></td>
+                    </tr>
+                    <tr>
+                      <td>Yahoo Backup</td><td>26</td><td>9</td><td>2</td>
+                      <td><span class="status status--neutral">Moderate</span></td>
+                      <td><button class="btn btn--secondary" data-action="open-account-row">Open</button></td>
+                    </tr>
+                    <tr>
+                      <td>iCloud</td><td>41</td><td>6</td><td>5</td>
+                      <td><span class="status status--warning">Needs review</span></td>
+                      <td><button class="btn btn--secondary" data-action="open-account-row">Open</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section class="panel">
+                <div class="panel__header"><h2>AI Operator</h2></div>
+                <div class="ai-console" id="overviewConsole">
+                  <div class="ai-console__message">Connected 4 accounts. Detected 296 total folders.</div>
+                  <div class="ai-console__message">58 folders appear inactive. 23 folder groups appear duplicative by name or intent.</div>
+                  <div class="ai-console__message is-highlight">Recommended next action: open Gmail Personal and inspect topology.</div>
+                </div>
+                <div class="panel__footer panel__footer--actions">
+                  <button class="btn btn--primary" data-action="open-gmail">Open Gmail Personal</button>
+                  <button class="btn btn--secondary" data-action="go-findings">Review Suggested Cleanup</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="topology">
+            <div class="content-grid content-grid--3col">
+              <section class="panel panel--folder-tree">
+                <div class="panel__header">
+                  <h2>Folder Topology</h2>
+                  <div class="toolbar">
+                    <button class="btn btn--ghost">Tree</button>
+                    <button class="btn btn--ghost">Cluster</button>
+                    <button class="btn btn--ghost">Show stale</button>
+                    <button class="btn btn--ghost">Show duplicates</button>
+                  </div>
+                </div>
+                <div class="tree-view">
+                  <ul class="tree">
+                    <li>
+                      <button class="tree-item" data-folder="Inbox">Inbox</button>
+                      <ul>
+                        <li><button class="tree-item" data-folder="Action Needed">Action Needed</button></li>
+                        <li>
+                          <button class="tree-item" data-folder="Receipts">Receipts</button>
+                          <ul>
+                            <li><button class="tree-item is-flagged" data-folder="Receipts 2024">Receipts 2024</button></li>
+                            <li><button class="tree-item is-flagged" data-folder="Shopping Receipts">Shopping Receipts</button></li>
+                            <li><button class="tree-item is-flagged" data-folder="Bills & Receipts">Bills &amp; Receipts</button></li>
+                          </ul>
+                        </li>
+                        <li>
+                          <button class="tree-item" data-folder="Travel">Travel</button>
+                          <ul>
+                            <li><button class="tree-item is-flagged" data-folder="Trips">Trips</button></li>
+                            <li><button class="tree-item is-selected is-flagged" data-folder="Travel Plans">Travel Plans</button></li>
+                            <li><button class="tree-item is-flagged" data-folder="Confirmations">Confirmations</button></li>
+                          </ul>
+                        </li>
+                        <li>
+                          <button class="tree-item" data-folder="Clients">Clients</button>
+                          <ul>
+                            <li>
+                              <button class="tree-item" data-folder="Active">Active</button>
+                              <ul>
+                                <li>
+                                  <button class="tree-item" data-folder="2024">2024</button>
+                                  <ul><li><button class="tree-item is-flagged" data-folder="Q3">Q3</button></li></ul>
+                                </li>
+                              </ul>
+                            </li>
+                            <li><button class="tree-item is-flagged" data-folder="Former Clients">Former Clients</button></li>
+                          </ul>
+                        </li>
+                        <li><button class="tree-item is-flagged" data-folder="Newsletters">Newsletters</button></li>
+                        <li><button class="tree-item is-flagged" data-folder="Read Later">Read Later</button></li>
+                        <li><button class="tree-item" data-folder="Misc">Misc</button></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+
+              <section class="panel panel--inspection">
+                <div class="panel__header"><h2>Inspection Panel</h2></div>
+                <article class="inspection-card">
+                  <header class="inspection-card__header">
+                    <h3 id="inspectionTitle">Travel Plans</h3>
+                    <span class="status status--warning" id="inspectionStatus">Overlapping purpose</span>
+                  </header>
+                  <dl class="inspection-meta">
+                    <div><dt>Status</dt><dd id="metaStatus">Overlaps with Travel and Trips</dd></div>
+                    <div><dt>Semantic overlap</dt><dd id="metaOverlap">87%</dd></div>
+                    <div><dt>Last unique usage</dt><dd id="metaUsage">8 months ago</dd></div>
+                    <div><dt>Linked rule</dt><dd id="metaRule">Rule #4 routes airline confirmations here</dd></div>
+                  </dl>
+                </article>
+                <div class="explanation-block">
+                  <h4>Suggested Action</h4>
+                  <p id="inspectionRecommendation">Merge into <strong>Travel</strong>, preserve all messages, and retarget the linked rule.</p>
+                </div>
+                <div class="action-group">
+                  <button class="btn btn--primary" data-action="go-preview">Preview Merge</button>
+                  <button class="btn btn--secondary">Mark Keep</button>
+                  <button class="btn btn--ghost">Ignore</button>
+                </div>
+              </section>
+
+              <section class="panel panel--operator">
+                <div class="panel__header"><h2>AI Operator</h2></div>
+                <div class="ai-console" id="topologyConsole">
+                  <div class="ai-console__message">This account shows structural drift caused by stale folders and duplicate filing paths.</div>
+                  <div class="ai-console__message">I recommend collapsing receipt-related folders and travel-related folders first.</div>
+                </div>
+                <div class="panel__footer panel__footer--actions">
+                  <button class="btn btn--primary" data-action="go-plan">Generate Cleanup Plan</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="findings">
+            <section class="panel">
+              <div class="panel__header">
+                <h2>Findings Queue</h2>
+                <div class="toolbar">
+                  <button class="btn btn--ghost">Priority: High</button>
+                  <button class="btn btn--ghost">Type: All</button>
+                  <button class="btn btn--ghost">Confidence: 70%+</button>
+                </div>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th></th><th>Finding</th><th>Type</th><th>Confidence</th><th>Suggested action</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="findingsTableBody">
+                  <tr class="is-selected"><td><input type="checkbox" checked /></td><td>Receipts 2024</td><td>Stale</td><td>98%</td><td>Merge into Receipts</td><td><button class="btn btn--ghost" data-action="inspect-finding" data-folder="Receipts 2024">Inspect</button></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Shopping Receipts</td><td>Duplicate intent</td><td>94%</td><td>Merge into Receipts</td><td><button class="btn btn--ghost" data-action="inspect-finding" data-folder="Shopping Receipts">Inspect</button></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Bills &amp; Receipts</td><td>Duplicate intent</td><td>91%</td><td>Merge into Receipts</td><td><button class="btn btn--ghost" data-action="inspect-finding" data-folder="Bills & Receipts">Inspect</button></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Trips</td><td>Duplicate intent</td><td>89%</td><td>Merge into Travel</td><td><button class="btn btn--ghost" data-action="inspect-finding" data-folder="Trips">Inspect</button></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Travel Plans</td><td>Overlapping purpose</td><td>87%</td><td>Merge into Travel</td><td><button class="btn btn--ghost" data-action="inspect-finding" data-folder="Travel Plans">Inspect</button></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Active &gt; 2024 &gt; Q3</td><td>Over-nested</td><td>85%</td><td>Flatten under Clients</td><td><button class="btn btn--ghost" data-action="inspect-finding" data-folder="Q3">Inspect</button></td></tr>
+                </tbody>
+              </table>
+              <div class="panel__footer panel__footer--actions">
+                <button class="btn btn--secondary">Select All Safe Changes</button>
+                <button class="btn btn--primary" data-action="go-plan">Build Cleanup Plan</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="screen" data-screen="plan">
+            <div class="content-grid content-grid--2col">
+              <section class="panel">
+                <div class="panel__header"><h2>Cleanup Plan</h2></div>
+                <article class="plan-block"><h3>Keep Core Structure</h3><ul class="token-list"><li>Inbox</li><li>Action Needed</li><li>Clients</li><li>Finance</li><li>Travel</li><li>Personal</li><li>Family</li><li>Purchases</li><li>Archive</li></ul></article>
+                <article class="plan-block"><h3>Merge Into Purchases</h3><ul class="check-list"><li>Receipts 2024</li><li>Shopping Receipts</li><li>Bills &amp; Receipts</li></ul></article>
+                <article class="plan-block"><h3>Merge Into Travel</h3><ul class="check-list"><li>Trips</li><li>Travel Plans</li><li>Confirmations</li></ul></article>
+                <article class="plan-block"><h3>Delete / Remove</h3><ul class="check-list"><li>Untitled Folder</li><li>Old Folder Copy</li><li>EmptyTemp</li></ul></article>
+              </section>
+              <section class="panel">
+                <div class="panel__header"><h2>Plan Summary</h2></div>
+                <dl class="metric-list">
+                  <div class="metric"><dt>Folders to merge</dt><dd>8</dd></div>
+                  <div class="metric"><dt>Folders to delete</dt><dd>3</dd></div>
+                  <div class="metric"><dt>Rules to update</dt><dd>4</dd></div>
+                  <div class="metric"><dt>Messages moved</dt><dd>3,481</dd></div>
+                </dl>
+                <div class="explanation-block"><h3>AI Rationale</h3><p>The current structure has multiple folders with the same purpose. Consolidation reduces filing friction, lowers rule drift, and makes the account easier to maintain.</p></div>
+                <div class="panel__footer panel__footer--actions">
+                  <button class="btn btn--secondary">Edit Plan</button>
+                  <button class="btn btn--primary" data-action="go-preview">Preview Actions</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="preview">
+            <section class="panel">
+              <div class="panel__header">
+                <h2>Preview Changes</h2>
+                <div class="toolbar">
+                  <button class="btn btn--ghost">Safe Mode: On</button>
+                  <button class="btn btn--ghost">Snapshot: On</button>
+                  <button class="btn btn--ghost">Approval Required</button>
+                </div>
+              </div>
+              <table class="data-table">
+                <thead><tr><th>Change</th><th>Impact</th><th>Confidence</th><th>Details</th></tr></thead>
+                <tbody>
+                  <tr><td>Merge “Receipts 2024”</td><td>412 emails</td><td>98%</td><td>Target: Purchases</td></tr>
+                  <tr><td>Merge “Shopping Receipts”</td><td>221 emails</td><td>94%</td><td>Target: Purchases</td></tr>
+                  <tr><td>Merge “Bills &amp; Receipts”</td><td>187 emails</td><td>91%</td><td>Target: Purchases</td></tr>
+                  <tr><td>Merge “Travel Plans”</td><td>214 emails</td><td>87%</td><td>Target: Travel</td></tr>
+                  <tr><td>Update Rule #4</td><td>1 rule</td><td>93%</td><td>Travel Plans → Travel</td></tr>
+                  <tr><td>Delete “Untitled Folder”</td><td>0 emails</td><td>99%</td><td>Empty for 26 months</td></tr>
+                </tbody>
+              </table>
+              <div class="impact-summary"><h3>Total Impact</h3><ul><li>3,481 emails re-indexed</li><li>4 rules updated</li><li>3 empty folders removed</li><li>0 protected folders touched</li></ul></div>
+              <div class="panel__footer panel__footer--actions">
+                <button class="btn btn--secondary" data-action="back-plan">Back</button>
+                <button class="btn btn--ghost">Export Plan</button>
+                <button class="btn btn--primary btn--danger" data-action="apply-cleanup">Apply Cleanup</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="screen" data-screen="execution">
+            <div class="content-grid content-grid--2col">
+              <section class="panel">
+                <div class="panel__header"><h2>Applying Cleanup</h2></div>
+                <div class="execution-status">
+                  <p><strong>Account:</strong> Gmail Personal</p>
+                  <p><strong>Snapshot ID:</strong> SNAP-2026-03-23-001</p>
+                  <div class="progress"><div class="progress__bar" id="progressBar"></div></div>
+                  <p class="progress__label" id="progressLabel">0% complete</p>
+                </div>
+                <ol class="operation-log" id="operationLog">
+                  <li>Snapshot created</li>
+                  <li>Validated folder permissions</li>
+                  <li>Merged “Receipts 2024” → “Purchases”</li>
+                  <li>Merged “Shopping Receipts” → “Purchases”</li>
+                  <li>Updated Rule #2</li>
+                  <li>Updated Rule #4</li>
+                  <li>Processing “Travel Plans” → “Travel”</li>
+                  <li>Flattening nested client path</li>
+                </ol>
+              </section>
+              <section class="panel">
+                <div class="panel__header"><h2>AI Operator</h2></div>
+                <div class="ai-console" id="executionConsole">
+                  <div class="ai-console__message">Cleanup is ready to run. Protected folders remain excluded.</div>
+                </div>
+                <div class="panel__footer panel__footer--actions">
+                  <button class="btn btn--secondary">Pause</button>
+                  <button class="btn btn--ghost">View Low-Confidence Actions</button>
+                  <button class="btn btn--danger">Roll Back</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="results">
+            <div class="content-grid content-grid--2col">
+              <section class="panel">
+                <div class="panel__header"><h2>Before</h2></div>
+                <div class="before-after before-after--before">
+                  <ul class="tree"><li>Inbox<ul><li>Action Needed</li><li>Receipts<ul><li>Receipts 2024</li><li>Shopping Receipts</li><li>Bills &amp; Receipts</li></ul></li><li>Travel<ul><li>Trips</li><li>Travel Plans</li><li>Confirmations</li></ul></li><li>Clients &gt; Active &gt; 2024 &gt; Q3</li><li>Newsletters</li><li>Read Later</li></ul></li></ul>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel__header"><h2>After</h2></div>
+                <div class="before-after before-after--after">
+                  <ul class="tree"><li>Inbox<ul><li>Action Needed</li><li>Purchases</li><li>Travel</li><li>Clients</li><li>Finance</li><li>Personal</li><li>Family</li><li>Archive</li></ul></li></ul>
+                </div>
+              </section>
+            </div>
+            <section class="panel panel--results-metrics">
+              <div class="panel__header"><h2>Results</h2></div>
+              <div class="metrics-grid">
+                <article class="metric-card"><h3>Folder Count</h3><p>142 → 61</p></article>
+                <article class="metric-card"><h3>Stale Folders Removed</h3><p>31</p></article>
+                <article class="metric-card"><h3>Rules Fixed</h3><p>4</p></article>
+                <article class="metric-card"><h3>Estimated Time Saved</h3><p>2.4 hrs / month</p></article>
+              </div>
+              <div class="panel__footer panel__footer--actions">
+                <button class="btn btn--secondary">View Report</button>
+                <button class="btn btn--ghost">Undo</button>
+                <button class="btn btn--primary" data-action="run-next">Run Next Account</button>
+              </div>
+            </section>
+          </section>
+        </div>
+      </main>
+
+      <aside class="rightbar">
+        <section class="panel panel--activity">
+          <div class="panel__header"><h2>Activity Feed</h2></div>
+          <ol class="feed-list" id="activityFeed">
+            <li>Scan complete for Gmail Personal</li>
+            <li>31 stale folders identified</li>
+            <li>9 duplicate intent groups clustered</li>
+            <li>Cleanup plan generated</li>
+            <li>Preview ready for approval</li>
+          </ol>
+        </section>
+        <section class="panel panel--safety">
+          <div class="panel__header"><h2>Safety Controls</h2></div>
+          <form class="toggle-list">
+            <label><input type="checkbox" checked /> Create rollback snapshot</label>
+            <label><input type="checkbox" checked /> Pause low-confidence actions</label>
+            <label><input type="checkbox" checked /> Protect recent folders</label>
+            <label><input type="checkbox" checked /> Require approval before apply</label>
+          </form>
+        </section>
+        <section class="panel panel--cta">
+          <div class="panel__header"><h2>Presenter Actions</h2></div>
+          <div class="stack-actions">
+            <button class="btn btn--primary" data-action="advance">Advance Demo State</button>
+            <button class="btn btn--secondary" data-action="scan">Replay Scan</button>
+            <button class="btn btn--ghost" data-action="reset">Reset Demo</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const folderDetails = {
+      'Travel Plans': {
+        status: 'Overlapping purpose',
+        metaStatus: 'Overlaps with Travel and Trips',
+        overlap: '87%',
+        usage: '8 months ago',
+        rule: 'Rule #4 routes airline confirmations here',
+        recommendation: 'Merge into <strong>Travel</strong>, preserve all messages, and retarget the linked rule.'
+      },
+      'Receipts 2024': {
+        status: 'Stale',
+        metaStatus: 'No unique messages in the last 14 months',
+        overlap: '94%',
+        usage: '14 months ago',
+        rule: 'No active rules target this folder',
+        recommendation: 'Merge into <strong>Purchases</strong> and retain the existing message history.'
+      },
+      'Shopping Receipts': {
+        status: 'Duplicate intent',
+        metaStatus: 'Overlaps with Receipts and Bills & Receipts',
+        overlap: '91%',
+        usage: '5 months ago',
+        rule: '2 filters route order confirmations here',
+        recommendation: 'Merge into <strong>Purchases</strong> and update linked filters automatically.'
+      },
+      'Bills & Receipts': {
+        status: 'Duplicate intent',
+        metaStatus: 'Categorically overlaps with Purchases',
+        overlap: '89%',
+        usage: '7 months ago',
+        rule: '1 finance rule points here',
+        recommendation: 'Merge into <strong>Purchases</strong> while preserving sender-based filing rules.'
+      },
+      'Trips': {
+        status: 'Duplicate intent',
+        metaStatus: 'Shares content patterns with Travel',
+        overlap: '85%',
+        usage: '9 months ago',
+        rule: 'No active rules target this folder',
+        recommendation: 'Merge into <strong>Travel</strong> to remove duplicate filing choices.'
+      },
+      'Q3': {
+        status: 'Over-nested',
+        metaStatus: 'Path depth exceeds recommended structure',
+        overlap: 'n/a',
+        usage: '4 months ago',
+        rule: 'No direct rule impact',
+        recommendation: 'Flatten under <strong>Clients</strong> to reduce navigation depth.'
+      }
+    };
+
+    const screens = ['overview', 'topology', 'findings', 'plan', 'preview', 'execution', 'results'];
+    const app = document.getElementById('app');
+    const screenEls = [...document.querySelectorAll('.screen')];
+    const tabEls = [...document.querySelectorAll('.tab')];
+    const stepEls = [...document.querySelectorAll('.step')];
+    const accountEls = [...document.querySelectorAll('.account-card')];
+    const toast = document.getElementById('toast');
+    let currentScreen = 'overview';
+    let executionTimer = null;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove('is-visible'), 1800);
+    }
+
+    function goToScreen(name) {
+      currentScreen = name;
+      app.dataset.demoStep = name;
+      screenEls.forEach(el => el.classList.toggle('is-visible', el.dataset.screen === name));
+      tabEls.forEach(el => el.classList.toggle('is-active', el.dataset.screen === name));
+      const idx = screens.indexOf(name);
+      stepEls.forEach((el, i) => {
+        el.classList.toggle('is-current', i === idx || (name === 'topology' && (i === 1 || i === 2)));
+        el.classList.toggle('is-complete', i < idx);
+      });
+      if (name === 'execution') runExecution();
+    }
+
+    function setActiveAccount(account) {
+      accountEls.forEach(el => el.classList.toggle('is-active', el.dataset.account === account));
+    }
+
+    function inspectFolder(folder) {
+      const detail = folderDetails[folder] || folderDetails['Travel Plans'];
+      document.getElementById('inspectionTitle').textContent = folder;
+      document.getElementById('inspectionStatus').textContent = detail.status;
+      document.getElementById('metaStatus').textContent = detail.metaStatus;
+      document.getElementById('metaOverlap').textContent = detail.overlap;
+      document.getElementById('metaUsage').textContent = detail.usage;
+      document.getElementById('metaRule').textContent = detail.rule;
+      document.getElementById('inspectionRecommendation').innerHTML = detail.recommendation;
+      document.querySelectorAll('.tree-item').forEach(el => el.classList.toggle('is-selected', el.dataset.folder === folder));
+      showToast('Loaded ' + folder + ' details');
+    }
+
+    function runExecution() {
+      clearInterval(executionTimer);
+      const progressBar = document.getElementById('progressBar');
+      const progressLabel = document.getElementById('progressLabel');
+      const items = [...document.querySelectorAll('#operationLog li')];
+      const consoleEl = document.getElementById('executionConsole');
+      let progress = 0;
+      items.forEach((item, i) => item.className = i === 0 ? 'is-current' : '');
+      consoleEl.innerHTML = '<div class="ai-console__message">Cleanup started. Snapshot created and protections verified.</div>';
+
+      executionTimer = setInterval(() => {
+        progress += 14;
+        if (progress > 100) progress = 100;
+        progressBar.style.width = progress + '%';
+        progressLabel.textContent = progress + '% complete';
+
+        const activeIndex = Math.min(Math.floor(progress / 14), items.length - 1);
+        items.forEach((item, i) => {
+          if (i < activeIndex) item.className = 'is-complete';
+          else if (i === activeIndex && progress < 100) item.className = 'is-current';
+          else if (progress === 100) item.className = 'is-complete';
+          else item.className = '';
+        });
+
+        if (progress >= 42 && progress < 84) {
+          consoleEl.innerHTML = '<div class="ai-console__message">Cleanup is proceeding normally. No conflicts detected.</div><div class="ai-console__message">Retargeting folder rules as messages are consolidated.</div>';
+        }
+
+        if (progress === 100) {
+          clearInterval(executionTimer);
+          consoleEl.innerHTML = '<div class="ai-console__message is-highlight">Cleanup complete. 31 stale folders removed. 4 rules updated. Ready to review the final state.</div>';
+          setTimeout(() => {
+            goToScreen('results');
+            showToast('Cleanup complete');
+          }, 900);
+        }
+      }, 500);
+    }
+
+    document.body.addEventListener('click', (event) => {
+      const tab = event.target.closest('.tab');
+      if (tab) {
+        goToScreen(tab.dataset.screen);
+        return;
+      }
+
+      const treeItem = event.target.closest('.tree-item');
+      if (treeItem && treeItem.dataset.folder) {
+        inspectFolder(treeItem.dataset.folder);
+        return;
+      }
+
+      const actionEl = event.target.closest('[data-action]');
+      if (!actionEl) return;
+      const action = actionEl.dataset.action;
+
+      if (action === 'scan') {
+        document.getElementById('overviewConsole').innerHTML = '<div class="ai-console__message">Scanning connected accounts…</div><div class="ai-console__message">Resolved 296 folders and 11 active automations across providers.</div><div class="ai-console__message is-highlight">Top target: Gmail Personal shows the highest cleanup impact.</div>';
+        showToast('Scan refreshed');
+      }
+
+      if (action === 'open-account') {
+        setActiveAccount(actionEl.dataset.account || 'gmail-personal');
+        goToScreen('topology');
+      }
+
+      if (action === 'open-gmail') {
+        setActiveAccount('gmail-personal');
+        goToScreen('topology');
+      }
+
+      if (action === 'open-account-row') {
+        showToast('Account detail would open here');
+      }
+
+      if (action === 'go-findings') {
+        goToScreen('findings');
+      }
+
+      if (action === 'inspect-finding') {
+        inspectFolder(actionEl.dataset.folder);
+        goToScreen('topology');
+      }
+
+      if (action === 'go-plan') {
+        goToScreen('plan');
+      }
+
+      if (action === 'go-preview') {
+        goToScreen('preview');
+      }
+
+      if (action === 'back-plan') {
+        goToScreen('plan');
+      }
+
+      if (action === 'apply-cleanup') {
+        goToScreen('execution');
+      }
+
+      if (action === 'run-next') {
+        setActiveAccount('outlook-work');
+        goToScreen('overview');
+        showToast('Ready for next account');
+      }
+
+      if (action === 'advance') {
+        const idx = screens.indexOf(currentScreen);
+        const next = screens[Math.min(idx + 1, screens.length - 1)];
+        goToScreen(next);
+      }
+
+      if (action === 'reset') {
+        clearInterval(executionTimer);
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('progressLabel').textContent = '0% complete';
+        goToScreen('overview');
+        showToast('Demo reset');
+      }
+    });
+  </script>
+</body>
+</html>

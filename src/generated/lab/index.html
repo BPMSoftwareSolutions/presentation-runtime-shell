@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Margin Analysis Lab</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html, body {
+        height: 100%;
+        background: #08101d;
+        color: #eef2ff;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+
+      body {
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      /* Header */
+      .lab-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        opacity: 0;
+        animation: fade-up 0.6s 0.1s ease forwards;
+      }
+
+      .lab-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      .lab-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #eef2ff;
+      }
+
+      .lab-subtitle {
+        font-size: 12px;
+        color: #a8b3cf;
+        margin-top: 2px;
+      }
+
+      /* Cards grid */
+      .metrics-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        opacity: 0;
+        animation: fade-up 0.6s 0.25s ease forwards;
+      }
+
+      .metric-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+
+      .metric-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #a8b3cf;
+        margin-bottom: 6px;
+      }
+
+      .metric-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #eef2ff;
+      }
+
+      .metric-value.negative { color: #f87171; }
+      .metric-value.positive { color: #34d399; }
+
+      /* Scenario panel */
+      .scenario-panel {
+        background: rgba(139, 92, 246, 0.06);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 16px;
+        padding: 20px;
+        opacity: 0;
+        animation: fade-up 0.6s 0.4s ease forwards;
+      }
+
+      .scenario-panel h3 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #a78bfa;
+        margin-bottom: 16px;
+      }
+
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+
+      .slider-label {
+        font-size: 13px;
+        color: #a8b3cf;
+        width: 140px;
+        flex-shrink: 0;
+      }
+
+      input[type="range"] {
+        flex: 1;
+        accent-color: #8b5cf6;
+        cursor: pointer;
+        height: 4px;
+      }
+
+      .slider-value {
+        font-size: 14px;
+        font-weight: 700;
+        width: 52px;
+        text-align: right;
+        color: #eef2ff;
+        flex-shrink: 0;
+      }
+
+      /* Impact bar chart */
+      .impact-section {
+        flex: 1;
+        opacity: 0;
+        animation: fade-up 0.6s 0.55s ease forwards;
+      }
+
+      .impact-section h3 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #a8b3cf;
+        margin-bottom: 14px;
+      }
+
+      .bar-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 120px 1fr 56px;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .bar-name {
+        font-size: 13px;
+        color: #a8b3cf;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .bar-track {
+        height: 8px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 99px;
+        transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+      }
+
+      .bar-fill.is-primary {
+        background: linear-gradient(90deg, #f87171, #fca5a5);
+      }
+
+      .bar-pct {
+        font-size: 13px;
+        font-weight: 600;
+        text-align: right;
+        color: #eef2ff;
+      }
+
+      /* Result callout */
+      .result-callout {
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid rgba(248, 113, 113, 0.2);
+        border-radius: 14px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+
+      .result-callout.is-visible { opacity: 1; }
+
+      .result-label {
+        font-size: 13px;
+        color: #a8b3cf;
+      }
+
+      .result-number {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f87171;
+      }
+
+      @keyframes fade-up {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="lab-header">
+      <div class="lab-icon">🔬</div>
+      <div>
+        <div class="lab-title">Margin Analysis Lab</div>
+        <div class="lab-subtitle">Adjust inputs to model profit impact</div>
+      </div>
+    </div>
+
+    <!-- Baseline metrics -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Revenue</div>
+        <div class="metric-value">$42.8M</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Gross Margin</div>
+        <div class="metric-value">38.2%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Op. Profit (baseline)</div>
+        <div class="metric-value positive">$8.4M</div>
+      </div>
+    </div>
+
+    <!-- Scenario controls -->
+    <div class="scenario-panel">
+      <h3>Scenario Inputs</h3>
+
+      <div class="slider-row">
+        <span class="slider-label">Labor Cost Δ</span>
+        <input type="range" id="labor-slider" min="-20" max="30" value="0" step="1" />
+        <span class="slider-value" id="labor-value">0%</span>
+      </div>
+
+      <div class="slider-row">
+        <span class="slider-label">Material Cost Δ</span>
+        <input type="range" id="material-slider" min="-20" max="30" value="0" step="1" />
+        <span class="slider-value" id="material-value">0%</span>
+      </div>
+
+      <div class="slider-row">
+        <span class="slider-label">Volume Δ</span>
+        <input type="range" id="volume-slider" min="-20" max="20" value="0" step="1" />
+        <span class="slider-value" id="volume-value">0%</span>
+      </div>
+    </div>
+
+    <!-- Impact chart -->
+    <div class="impact-section">
+      <h3>Driver Attribution</h3>
+      <div class="bar-list">
+        <div class="bar-row">
+          <span class="bar-name">Labor Cost</span>
+          <div class="bar-track"><div class="bar-fill is-primary" id="bar-labor" style="width:0%"></div></div>
+          <span class="bar-pct" id="pct-labor">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Material Cost</span>
+          <div class="bar-track"><div class="bar-fill" id="bar-material" style="width:0%"></div></div>
+          <span class="bar-pct" id="pct-material">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Volume</span>
+          <div class="bar-track"><div class="bar-fill" id="bar-volume" style="width:0%"></div></div>
+          <span class="bar-pct" id="pct-volume">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result callout -->
+    <div class="result-callout" id="result-callout">
+      <span class="result-label">Projected Operating Profit Impact</span>
+      <span class="result-number" id="result-number">—</span>
+    </div>
+
+    <script>
+      const BASE_OP_PROFIT = 8.4; // $M
+      const LABOR_WEIGHT = 0.52;
+      const MATERIAL_WEIGHT = 0.30;
+      const VOLUME_WEIGHT = 0.18;
+
+      const laborSlider   = document.getElementById("labor-slider");
+      const materialSlider = document.getElementById("material-slider");
+      const volumeSlider  = document.getElementById("volume-slider");
+
+      function update() {
+        const labor    = parseInt(laborSlider.value);
+        const material = parseInt(materialSlider.value);
+        const volume   = parseInt(volumeSlider.value);
+
+        document.getElementById("labor-value").textContent    = (labor >= 0 ? "+" : "") + labor + "%";
+        document.getElementById("material-value").textContent = (material >= 0 ? "+" : "") + material + "%";
+        document.getElementById("volume-value").textContent   = (volume >= 0 ? "+" : "") + volume + "%";
+
+        const laborImpact    = -(labor * LABOR_WEIGHT) / 100;
+        const materialImpact = -(material * MATERIAL_WEIGHT) / 100;
+        const volumeImpact   = (volume * VOLUME_WEIGHT) / 100;
+        const totalImpact    = laborImpact + materialImpact + volumeImpact;
+        const totalPct       = Math.round(totalImpact * 100);
+
+        // Bars — normalize to the largest absolute driver
+        const magnitudes = [Math.abs(labor * LABOR_WEIGHT), Math.abs(material * MATERIAL_WEIGHT), Math.abs(volume * VOLUME_WEIGHT)];
+        const maxMag = Math.max(...magnitudes, 1);
+
+        document.getElementById("bar-labor").style.width    = Math.min(100, (magnitudes[0] / maxMag) * 100) + "%";
+        document.getElementById("bar-material").style.width = Math.min(100, (magnitudes[1] / maxMag) * 100) + "%";
+        document.getElementById("bar-volume").style.width   = Math.min(100, (magnitudes[2] / maxMag) * 100) + "%";
+
+        document.getElementById("pct-labor").textContent    = (labor !== 0 ? Math.round(Math.abs(laborImpact * 100)) + "%" : "—");
+        document.getElementById("pct-material").textContent = (material !== 0 ? Math.round(Math.abs(materialImpact * 100)) + "%" : "—");
+        document.getElementById("pct-volume").textContent   = (volume !== 0 ? Math.round(Math.abs(volumeImpact * 100)) + "%" : "—");
+
+        const callout = document.getElementById("result-callout");
+        const resultEl = document.getElementById("result-number");
+
+        if (labor !== 0 || material !== 0 || volume !== 0) {
+          callout.classList.add("is-visible");
+          resultEl.textContent = (totalPct >= 0 ? "+" : "") + totalPct + "%";
+          resultEl.style.color = totalPct >= 0 ? "#34d399" : "#f87171";
+        } else {
+          callout.classList.remove("is-visible");
+          resultEl.textContent = "—";
+        }
+
+        window.parent.postMessage({
+          type: "scenario:complete",
+          result: { operatingProfitDeltaPct: totalPct }
+        }, "*");
+      }
+
+      laborSlider.addEventListener("input", update);
+      materialSlider.addEventListener("input", update);
+      volumeSlider.addEventListener("input", update);
+
+      // Listen for commands from the shell
+      window.addEventListener("message", (event) => {
+        const { type, payload } = event.data || {};
+
+        if (type === "scenario:set") {
+          if (payload?.laborCostDeltaPct !== undefined) {
+            laborSlider.value = payload.laborCostDeltaPct;
+          }
+          if (payload?.materialCostDeltaPct !== undefined) {
+            materialSlider.value = payload.materialCostDeltaPct;
+          }
+          update();
+        }
+
+        if (type === "highlight:driver") {
+          // Could visually emphasize the named driver bar
+        }
+      });
+
+      // Signal ready
+      window.addEventListener("load", () => {
+        window.parent.postMessage({ type: "iframe:ready", sceneId: "scene-02" }, "*");
+      });
+    </script>
+  </body>
+</html>

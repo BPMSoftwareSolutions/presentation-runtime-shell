@@ -1,0 +1,175 @@
+{
+  "id": "resume-demo-deck",
+  "title": "Demo Resume - Systems I Have Built",
+  "status": "ready",
+  "theme": { "shell": "dark", "accent": "violet", "presenterPosition": "left" },
+  "settings": {
+    "typingSpeedMs": 22,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1800,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "resume-01",
+      "title": "Opening",
+      "type": "title",
+      "editIntent": "Title card for the demo resume. Establish that this is a system-level portfolio, not a static list of jobs. The scene should feel cinematic and deliberate.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "This is not a resume.", "pauseMs": 700 },
+          { "text": " It is a set of working systems.", "pauseMs": 800 },
+          { "text": " Each role becomes a demo.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-01-title/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-02",
+      "title": "Career System Map",
+      "type": "narrative",
+      "editIntent": "Career overview as a systems map. Show the progression from embedded diagnostics to enterprise platforms, financial automation, and AI orchestration. The point is architectural continuity, not chronology.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "These were never isolated jobs.", "pauseMs": 700 },
+          { "text": " They were connected systems problems.", "pauseMs": 700 },
+          { "text": " The pattern is architecture, automation, and operational clarity.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-02-system-map/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-03",
+      "title": "Edward Jones - Problem",
+      "type": "narrative",
+      "editIntent": "Frame the Edward Jones platform problem state before the redesign. Emphasize monolithic coupling, cross-team friction, and the scale of delivery coordination across thirteen agile teams.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Edward Jones had a delivery problem, not just a code problem.", "pauseMs": 700 },
+          { "text": " Thirteen teams were tied to one tightly coupled platform.", "pauseMs": 700 },
+          { "text": " Release friction was structural.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-03-platform-problem/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-04",
+      "title": "Edward Jones - Transformation",
+      "type": "narrative",
+      "editIntent": "Show the target architecture and capability shift at Edward Jones. Micro frontends, service decomposition, AWS, and continuous delivery should read as an operating model change, not just a diagram.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "The answer was architectural separation.", "pauseMs": 700 },
+          { "text": " Micro frontends, service boundaries, and cloud delivery changed the team topology.", "pauseMs": 800 },
+          { "text": " Coordination gave way to autonomy.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-04-platform-architecture/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-05",
+      "title": "Platform Command Center",
+      "type": "narrative",
+      "editIntent": "Translate the Edward Jones modernization story into a live command-center frame. The system should look operable: services, events, AI terminal, and guided action.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Once the platform is decomposed, you can operate it.", "pauseMs": 700 },
+          { "text": " You can see incidents form, isolate blast radius, and act with confidence.", "pauseMs": 800 },
+          { "text": " That is the difference between a platform and a monolith.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-05-platform-command-center/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-06",
+      "title": "Edward Jones - Impact",
+      "type": "chart",
+      "editIntent": "Summarize the organizational impact of the Edward Jones modernization. Quantify the release-time reduction and show how architecture removed friction across teams.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Release time dropped by fifty percent.", "pauseMs": 700 },
+          { "text": " Governance became systematic instead of reactive.", "pauseMs": 700 },
+          { "text": " Architecture removed friction from thirteen teams at once.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-06-platform-impact/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-07",
+      "title": "BPM - Financial Automation",
+      "type": "narrative",
+      "editIntent": "Represent BPM Software Solutions as an automation and financial operations system. Show ingestion, normalization, automation, AI, and reporting as one continuous flow grounded in the experience data.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "At BPM, the work was turning messy operational inputs into reliable business systems.", "pauseMs": 700 },
+          { "text": " ETL, integrations, AI, and automation all sat in the same pipeline.", "pauseMs": 800 },
+          { "text": " The result was less manual overhead and faster decisions.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-07-financial-automation/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-08",
+      "title": "RenderX - AI Orchestration",
+      "type": "narrative",
+      "editIntent": "Show RenderX as an orchestration system: plugin model, event flow, and the insight that too much structure can become its own failure mode.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "RenderX was an experiment in orchestrated intelligence.", "pauseMs": 700 },
+          { "text": " Events, plugins, and structured outputs made the system extensible.", "pauseMs": 700 },
+          { "text": " It also taught a harder lesson: complexity can become the product.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-08-ai-orchestration/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-09",
+      "title": "Snap-On - Embedded Diagnostics",
+      "type": "narrative",
+      "editIntent": "Represent the Snap-On work as the systems foundation: diagnostic tooling, adaptive protocols, and communication across heterogeneous vehicle networks.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "This foundation started in embedded diagnostics.", "pauseMs": 700 },
+          { "text": " Vehicle protocols, adaptive communication, and real-time troubleshooting shaped the systems mindset early.", "pauseMs": 800 },
+          { "text": " One system, many communication worlds.", "pauseMs": 500 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-09-embedded-systems/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "resume-10",
+      "title": "What This Resume Is",
+      "type": "closing",
+      "editIntent": "Final meta scene. Close the argument that the portfolio is a set of runnable proofs rather than a static document. Land the language cleanly and directly.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "This is not what I say I built.", "pauseMs": 800 },
+          { "text": " It is how the systems actually work.", "pauseMs": 700 },
+          { "text": " That is the resume.", "pauseMs": 400 }
+        ]
+      },
+      "content": { "route": "./src/generated/resume-demo/scene-10-meta/index.html" },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

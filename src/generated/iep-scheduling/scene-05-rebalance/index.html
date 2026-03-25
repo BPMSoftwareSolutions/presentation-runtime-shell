@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Rebalance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    /* Green glow orb */
+    .bg-orb {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      filter: blur(100px); pointer-events: none;
+      background: radial-gradient(circle, rgba(32,201,151,0.12), transparent 70%);
+      bottom: -160px; right: -120px;
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+    .scene { position: relative; height: 100%; display: flex; flex-direction: column; padding: 20px 24px; gap: 14px; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+      border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      opacity: 0; animation: reveal 0.5s 0.1s ease forwards;
+    }
+    .status-indicator {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800;
+    }
+    .indicator-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #f5b94c;
+      box-shadow: 0 0 10px rgba(245,185,76,0.7);
+      animation: pulse-dot 1s ease-in-out infinite;
+    }
+    .indicator-dot.done { background: #20c997; box-shadow: 0 0 10px rgba(32,201,151,0.7); animation: none; }
+    @keyframes pulse-dot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+    .indicator-label { color: #f5b94c; transition: color 0.4s; }
+    .indicator-label.done { color: #20c997; }
+    .spacer { flex: 1; }
+    .rebalance-badge {
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(167,139,250,0.30); background: rgba(167,139,250,0.09); color: #a78bfa;
+      transition: all 0.5s;
+    }
+    .rebalance-badge.done { border-color: rgba(32,201,151,0.30); background: rgba(32,201,151,0.09); color: #20c997; }
+
+    /* Main grid */
+    .main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Groups panel */
+    .groups-panel {
+      border: 1px solid rgba(32,201,151,0.22); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(32,201,151,0.07), rgba(32,201,151,0.02));
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; animation: reveal 0.6s 0.15s ease forwards;
+    }
+    .panel-header {
+      display: flex; align-items: center; gap: 9px; padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.02);
+    }
+    .ph-dot { width: 7px; height: 7px; border-radius: 50%; background: #20c997; box-shadow: 0 0 7px rgba(32,201,151,0.55); }
+    .ph-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.13em; font-weight: 800; color: #20c997; }
+    .ph-tag { margin-left: auto; }
+    .new-tag {
+      padding: 2px 9px; border-radius: 999px; font-size: 10px; font-weight: 800;
+      border: 1px solid rgba(86,216,255,0.35); background: rgba(86,216,255,0.12); color: #56d8ff;
+    }
+    .panel-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+    .member-row {
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      border-radius: 11px; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+    .member-row--new {
+      border-color: rgba(86,216,255,0.35); background: rgba(86,216,255,0.08);
+      opacity: 0;
+    }
+    .av {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800;
+    }
+    .av-b  { background: rgba(86,216,255,0.14);  color: #56d8ff;  border: 1px solid rgba(86,216,255,0.28); }
+    .av-v  { background: rgba(167,139,250,0.14); color: #a78bfa;  border: 1px solid rgba(167,139,250,0.28); }
+    .av-c  { background: rgba(86,216,255,0.20);  color: #56d8ff;  border: 2px solid rgba(86,216,255,0.45); }
+    .av-g  { background: rgba(32,201,151,0.14);  color: #20c997;  border: 1px solid rgba(32,201,151,0.28); }
+    .av-r  { background: rgba(255,125,184,0.14); color: #ff7db8;  border: 1px solid rgba(255,125,184,0.28); }
+    .av-am { background: rgba(245,185,76,0.14);  color: #f5b94c;  border: 1px solid rgba(245,185,76,0.28); }
+
+    .m-name { font-size: 12px; font-weight: 700; }
+    .m-badge { margin-left: auto; }
+    .m-new-badge {
+      padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 800;
+      border: 1px solid rgba(86,216,255,0.30); background: rgba(86,216,255,0.10); color: #56d8ff;
+    }
+
+    .group-mini {
+      padding: 8px 10px; border-radius: 10px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.025); color: #70819a;
+    }
+
+    /* Schedule panel */
+    .schedule-panel {
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; animation: reveal 0.6s 0.20s ease forwards;
+    }
+    .sched-header {
+      display: flex; align-items: center; gap: 9px; padding: 12px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.02);
+    }
+    .sh-dot { width: 7px; height: 7px; border-radius: 50%; background: #56d8ff; box-shadow: 0 0 7px rgba(86,216,255,0.55); }
+    .sh-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.13em; font-weight: 800; color: #56d8ff; }
+    .sched-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+    .sched-block {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+      border-radius: 11px;
+    }
+    .sched-block--a    { border: 1px solid rgba(32,201,151,0.28); background: rgba(32,201,151,0.07); }
+    .sched-block--ava  { border: 1px solid rgba(255,125,184,0.28); background: rgba(255,125,184,0.07); }
+    .sched-block--b    { border: 1px solid rgba(86,216,255,0.25); background: rgba(86,216,255,0.07); }
+    .sched-block--noah { border: 1px solid rgba(245,185,76,0.25); background: rgba(245,185,76,0.06); }
+    .sched-block--a-updated { border-color: rgba(32,201,151,0.50); background: rgba(32,201,151,0.12); }
+
+    .sblock-time { font-size: 11px; color: #4d5f77; font-weight: 600; width: 68px; flex-shrink: 0; }
+    .sblock-name { font-size: 13px; font-weight: 700; }
+    .sblock-name--green { color: #20c997; }
+    .sblock-name--cyan  { color: #56d8ff; }
+    .sblock-name--rose  { color: #ff7db8; }
+    .sblock-name--amber { color: #f5b94c; }
+    .sblock-changed {
+      margin-left: auto; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 700;
+      border: 1px solid rgba(86,216,255,0.30); background: rgba(86,216,255,0.10); color: #56d8ff;
+      opacity: 0; transition: opacity 0.4s;
+    }
+
+    /* Change log */
+    .change-log {
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;
+      background: rgba(255,255,255,0.025); padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 7px;
+      opacity: 0; animation: reveal 0.5s 0.25s ease forwards;
+    }
+    .change-log-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: #4d5f77; font-weight: 700; margin-bottom: 2px; }
+    .change-item { display: flex; align-items: center; gap: 8px; font-size: 12px; opacity: 0; transition: opacity 0.4s; }
+    .ci-plus  { color: #20c997; font-weight: 800; }
+    .ci-tilde { color: #56d8ff; font-weight: 800; }
+    .ci-check { color: #20c997; font-weight: 800; }
+    .ci-text  { color: #b8c7df; }
+
+    /* Narration */
+    .narration-bar {
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px;
+      border-radius: 14px; border: 1px solid rgba(167,139,250,0.18);
+      background: rgba(10,18,32,0.80); backdrop-filter: blur(20px);
+      opacity: 0; animation: reveal 0.5s 0.3s ease forwards;
+    }
+    .narr-orb {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.28);
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+    }
+    .narr-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d5fcf; font-weight: 800; margin-bottom: 5px; }
+    .narr-text { font-size: 13px; line-height: 1.6; color: #94a3b8; min-height: 38px; }
+    .cursor {
+      display: inline-block; width: 2px; height: 0.85em; background: #a78bfa;
+      margin-left: 1px; vertical-align: text-bottom;
+      animation: blink-cursor 0.75s step-end infinite;
+    }
+    @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes reveal { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slide-in-left { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+  </style>
+</head>
+<body>
+  <div class="bg-orb"></div>
+  <div class="scene">
+    <div class="header">
+      <div class="status-indicator">
+        <div class="indicator-dot" id="indDot"></div>
+        <span class="indicator-label" id="indLabel">Rebalancing…</span>
+      </div>
+      <div class="spacer"></div>
+      <span class="rebalance-badge" id="rebadge">AI Rebalance</span>
+    </div>
+
+    <div class="main">
+      <!-- Groups -->
+      <div class="groups-panel">
+        <div class="panel-header">
+          <div class="ph-dot"></div>
+          <span class="ph-title">Updated Groups</span>
+          <div class="ph-tag"><span class="new-tag" id="plusTag" style="opacity:0">+1</span></div>
+        </div>
+        <div class="panel-body">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:#20c997;font-weight:800;margin-bottom:3px;">Group A — Grade 3</div>
+          <div class="member-row"><div class="av av-b">E</div><span class="m-name">Emma</span></div>
+          <div class="member-row"><div class="av av-v">L</div><span class="m-name">Liam</span></div>
+          <div class="member-row member-row--new" id="masonRow">
+            <div class="av av-c">M</div>
+            <span class="m-name">Mason</span>
+            <div class="m-badge"><span class="m-new-badge">New</span></div>
+          </div>
+          <div style="margin-top:6px;font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:#70819a;font-weight:800;margin-bottom:3px;">Other Groups — Unchanged</div>
+          <div class="group-mini">Group B · Sophia</div>
+          <div class="group-mini">1:1 · Ava &amp; Noah</div>
+        </div>
+      </div>
+
+      <!-- Schedule + change log -->
+      <div style="display:flex;flex-direction:column;gap:14px;min-height:0;">
+        <div class="schedule-panel" style="flex:1;min-height:0;">
+          <div class="sched-header">
+            <div class="sh-dot"></div>
+            <span class="sh-title">Updated Schedule — Mon</span>
+          </div>
+          <div class="sched-body">
+            <div class="sched-block sched-block--a" id="blockA">
+              <span class="sblock-time">9:00</span>
+              <span class="sblock-name sblock-name--green">Group A</span>
+              <span class="sblock-changed" id="changedA">updated</span>
+            </div>
+            <div class="sched-block sched-block--ava">
+              <span class="sblock-time">9:30</span>
+              <span class="sblock-name sblock-name--rose">1:1 Ava</span>
+            </div>
+            <div class="sched-block sched-block--b">
+              <span class="sblock-time">10:00</span>
+              <span class="sblock-name sblock-name--cyan">Group B</span>
+            </div>
+            <div class="sched-block sched-block--noah">
+              <span class="sblock-time">10:30</span>
+              <span class="sblock-name sblock-name--amber">1:1 Noah</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="change-log">
+          <div class="change-log-title">Changes Applied</div>
+          <div class="change-item" id="c1"><span class="ci-plus">+</span><span class="ci-text">Mason added to Group A</span></div>
+          <div class="change-item" id="c2"><span class="ci-tilde">~</span><span class="ci-text">Time blocks redistributed</span></div>
+          <div class="change-item" id="c3"><span class="ci-check">✓</span><span class="ci-text">All constraints still satisfied</span></div>
+          <div class="change-item" id="c4"><span class="ci-check">✓</span><span class="ci-text">No full rebuild required</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="narration-bar">
+      <div class="narr-orb">✦</div>
+      <div>
+        <div class="narr-label">AI Assistant</div>
+        <div class="narr-text"><span id="narr"></span><span class="cursor" id="cur"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function typewrite(lines, speed = 26) {
+      const el = document.getElementById('narr');
+      el.textContent = '';
+      document.getElementById('cur').style.display = 'inline-block';
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(speed); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    }
+
+    async function runRebalance() {
+      // Phase 1: Rebalancing...
+      await sleep(800);
+      await typewrite([{ text: "Analyzing new student…", pauseMs: 600 }], 22);
+
+      await sleep(900);
+
+      // Mason appears
+      const masonRow = document.getElementById('masonRow');
+      masonRow.style.animation = 'slide-in-left 0.5s ease forwards';
+      document.getElementById('plusTag').style.opacity = '1';
+
+      await sleep(400);
+
+      // Block A updates
+      document.getElementById('blockA').classList.add('sched-block--a-updated');
+      document.getElementById('changedA').style.opacity = '1';
+
+      await sleep(300);
+
+      // Change log items appear
+      ['c1','c2','c3','c4'].forEach((id, i) => {
+        setTimeout(() => {
+          document.getElementById(id).style.opacity = '1';
+        }, i * 200);
+      });
+
+      await sleep(700);
+
+      // Status updates
+      const indDot = document.getElementById('indDot');
+      const indLabel = document.getElementById('indLabel');
+      const rebadge = document.getElementById('rebadge');
+      indDot.classList.add('done');
+      indLabel.textContent = 'Rebalanced';
+      indLabel.classList.add('done');
+      rebadge.textContent = '✓ Complete';
+      rebadge.classList.add('done');
+
+      // Narration — slow and impactful
+      await typewrite([
+        { text: "I've integrated Mason into an existing group.", pauseMs: 900 },
+        { text: " No full rebuild was required.", pauseMs: 900 },
+        { text: " All constraints are still satisfied.", pauseMs: 0 }
+      ], 28);
+
+      document.getElementById('cur').style.display = 'none';
+
+      await sleep(1800);
+      window.parent.postMessage({ type: "rebalance:complete" }, "*");
+    }
+
+    runRebalance();
+  </script>
+</body>
+</html>

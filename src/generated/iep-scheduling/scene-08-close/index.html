@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Kind of Relief Busy Educators Need</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.1));
+      pointer-events: none;
+    }
+
+    .orb-container {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      pointer-events: none; z-index: 0;
+    }
+
+    .orb-center {
+      width: 600px; height: 600px; border-radius: 50%;
+      filter: blur(120px);
+      background: radial-gradient(circle, rgba(32,201,151,0.20), transparent 60%);
+      opacity: 0;
+      animation: glow-pulse 3s ease-in-out forwards;
+    }
+    @keyframes glow-pulse { 0%{opacity:0;} 40%{opacity:1;} 100%{opacity:1;} }
+
+    .scene {
+      position: relative; z-index: 1; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+    }
+
+    .hero-content {
+      max-width: 700px; display: flex; flex-direction: column; gap: 24px;
+      opacity: 0;
+      animation: fade-up 1s ease 0.3s forwards;
+    }
+
+    .headline {
+      font-size: 42px; font-weight: 900; line-height: 1.15;
+      background: linear-gradient(180deg, #20c997, #56d8ff);
+      background-clip: text; color: transparent; -webkit-background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    .subheading {
+      font-size: 16px; color: #a8f5d1; font-weight: 500;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+
+    .supporting-text {
+      font-size: 13px; color: #9ca3af; line-height: 1.7;
+      max-width: 500px; margin: 0 auto;
+    }
+
+    .cta-container {
+      display: flex; gap: 12px; justify-content: center;
+      opacity: 0;
+      animation: fade-up 1s ease 0.8s forwards;
+    }
+
+    .button {
+      padding: 12px 28px; border-radius: 10px; border: none;
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #20c997, #10b981);
+      color: #ffffff; box-shadow: 0 8px 24px rgba(32,201,151,0.25);
+    }
+    .button-primary:hover {
+      transform: translateY(-2px); box-shadow: 0 12px 32px rgba(32,201,151,0.35);
+    }
+
+    .button-secondary {
+      background: rgba(255,255,255,0.08); color: #c4b5fd;
+      border: 1px solid rgba(167,139,250,0.25);
+    }
+    .button-secondary:hover {
+      background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.40);
+    }
+
+    .footer-note {
+      position: absolute; bottom: 24px; left: 24px; right: 24px;
+      font-size: 11px; color: #4d5f77; text-align: center;
+      opacity: 0;
+      animation: fade-in 0.6s ease 1.2s forwards;
+    }
+
+    @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="orb-container">
+    <div class="orb-center"></div>
+  </div>
+
+  <div class="scene">
+    <div class="hero-content">
+      <div class="headline">This is the kind of relief<br/>busy educators need.</div>
+      <div class="subheading">
+        Add a student. Press a button. Move on with your day.
+      </div>
+      <div class="supporting-text">
+        No rescheduling from scratch. No scheduling conflicts. No wondering if it will work.
+        <br><br>
+        Just a schedule that adapts with you.
+      </div>
+    </div>
+
+    <div class="cta-container">
+      <button class="button button-primary" onclick="restartDemo()">Restart Demo</button>
+      <button class="button button-secondary" onclick="alert('Thank you for viewing the IEP Scheduling Demo!');">Close</button>
+    </div>
+
+    <div class="footer-note">
+      This demo takes 45-55 seconds and represents the complete scheduling workflow.
+    </div>
+  </div>
+
+  <script>
+    function restartDemo() {
+      window.parent.postMessage({ type: 'deck:restart' }, '*');
+    }
+  </script>
+</body>
+</html>

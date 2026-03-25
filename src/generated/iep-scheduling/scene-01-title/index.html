@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IEP Scheduling Assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.25));
+      pointer-events: none;
+    }
+
+    .orb-1 {
+      position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      filter: blur(100px); pointer-events: none;
+      background: radial-gradient(circle, rgba(139,92,246,0.18), transparent 70%);
+      top: -160px; left: -140px; animation: breathe 5s ease-in-out infinite;
+    }
+    .orb-2 {
+      position: absolute; width: 480px; height: 480px; border-radius: 50%;
+      filter: blur(90px); pointer-events: none;
+      background: radial-gradient(circle, rgba(32,201,151,0.14), transparent 70%);
+      bottom: -120px; right: -100px; animation: breathe 6s 1s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+    /* Main layout */
+    .scene {
+      position: relative; height: 100%; width: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px;
+    }
+
+    .content {
+      position: relative; z-index: 1; text-align: center;
+      max-width: 620px; width: 100%;
+    }
+
+    /* App header bar */
+    .app-bar {
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 32px;
+      padding: 8px 16px; border-radius: 999px;
+      border: 1px solid rgba(167,139,250,0.25); background: rgba(167,139,250,0.08);
+      opacity: 0; animation: fade-up 0.6s 0.3s ease forwards;
+    }
+    .app-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #a78bfa;
+      box-shadow: 0 0 10px rgba(167,139,250,0.7);
+      animation: blink 2s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .app-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: #a78bfa; font-weight: 800; }
+
+    /* Title */
+    .title {
+      font-size: clamp(30px, 5vw, 50px); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #f0f6ff 0%, #c4b5fd 50%, #56d8ff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      opacity: 0; animation: fade-up 0.8s 0.5s ease forwards;
+    }
+
+    .divider {
+      width: 48px; height: 2px; margin: 24px auto;
+      background: linear-gradient(90deg, #8b5cf6, #56d8ff); border-radius: 2px;
+      opacity: 0; animation: fade-up 0.6s 0.7s ease forwards;
+    }
+
+    .subtitle {
+      font-size: 16px; line-height: 1.7; color: #b8c7df;
+      opacity: 0; animation: fade-up 0.7s 0.85s ease forwards;
+    }
+
+    /* Start button */
+    .start-btn {
+      display: inline-flex; align-items: center; gap: 10px; margin-top: 36px;
+      padding: 14px 28px; border-radius: 16px;
+      border: 1px solid rgba(32,201,151,0.35);
+      background: linear-gradient(135deg, rgba(32,201,151,0.16), rgba(86,216,255,0.10));
+      color: #20c997; font-size: 15px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 0 28px rgba(32,201,151,0.18);
+      opacity: 0;
+      transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+    }
+    .start-btn.visible { animation: fade-up 0.6s ease forwards; }
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 40px rgba(32,201,151,0.28);
+      background: linear-gradient(135deg, rgba(32,201,151,0.24), rgba(86,216,255,0.15));
+    }
+    .btn-arrow { font-size: 18px; }
+
+    /* AI Narration bar */
+    .narration-bar {
+      position: absolute; bottom: 28px; left: 28px; right: 28px;
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 20px; border-radius: 16px;
+      border: 1px solid rgba(167,139,250,0.20);
+      background: rgba(10,18,32,0.85); backdrop-filter: blur(20px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.30);
+      opacity: 0; animation: fade-up 0.6s 1.0s ease forwards;
+    }
+    .narr-orb {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.30);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+    }
+    .narr-body { flex: 1; min-width: 0; }
+    .narr-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d5fcf; font-weight: 800; margin-bottom: 6px; }
+    .narr-text { font-size: 13px; line-height: 1.65; color: #94a3b8; min-height: 42px; }
+    .cursor {
+      display: inline-block; width: 2px; height: 0.85em; background: #a78bfa;
+      margin-left: 1px; vertical-align: text-bottom;
+      animation: blink-cursor 0.75s step-end infinite;
+    }
+    @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    @keyframes fade-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <div class="scene">
+    <div class="content">
+      <div class="app-bar">
+        <div class="app-dot"></div>
+        <span class="app-label">IEP Scheduling Assistant</span>
+      </div>
+      <h1 class="title">Scheduling that works<br>with constant change</h1>
+      <div class="divider"></div>
+      <p class="subtitle">Constraint-aware. AI-assisted.<br>Built for the reality of special education.</p>
+      <button class="start-btn" id="startBtn">
+        Start Planning <span class="btn-arrow">→</span>
+      </button>
+    </div>
+
+    <div class="narration-bar">
+      <div class="narr-orb">✦</div>
+      <div class="narr-body">
+        <div class="narr-label">AI Assistant</div>
+        <div class="narr-text"><span id="narr"></span><span class="cursor" id="cur"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function typewrite(lines) {
+      const el = document.getElementById('narr');
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(20); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    }
+
+    async function run() {
+      await sleep(1300);
+      await typewrite([
+        { text: "You're managing multiple students, constraints, and constant change.", pauseMs: 700 },
+        { text: " Let's start with your current student list.", pauseMs: 0 }
+      ]);
+      // Hide cursor, show button
+      document.getElementById('cur').style.display = 'none';
+      const btn = document.getElementById('startBtn');
+      btn.classList.add('visible');
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      window.parent.postMessage({ type: "start:clicked" }, "*");
+    });
+
+    run();
+  </script>
+</body>
+</html>

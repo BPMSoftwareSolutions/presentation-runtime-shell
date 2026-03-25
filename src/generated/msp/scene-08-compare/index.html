@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Before vs After</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; position: relative; padding: 32px; }
+
+    .grid-lines {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .compare { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 680px; }
+
+    .col { border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
+    .col--after { border-color: rgba(16,185,129,0.25); }
+
+    .col-header { padding: 12px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .col--before .col-header { background: rgba(255,255,255,0.02); color: #64748b; }
+    .col--after  .col-header { background: rgba(16,185,129,0.06); color: #10b981; border-bottom-color: rgba(16,185,129,0.15); }
+
+    .col-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+
+    .row { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #a8b3cf; }
+    .row-icon { width: 14px; flex-shrink: 0; margin-top: 1px; }
+    .col--before .row-icon { color: #ef4444; }
+    .col--after  .row-icon { color: #10b981; }
+
+    .tagline { position: relative; z-index: 1; max-width: 520px; text-align: center; }
+    .tagline p { font-size: 14px; line-height: 1.6; color: #64748b; font-style: italic; }
+    .tagline strong { color: #a78bfa; font-style: normal; font-size: 15px; }
+
+    @keyframes reveal-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.45s ease forwards; }
+
+    .narration {
+      position: relative; z-index: 1; width: 100%; max-width: 680px;
+      padding: 14px 20px; border: 1px solid rgba(139,92,246,0.18); border-radius: 10px;
+      background: rgba(139,92,246,0.04);
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .narration-eyebrow { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d28d9; margin-bottom: 8px; }
+    .narration-text { font-size: 13px; line-height: 1.7; color: #94a3b8; min-height: 22px; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #a78bfa; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+
+    <div class="narration">
+      <div class="narration-eyebrow">AI Operator</div>
+      <div class="narration-text"><span id="narr"></span><span class="cursor"></span></div>
+    </div>
+
+    <div class="compare">
+      <div class="col col--before">
+        <div class="col-header" data-reveal>Traditional Ops</div>
+        <div class="col-body">
+          <div class="row" data-reveal><span class="row-icon">✕</span><span>5 disconnected tools</span></div>
+          <div class="row" data-reveal><span class="row-icon">✕</span><span>45 min triage per incident</span></div>
+          <div class="row" data-reveal><span class="row-icon">✕</span><span>Unclear ownership</span></div>
+          <div class="row" data-reveal><span class="row-icon">✕</span><span>Escalation required</span></div>
+          <div class="row" data-reveal><span class="row-icon">✕</span><span>Per-customer chaos</span></div>
+        </div>
+      </div>
+
+      <div class="col col--after">
+        <div class="col-header" data-reveal>ACN MSP Command Center</div>
+        <div class="col-body">
+          <div class="row" data-reveal><span class="row-icon">✓</span><span>1 unified interface</span></div>
+          <div class="row" data-reveal><span class="row-icon">✓</span><span>5 second diagnosis</span></div>
+          <div class="row" data-reveal><span class="row-icon">✓</span><span>Clear root cause, every time</span></div>
+          <div class="row" data-reveal><span class="row-icon">✓</span><span>Contained failure, automated playbook</span></div>
+          <div class="row" data-reveal><span class="row-icon">✓</span><span>Multi-tenant visibility</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tagline" data-reveal>
+      <p>You are not debugging systems anymore.<br><strong>You are operating them.</strong></p>
+    </div>
+  </div>
+  <script>
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "This is the difference.", pauseMs: 800 },
+        { text: " Not five tools. One view.", pauseMs: 700 },
+        { text: " You are not debugging systems anymore. You are operating them.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.1}s`;
+    });
+
+    // Count up numbers embedded in row text spans
+    document.querySelectorAll(".col-body .row > span:last-child").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+      const raw = textNode.textContent.trim();
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+      const prefix = match[1], endVal = parseFloat(match[2]), suffix = match[3];
+      const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
+      if (isNaN(endVal)) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const countStart = performance.now() + (revealDelay + 0.25) * 1000;
+      const duration = 900;
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+      (function tick(now) {
+        if (now < countStart) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - countStart) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + (endVal * eased).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>

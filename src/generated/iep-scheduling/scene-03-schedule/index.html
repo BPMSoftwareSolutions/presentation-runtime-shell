@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Schedule</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    .scene { position: relative; height: 100%; display: flex; flex-direction: column; padding: 20px 24px; gap: 14px; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+      border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      opacity: 0; animation: reveal 0.5s 0.1s ease forwards;
+    }
+    .header-dot { width: 8px; height: 8px; border-radius: 50%; background: #56d8ff; box-shadow: 0 0 8px rgba(86,216,255,0.6); }
+    .header-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 800; color: #56d8ff; }
+    .spacer { flex: 1; }
+    .status-badge {
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(245,185,76,0.30); background: rgba(245,185,76,0.09); color: #f5b94c;
+    }
+    .status-badge.done { border-color: rgba(32,201,151,0.30); background: rgba(32,201,151,0.09); color: #20c997; transition: all 0.4s; }
+
+    /* Schedule panel */
+    .schedule-panel {
+      flex: 1; min-height: 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; animation: reveal 0.6s 0.2s ease forwards;
+    }
+
+    .grid-head {
+      display: grid; grid-template-columns: 108px repeat(5, 1fr);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.025);
+    }
+    .day-h {
+      padding: 11px 12px; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.14em; font-weight: 800; text-align: center; color: #70819a;
+    }
+    .day-h:first-child { text-align: left; color: #4d5f77; border-right: 1px solid rgba(255,255,255,0.05); }
+
+    .grid-body { flex: 1; }
+
+    .time-row {
+      display: grid; grid-template-columns: 108px repeat(5, 1fr);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      opacity: 0; transform: translateX(-8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .time-row:last-child { border-bottom: none; }
+    .time-row.visible { opacity: 1; transform: translateX(0); }
+
+    .time-lbl {
+      padding: 14px 14px; font-size: 11px; color: #4d5f77; font-weight: 600;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.015);
+    }
+    .slot {
+      padding: 8px 8px; border-right: 1px solid rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center; min-height: 58px;
+    }
+    .slot:last-child { border-right: none; }
+    .slot-pill {
+      width: 100%; padding: 7px 8px; border-radius: 10px; text-align: center;
+      font-size: 11px; font-weight: 700; line-height: 1.3;
+    }
+    .pill-a    { border: 1px solid rgba(32,201,151,0.32); background: rgba(32,201,151,0.10); color: #20c997; }
+    .pill-b    { border: 1px solid rgba(86,216,255,0.32); background: rgba(86,216,255,0.10); color: #56d8ff; }
+    .pill-ava  { border: 1px solid rgba(255,125,184,0.30); background: rgba(255,125,184,0.10); color: #ff7db8; }
+    .pill-noah { border: 1px solid rgba(245,185,76,0.28); background: rgba(245,185,76,0.08); color: #f5b94c; }
+
+    /* Status items */
+    .status-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      opacity: 0; animation: reveal 0.5s ease forwards;
+    }
+    .s-item {
+      display: flex; align-items: center; gap: 8px; padding: 9px 15px;
+      border-radius: 11px; font-size: 13px; font-weight: 700;
+    }
+    .s-item--green { border: 1px solid rgba(32,201,151,0.22); background: rgba(32,201,151,0.06); color: #20c997; }
+    .s-item--warn  { border: 1px solid rgba(245,185,76,0.22); background: rgba(245,185,76,0.06); color: #f5b94c; }
+
+    /* Narration */
+    .narration-bar {
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px;
+      border-radius: 14px; border: 1px solid rgba(167,139,250,0.18);
+      background: rgba(10,18,32,0.80); backdrop-filter: blur(20px);
+      opacity: 0; animation: reveal 0.5s 0.15s ease forwards;
+    }
+    .narr-orb {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.28);
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+    }
+    .narr-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d5fcf; font-weight: 800; margin-bottom: 5px; }
+    .narr-text { font-size: 13px; line-height: 1.6; color: #94a3b8; min-height: 38px; }
+    .cursor {
+      display: inline-block; width: 2px; height: 0.85em; background: #a78bfa;
+      margin-left: 1px; vertical-align: text-bottom;
+      animation: blink-cursor 0.75s step-end infinite;
+    }
+    @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes reveal { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="header">
+      <div class="header-dot"></div>
+      <span class="header-title">Weekly Schedule</span>
+      <div class="spacer"></div>
+      <span class="status-badge" id="statusBadge">Generating…</span>
+    </div>
+
+    <div class="schedule-panel">
+      <div class="grid-head">
+        <div class="day-h">Time</div>
+        <div class="day-h">Mon</div>
+        <div class="day-h">Tue</div>
+        <div class="day-h">Wed</div>
+        <div class="day-h">Thu</div>
+        <div class="day-h">Fri</div>
+      </div>
+      <div class="grid-body">
+        <div class="time-row" id="row0">
+          <div class="time-lbl">9:00–9:30</div>
+          <div class="slot"><div class="slot-pill pill-a">Group A</div></div>
+          <div class="slot"><div class="slot-pill pill-a">Group A</div></div>
+          <div class="slot"><div class="slot-pill pill-ava">1:1 Ava</div></div>
+          <div class="slot"><div class="slot-pill pill-a">Group A</div></div>
+          <div class="slot"><div class="slot-pill pill-a">Group A</div></div>
+        </div>
+        <div class="time-row" id="row1">
+          <div class="time-lbl">9:30–10:00</div>
+          <div class="slot"><div class="slot-pill pill-noah">1:1 Noah</div></div>
+          <div class="slot"><div class="slot-pill pill-ava">1:1 Ava</div></div>
+          <div class="slot"><div class="slot-pill pill-b">Group B</div></div>
+          <div class="slot"><div class="slot-pill pill-noah">1:1 Noah</div></div>
+          <div class="slot"><div class="slot-pill pill-b">Group B</div></div>
+        </div>
+        <div class="time-row" id="row2">
+          <div class="time-lbl">10:00–10:30</div>
+          <div class="slot"><div class="slot-pill pill-b">Group B</div></div>
+          <div class="slot"><div class="slot-pill pill-b">Group B</div></div>
+          <div class="slot"><div class="slot-pill pill-a">Group A</div></div>
+          <div class="slot"><div class="slot-pill pill-b">Group B</div></div>
+          <div class="slot"><div class="slot-pill pill-ava">1:1 Ava</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-row" id="statusRow" style="animation-delay:0.4s">
+      <div class="s-item s-item--green" id="s1" style="opacity:0">✓ All required minutes satisfied</div>
+      <div class="s-item s-item--green" id="s2" style="opacity:0">✓ No hard conflicts</div>
+      <div class="s-item s-item--warn" id="s3" style="opacity:0">⚠ Minor travel gaps — acceptable</div>
+    </div>
+
+    <div class="narration-bar">
+      <div class="narr-orb">✦</div>
+      <div>
+        <div class="narr-label">AI Assistant</div>
+        <div class="narr-text"><span id="narr"></span><span class="cursor" id="cur"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function typewrite(lines, speed = 20) {
+      const el = document.getElementById('narr');
+      el.textContent = '';
+      document.getElementById('cur').style.display = 'inline-block';
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(speed); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    }
+
+    async function buildSchedule() {
+      // Stagger rows in
+      await sleep(800);
+      for (let i = 0; i < 3; i++) {
+        document.getElementById('row' + i).classList.add('visible');
+        await sleep(380);
+      }
+      // Show status items
+      await sleep(300);
+      ['s1','s2','s3'].forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          el.style.transform = 'translateY(6px)';
+          requestAnimationFrame(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+          });
+        }, i * 200);
+      });
+
+      // Update badge
+      await sleep(400);
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = 'No Conflicts';
+      badge.classList.add('done');
+
+      // Narration
+      await typewrite([
+        { text: "Here's a first-pass schedule.", pauseMs: 700 },
+        { text: " All required minutes are satisfied with no conflicts.", pauseMs: 800 },
+        { text: " This is your starting point.", pauseMs: 0 }
+      ]);
+
+      document.getElementById('cur').style.display = 'none';
+
+      // Signal ready
+      await sleep(1200);
+      window.parent.postMessage({ type: "schedule:ready" }, "*");
+    }
+
+    buildSchedule();
+  </script>
+</body>
+</html>

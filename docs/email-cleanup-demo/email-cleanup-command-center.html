@@ -1,0 +1,1743 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Cleanup Command Center</title>
+  <style>
+    :root {
+      --bg: #08101d;
+      --surface: rgba(255,255,255,0.03);
+      --surface-2: rgba(255,255,255,0.05);
+      --surface-3: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.08);
+      --text: #eef2ff;
+      --muted: #94a3b8;
+      --dim: #475569;
+      --violet: #a78bfa;
+      --violet-2: #8b5cf6;
+      --indigo: #818cf8;
+      --blue: #38bdf8;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --pink: #fb7185;
+      --shadow: 0 16px 40px rgba(0,0,0,0.28);
+      --radius: 14px;
+      --ease: cubic-bezier(0.16,1,0.3,1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .app {
+      position: relative;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 76px 1fr;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .grid-lines,
+    .noise,
+    .vignette,
+    .orb {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+    }
+
+    .grid-lines {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(circle at center, rgba(0,0,0,1), rgba(0,0,0,0.65));
+      z-index: -3;
+    }
+
+    .noise {
+      background: radial-gradient(circle at 15% 20%, rgba(167,139,250,0.08), transparent 28%),
+                  radial-gradient(circle at 85% 78%, rgba(56,189,248,0.08), transparent 26%),
+                  radial-gradient(circle at 55% 10%, rgba(16,185,129,0.06), transparent 25%);
+      z-index: -4;
+    }
+
+    .orb.orb-1 {
+      width: 540px; height: 540px; left: -120px; top: -140px;
+      background: radial-gradient(circle, rgba(139,92,246,0.22), transparent 70%);
+      filter: blur(96px);
+      z-index: -5;
+    }
+    .orb.orb-2 {
+      width: 380px; height: 380px; right: -90px; bottom: -110px;
+      background: radial-gradient(circle, rgba(56,189,248,0.14), transparent 72%);
+      filter: blur(88px);
+      z-index: -5;
+    }
+    .vignette { box-shadow: inset 0 0 140px rgba(0,0,0,0.5); z-index: -2; }
+
+    .topbar {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 4;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.9), rgba(56,189,248,0.85));
+      box-shadow: 0 10px 28px rgba(139,92,246,0.32), inset 0 1px 1px rgba(255,255,255,0.18);
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,255,255,0.26);
+      border-radius: 99px;
+    }
+    .brand-mark::before { inset: 9px 7px 20px 7px; }
+    .brand-mark::after { inset: 22px 10px 8px 10px; }
+
+    .brand-copy h1 {
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .brand-copy p {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.035);
+      color: var(--text);
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease), opacity .2s;
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.06); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(139,92,246,0.9), rgba(56,189,248,0.78));
+      border-color: rgba(167,139,250,0.4);
+      box-shadow: 0 10px 28px rgba(139,92,246,0.22);
+    }
+    .btn-primary:hover { box-shadow: 0 14px 32px rgba(139,92,246,0.28); }
+    .btn-danger {
+      background: linear-gradient(135deg, rgba(239,68,68,0.9), rgba(245,158,11,0.8));
+      border-color: rgba(239,68,68,0.35);
+    }
+    .btn-ghost { color: var(--muted); }
+    .btn.small { height: 30px; padding: 0 11px; font-size: 11px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 280px;
+      gap: 16px;
+      padding: 16px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .rail, .stage, .inspector { min-height: 0; display: flex; flex-direction: column; gap: 16px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.025));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      position: relative;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 28%);
+      pointer-events: none;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      z-index: 1;
+    }
+    .card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--violet); font-weight: 700; }
+    .card-subtle { color: var(--dim); font-size: 11px; }
+    .card-body { padding: 14px 16px 16px; position: relative; z-index: 1; }
+
+    .account-list { display: flex; flex-direction: column; gap: 10px; }
+    .account {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      transition: transform .2s var(--ease), border-color .2s, background .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .account::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(167,139,250,0.14), transparent 56%);
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .account:hover { transform: translateY(-1px); border-color: rgba(167,139,250,0.24); }
+    .account.active {
+      border-color: rgba(167,139,250,0.35);
+      background: rgba(139,92,246,0.09);
+      box-shadow: 0 12px 26px rgba(139,92,246,0.18);
+    }
+    .account.active::after { opacity: 1; }
+    .account-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: relative; z-index: 1; }
+    .account-name { font-size: 13px; font-weight: 700; }
+    .account-meta, .tiny { color: var(--muted); font-size: 11px; }
+    .account-meta { margin-top: 6px; position: relative; z-index: 1; }
+    .account-stats {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      position: relative; z-index: 1;
+    }
+    .mini-stat {
+      padding: 7px 8px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .mini-stat .label { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: .12em; }
+    .mini-stat .value { margin-top: 4px; font-size: 12px; font-weight: 700; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      border: 1px solid transparent;
+    }
+    .badge.ok { color: var(--green); background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.26); }
+    .badge.warn { color: var(--amber); background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.24); }
+    .badge.danger { color: var(--red); background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.24); }
+    .badge.violet { color: var(--violet); background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.24); }
+
+    .portfolio-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px;
+    }
+    .portfolio-tile {
+      padding: 10px; border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .portfolio-tile .label { font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: var(--dim); }
+    .portfolio-tile .value { font-size: 19px; font-weight: 750; letter-spacing: -.03em; margin-top: 5px; }
+    .portfolio-tile .sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    .step-list { display: grid; gap: 8px; }
+    .step-pill {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.025);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .step-pill.active {
+      background: rgba(139,92,246,0.1);
+      color: var(--text);
+      border-color: rgba(167,139,250,0.25);
+    }
+    .step-num {
+      width: 22px; height: 22px; border-radius: 999px;
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 800;
+      background: rgba(255,255,255,0.06);
+      color: var(--violet);
+    }
+
+    .stage-top {
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px;
+    }
+    .kpi {
+      padding: 14px 15px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+      min-height: 98px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi::after {
+      content: "";
+      position: absolute; right: -20px; top: -24px; width: 90px; height: 90px;
+      background: radial-gradient(circle, rgba(167,139,250,0.16), transparent 68%);
+      filter: blur(8px);
+    }
+    .kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--dim); }
+    .kpi-value { font-size: 28px; font-weight: 800; letter-spacing: -.04em; margin-top: 8px; }
+    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+    .tabs {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+    }
+    .tab {
+      border: 1px solid rgba(255,255,255,0.08);
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: .2s var(--ease);
+    }
+    .tab.active {
+      color: var(--text);
+      background: rgba(139,92,246,0.14);
+      border-color: rgba(167,139,250,0.3);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 8px 20px rgba(139,92,246,0.15);
+    }
+
+    .screen-wrap { min-height: 0; flex: 1; position: relative; }
+    .screen {
+      position: absolute; inset: 0; display: none; min-height: 0;
+      animation: fadeSlide .45s var(--ease);
+    }
+    .screen.active { display: flex; flex-direction: column; gap: 14px; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .screen-grid-2,
+    .screen-grid-3 { display: grid; gap: 14px; min-height: 0; }
+    .screen-grid-2 { grid-template-columns: 1.35fr 0.95fr; }
+    .screen-grid-3 { grid-template-columns: 1.3fr 0.9fr 0.8fr; }
+
+    .table {
+      width: 100%; border-collapse: collapse; font-size: 12px;
+    }
+    .table th, .table td {
+      padding: 10px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05);
+      vertical-align: middle;
+    }
+    .table th { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--dim); font-weight: 700; }
+    .table tbody tr { transition: background .18s; }
+    .table tbody tr:hover { background: rgba(255,255,255,0.03); }
+    .row-highlight { background: rgba(139,92,246,0.08); }
+
+    .operator {
+      display: flex; flex-direction: column; gap: 12px;
+      min-height: 0;
+    }
+    .narration {
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(167,139,250,0.2);
+      background: rgba(139,92,246,0.06);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .eyebrow { font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: var(--violet-2); margin-bottom: 9px; font-weight: 700; }
+    .narration-text { font-size: 13px; line-height: 1.7; color: var(--muted); min-height: 88px; }
+    .cursor { display: inline-block; width: 2px; height: .9em; background: var(--violet); margin-left: 1px; vertical-align: text-bottom; animation: blink .8s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .tree-area { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 14px; min-height: 0; }
+    .tree {
+      list-style: none;
+      padding-left: 0;
+      font-size: 12px;
+    }
+    .tree ul { list-style: none; padding-left: 18px; border-left: 1px dashed rgba(255,255,255,0.08); margin-left: 8px; }
+    .tree-node {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 8px;
+      border-radius: 9px;
+      color: var(--muted);
+      cursor: pointer;
+      margin: 3px 0;
+      transition: .18s;
+    }
+    .tree-node:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .tree-node.selected { background: rgba(139,92,246,0.12); color: var(--text); border: 1px solid rgba(167,139,250,0.2); }
+    .tree-node .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.14); }
+    .flag { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 999px; letter-spacing: .1em; text-transform: uppercase; }
+    .flag.stale { color: var(--amber); background: rgba(245,158,11,0.12); }
+    .flag.dup { color: var(--pink); background: rgba(251,113,133,0.12); }
+    .flag.deep { color: var(--red); background: rgba(239,68,68,0.12); }
+    .flag.rule { color: var(--blue); background: rgba(56,189,248,0.12); }
+    .flag.merge { color: var(--green); background: rgba(16,185,129,0.12); }
+
+    .detail-list { display: grid; gap: 10px; }
+    .detail-item { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 8px 10px; background: rgba(255,255,255,0.025); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+    .detail-item .key { color: var(--dim); }
+    .detail-item .val { color: var(--text); text-align: right; }
+
+    .queue-row input { accent-color: var(--violet); }
+
+    .plan-columns { display: grid; grid-template-columns: 1fr 0.9fr; gap: 14px; min-height: 0; }
+    .plan-block + .plan-block { margin-top: 12px; }
+    .plan-block h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--violet); margin-bottom: 9px; }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px; color: var(--text);
+    }
+
+    .preview-legend { display: flex; gap: 10px; flex-wrap: wrap; }
+    .impact-summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+    .impact-box {
+      padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+    }
+    .impact-box .label { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--dim); }
+    .impact-box .value { margin-top: 6px; font-size: 20px; font-weight: 800; }
+
+    .execution-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px; min-height: 0; }
+    .progress-wrap { display: grid; gap: 10px; }
+    .progress-track {
+      height: 14px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+    }
+    .progress-fill {
+      position: absolute; inset: 0 auto 0 0; width: 0%;
+      background: linear-gradient(90deg, rgba(139,92,246,0.95), rgba(56,189,248,0.95));
+      border-radius: inherit;
+      box-shadow: 0 0 24px rgba(56,189,248,0.25);
+      transition: width .55s var(--ease);
+    }
+    .progress-meta { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--muted); }
+
+    .log { list-style: none; display: grid; gap: 9px; margin-top: 6px; }
+    .log li {
+      padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: var(--muted);
+    }
+    .log li.done { color: var(--green); border-color: rgba(16,185,129,0.16); background: rgba(16,185,129,0.06); }
+    .log li.current { color: var(--text); border-color: rgba(167,139,250,0.18); background: rgba(139,92,246,0.08); }
+
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .compare-col .tree { font-size: 12px; }
+    .result-metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+    .metric-card {
+      padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    }
+    .metric-card h4 { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .12em; }
+    .metric-card p { margin-top: 8px; font-size: 24px; font-weight: 800; letter-spacing: -.04em; }
+
+    .feed { list-style: none; display: grid; gap: 9px; }
+    .feed li {
+      padding: 10px 11px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .feed li::before {
+      content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 10px rgba(167,139,250,0.5);
+    }
+
+    .toggle-list { display: grid; gap: 10px; font-size: 12px; color: var(--muted); }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .switch {
+      width: 42px; height: 24px; border-radius: 999px; background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.24); position: relative;
+    }
+    .switch::after {
+      content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--green);
+      position: absolute; right: 2px; top: 2px;
+      box-shadow: 0 2px 10px rgba(16,185,129,0.4);
+    }
+
+    .mini-chart-card { padding: 4px 0 0; }
+    .chart-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-bottom: 8px; }
+    .chart-title { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--violet); }
+    .chart-note { font-size: 11px; color: var(--muted); }
+    svg { display: block; }
+    .chart-axis { stroke: rgba(255,255,255,0.08); stroke-width: 1; }
+    .chart-grid { stroke: rgba(255,255,255,0.045); stroke-width: 1; }
+    .chart-label { fill: #475569; font-size: 10px; }
+    .chart-value { fill: #94a3b8; font-size: 10px; }
+
+    .pulse-ring {
+      position: absolute; inset: auto 18px 18px auto; width: 12px; height: 12px; border-radius: 50%; background: var(--green); box-shadow: 0 0 16px rgba(16,185,129,0.6);
+    }
+    .pulse-ring::after {
+      content: ""; position: absolute; inset: -7px; border: 1px solid rgba(16,185,129,0.28); border-radius: 50%; animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { from { transform: scale(.7); opacity: .9; } to { transform: scale(1.5); opacity: 0; } }
+
+    .footer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .right-fixed { position: sticky; top: 0; }
+
+    .spark-track {
+      height: 44px; display: flex; align-items: flex-end; gap: 5px; margin-top: 8px;
+    }
+    .spark-bar {
+      flex: 1; border-radius: 4px 4px 0 0; height: 10%; background: linear-gradient(180deg, rgba(139,92,246,0.9), rgba(56,189,248,0.78));
+      opacity: .9; transition: height .9s var(--ease);
+    }
+
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+    @media (max-width: 1320px) {
+      .layout { grid-template-columns: 230px 1fr 250px; }
+      .stage-top { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .impact-summary, .result-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="noise"></div>
+    <div class="grid-lines"></div>
+    <div class="vignette"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-copy">
+          <h1>Email Cleanup Command Center</h1>
+          <p>AI-operated folder cleanup across Gmail, Outlook, Yahoo, and iCloud</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost">Demo Mode</button>
+        <button class="btn btn-ghost">Safe Mode On</button>
+        <button class="btn btn-primary" id="scanAllBtn">Scan All Accounts</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="rail">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Accounts</div>
+            <button class="btn small btn-ghost">+ Add</button>
+          </div>
+          <div class="card-body">
+            <div class="account-list" id="accountList"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Portfolio Health</div>
+            <div class="badge violet">Live</div>
+          </div>
+          <div class="card-body">
+            <div class="portfolio-grid">
+              <div class="portfolio-tile"><div class="label">Accounts</div><div class="value" data-count="4">0</div><div class="sub">connected</div></div>
+              <div class="portfolio-tile"><div class="label">Folders</div><div class="value" data-count="296">0</div><div class="sub">total</div></div>
+              <div class="portfolio-tile"><div class="label">Stale</div><div class="value" data-count="58">0</div><div class="sub">candidates</div></div>
+              <div class="portfolio-tile"><div class="label">Rules</div><div class="value" data-count="11">0</div><div class="sub">broken</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Demo Flow</div>
+          </div>
+          <div class="card-body">
+            <div class="step-list" id="stepList"></div>
+          </div>
+        </section>
+      </aside>
+
+      <main class="stage">
+        <section class="stage-top">
+          <div class="kpi">
+            <div class="kpi-label">Complexity Score</div>
+            <div class="kpi-value" id="complexityScore">78%</div>
+            <div class="kpi-sub">23 duplicate patterns · 14 over-nested paths</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Folders to Review</div>
+            <div class="kpi-value" id="foldersReview">58</div>
+            <div class="kpi-sub">stale, empty, or duplicative</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Automations at Risk</div>
+            <div class="kpi-value" id="rulesRisk">11</div>
+            <div class="kpi-sub">rules point to outdated targets</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Projected Reduction</div>
+            <div class="kpi-value" id="projectedReduction">296 → 158</div>
+            <div class="kpi-sub">simpler folder model across all accounts</div>
+          </div>
+        </section>
+
+        <section class="tabs" id="screenTabs"></section>
+
+        <div class="screen-wrap">
+          <section class="screen active" data-screen="overview">
+            <div class="screen-grid-2">
+              <section class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Account Health Overview</div>
+                    <div class="card-subtle">Select an account to drill in</div>
+                  </div>
+                  <div class="toolbar">
+                    <button class="btn small btn-ghost">Filter</button>
+                    <button class="btn small btn-ghost">Sort</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <table class="table" id="overviewTable">
+                    <thead>
+                      <tr>
+                        <th>Account</th><th>Folders</th><th>Unused</th><th>Duplicate Intent</th><th>Status</th><th></th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="operator">
+                <div class="narration">
+                  <div class="eyebrow">AI Operator</div>
+                  <div class="narration-text"><span id="narration"></span><span class="cursor"></span></div>
+                </div>
+
+                <section class="card mini-chart-card">
+                  <div class="card-header">
+                    <div class="card-title">Cross-Account Complexity Trend</div>
+                    <div class="card-subtle">last 6 scans</div>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-header">
+                      <div class="chart-note">Portfolio complexity drifting upward until cleanup</div>
+                      <div class="badge warn">Needs intervention</div>
+                    </div>
+                    <svg id="trendChart" viewBox="0 0 460 170" width="100%" height="170" aria-label="Complexity trend chart"></svg>
+                  </div>
+                </section>
+
+                <div class="footer-actions">
+                  <button class="btn btn-primary" data-goto="topology">Open Folder Topology</button>
+                  <button class="btn" data-goto="findings">Review Findings</button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="topology">
+            <div class="screen-grid-3">
+              <section class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Folder Topology</div>
+                    <div class="card-subtle" id="selectedAccountTitle">Gmail Personal</div>
+                  </div>
+                  <div class="toolbar">
+                    <button class="btn small btn-ghost">Tree</button>
+                    <button class="btn small btn-ghost">Cluster</button>
+                    <button class="btn small btn-ghost">Show Stale</button>
+                  </div>
+                </div>
+                <div class="card-body tree-area">
+                  <div>
+                    <ul class="tree" id="folderTree"></ul>
+                  </div>
+                  <div>
+                    <div class="plan-block">
+                      <h4>Inspection Panel</h4>
+                      <div class="detail-list" id="inspectionPanel"></div>
+                    </div>
+                    <div class="plan-block">
+                      <h4>Suggested Action</h4>
+                      <div class="detail-item"><span class="key">Target</span><span class="val" id="suggestedTarget">Travel</span></div>
+                      <div class="detail-item"><span class="key">Messages impacted</span><span class="val" id="suggestedImpact">214</span></div>
+                      <div class="detail-item"><span class="key">Rule updates</span><span class="val" id="suggestedRules">1 linked rule</span></div>
+                    </div>
+                    <div class="footer-actions" style="margin-top:14px;">
+                      <button class="btn btn-primary" id="previewMergeBtn">Preview Merge</button>
+                      <button class="btn">Mark Keep</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header">
+                  <div class="card-title">Structure Distribution</div>
+                  <div class="badge violet">Animated</div>
+                </div>
+                <div class="card-body">
+                  <svg id="donutChart" viewBox="0 0 280 220" width="100%" height="220"></svg>
+                  <div class="preview-legend" style="margin-top: 12px;">
+                    <span class="tiny"><span class="legend-dot" style="background:#10b981"></span>Core keepers</span>
+                    <span class="tiny"><span class="legend-dot" style="background:#f59e0b"></span>Stale</span>
+                    <span class="tiny"><span class="legend-dot" style="background:#fb7185"></span>Duplicate intent</span>
+                    <span class="tiny"><span class="legend-dot" style="background:#38bdf8"></span>Rule conflicts</span>
+                  </div>
+                </div>
+              </section>
+
+              <section class="operator">
+                <div class="narration">
+                  <div class="eyebrow">AI Operator</div>
+                  <div class="narration-text"><span id="topologyNarr"></span><span class="cursor"></span></div>
+                </div>
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title">Focused Insight</div>
+                  </div>
+                  <div class="card-body">
+                    <div class="detail-list">
+                      <div class="detail-item"><span class="key">Duplicate travel intent</span><span class="val">3 folders</span></div>
+                      <div class="detail-item"><span class="key">Receipt fragmentation</span><span class="val">4 variants</span></div>
+                      <div class="detail-item"><span class="key">Deep nesting chains</span><span class="val">2 problematic paths</span></div>
+                    </div>
+                    <div class="footer-actions" style="margin-top:14px;">
+                      <button class="btn btn-primary" data-goto="plan">Generate Cleanup Plan</button>
+                    </div>
+                  </div>
+                </section>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="findings">
+            <section class="card" style="height:100%;">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Findings Queue</div>
+                  <div class="card-subtle">Confidence-weighted recommendations</div>
+                </div>
+                <div class="toolbar">
+                  <button class="btn small btn-ghost">Priority: High</button>
+                  <button class="btn small btn-ghost">Type: All</button>
+                  <button class="btn small btn-ghost">Confidence 70%+</button>
+                </div>
+              </div>
+              <div class="card-body" style="display:flex; flex-direction:column; gap:14px; min-height:0;">
+                <table class="table" id="findingsTable">
+                  <thead>
+                    <tr><th></th><th>Finding</th><th>Type</th><th>Confidence</th><th>Suggested Action</th><th></th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div class="impact-summary">
+                  <div class="impact-box"><div class="label">Selected changes</div><div class="value" id="selectedChanges">8</div></div>
+                  <div class="impact-box"><div class="label">Folders affected</div><div class="value" id="foldersAffected">11</div></div>
+                  <div class="impact-box"><div class="label">Messages</div><div class="value" id="messagesAffected">3.5k</div></div>
+                  <div class="impact-box"><div class="label">Confidence</div><div class="value" id="avgConfidence">91%</div></div>
+                </div>
+                <div class="footer-actions">
+                  <button class="btn">Select All Safe Changes</button>
+                  <button class="btn btn-primary" data-goto="plan">Build Cleanup Plan</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="screen" data-screen="plan">
+            <div class="plan-columns">
+              <section class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Cleanup Plan</div>
+                    <div class="card-subtle">A flatter, governed folder structure</div>
+                  </div>
+                  <div class="badge ok">Safe to preview</div>
+                </div>
+                <div class="card-body">
+                  <div class="plan-block">
+                    <h4>Keep Core Structure</h4>
+                    <div class="chip-list" id="keepChips"></div>
+                  </div>
+                  <div class="plan-block">
+                    <h4>Merge Into Purchases</h4>
+                    <div class="chip-list" id="purchaseChips"></div>
+                  </div>
+                  <div class="plan-block">
+                    <h4>Merge Into Travel</h4>
+                    <div class="chip-list" id="travelChips"></div>
+                  </div>
+                  <div class="plan-block">
+                    <h4>Delete / Remove</h4>
+                    <div class="chip-list" id="deleteChips"></div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="operator">
+                <div class="narration">
+                  <div class="eyebrow">AI Operator</div>
+                  <div class="narration-text"><span id="planNarr"></span><span class="cursor"></span></div>
+                </div>
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title">Plan Summary</div>
+                  </div>
+                  <div class="card-body">
+                    <div class="detail-list">
+                      <div class="detail-item"><span class="key">Folders to merge</span><span class="val">8</span></div>
+                      <div class="detail-item"><span class="key">Folders to delete</span><span class="val">3</span></div>
+                      <div class="detail-item"><span class="key">Rules to update</span><span class="val">4</span></div>
+                      <div class="detail-item"><span class="key">Projected result</span><span class="val">142 → 61</span></div>
+                    </div>
+                    <section class="card" style="margin-top:14px; box-shadow:none;">
+                      <div class="card-header"><div class="card-title">AI Rationale</div></div>
+                      <div class="card-body" style="font-size:12px; color:var(--muted); line-height:1.7;">
+                        The current structure contains multiple folders with the same intent. Consolidation reduces filing friction, lowers rule drift, and makes automation safer to maintain over time.
+                      </div>
+                    </section>
+                    <div class="footer-actions" style="margin-top:14px;">
+                      <button class="btn">Edit Plan</button>
+                      <button class="btn btn-primary" data-goto="preview">Preview Actions</button>
+                    </div>
+                  </div>
+                </section>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="preview">
+            <section class="card" style="height:100%;">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Action Preview</div>
+                  <div class="card-subtle">Nothing changes until approved</div>
+                </div>
+                <div class="toolbar">
+                  <span class="badge ok">Snapshot On</span>
+                  <span class="badge violet">Safe Mode</span>
+                  <span class="badge warn">Approval Required</span>
+                </div>
+              </div>
+              <div class="card-body" style="display:flex; flex-direction:column; gap:14px; min-height:0;">
+                <table class="table" id="previewTable">
+                  <thead>
+                    <tr><th>Change</th><th>Impact</th><th>Confidence</th><th>Details</th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div class="impact-summary">
+                  <div class="impact-box"><div class="label">Emails re-indexed</div><div class="value">3,481</div></div>
+                  <div class="impact-box"><div class="label">Rules updated</div><div class="value">4</div></div>
+                  <div class="impact-box"><div class="label">Folders removed</div><div class="value">3</div></div>
+                  <div class="impact-box"><div class="label">Protected touched</div><div class="value">0</div></div>
+                </div>
+                <div class="footer-actions">
+                  <button class="btn">Export Plan</button>
+                  <button class="btn btn-primary" id="applyCleanupBtn">Apply Cleanup</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="screen" data-screen="execution">
+            <div class="execution-grid">
+              <section class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Applying Cleanup</div>
+                    <div class="card-subtle" id="executionAccount">Gmail Personal</div>
+                  </div>
+                  <div class="badge ok" id="executionStatus">Running</div>
+                </div>
+                <div class="card-body">
+                  <div class="progress-wrap">
+                    <div class="progress-meta"><span>Snapshot ID: SNAP-2026-03-23-001</span><span id="progressPct">0%</span></div>
+                    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+                  </div>
+                  <ul class="log" id="executionLog"></ul>
+                  <div class="footer-actions" style="margin-top:14px;">
+                    <button class="btn">Pause</button>
+                    <button class="btn">View Low-Confidence Actions</button>
+                    <button class="btn btn-danger">Roll Back</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="operator">
+                <div class="narration">
+                  <div class="eyebrow">AI Operator</div>
+                  <div class="narration-text"><span id="executionNarr"></span><span class="cursor"></span></div>
+                </div>
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title">Throughput Recovery</div>
+                    <div class="badge ok">Live</div>
+                  </div>
+                  <div class="card-body">
+                    <svg id="recoveryChart" viewBox="0 0 300 180" width="100%" height="180"></svg>
+                    <div class="pulse-ring"></div>
+                  </div>
+                </section>
+              </section>
+            </div>
+          </section>
+
+          <section class="screen" data-screen="results">
+            <div class="compare-grid">
+              <section class="card compare-col">
+                <div class="card-header"><div class="card-title">Before</div><div class="badge danger">Sprawling</div></div>
+                <div class="card-body">
+                  <ul class="tree">
+                    <li>Inbox
+                      <ul>
+                        <li>Action Needed</li>
+                        <li>Receipts
+                          <ul>
+                            <li>Receipts 2024</li>
+                            <li>Shopping Receipts</li>
+                            <li>Bills &amp; Receipts</li>
+                          </ul>
+                        </li>
+                        <li>Travel
+                          <ul>
+                            <li>Trips</li>
+                            <li>Travel Plans</li>
+                            <li>Confirmations</li>
+                          </ul>
+                        </li>
+                        <li>Clients &gt; Active &gt; 2024 &gt; Q3</li>
+                        <li>Newsletters</li>
+                        <li>Read Later</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+              <section class="card compare-col">
+                <div class="card-header"><div class="card-title">After</div><div class="badge ok">Governed</div></div>
+                <div class="card-body">
+                  <ul class="tree">
+                    <li>Inbox
+                      <ul>
+                        <li>Action Needed</li>
+                        <li>Purchases</li>
+                        <li>Travel</li>
+                        <li>Clients</li>
+                        <li>Finance</li>
+                        <li>Personal</li>
+                        <li>Family</li>
+                        <li>Archive</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </div>
+
+            <section class="card">
+              <div class="card-header">
+                <div class="card-title">Outcome Metrics</div>
+                <div class="badge ok">Completed</div>
+              </div>
+              <div class="card-body">
+                <div class="result-metrics">
+                  <div class="metric-card"><h4>Folder Count</h4><p id="resultFolders">142 → 61</p></div>
+                  <div class="metric-card"><h4>Stale Removed</h4><p id="resultStale">31</p></div>
+                  <div class="metric-card"><h4>Rules Fixed</h4><p id="resultRules">4</p></div>
+                  <div class="metric-card"><h4>Time Saved / Month</h4><p id="resultTime">2.4h</p></div>
+                </div>
+                <div class="footer-actions" style="margin-top:14px;">
+                  <button class="btn">View Report</button>
+                  <button class="btn">Undo</button>
+                  <button class="btn btn-primary" id="nextAccountBtn">Run Next Account</button>
+                </div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </main>
+
+      <aside class="inspector">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Activity Feed</div>
+          </div>
+          <div class="card-body">
+            <ul class="feed" id="activityFeed"></ul>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Safety Controls</div>
+          </div>
+          <div class="card-body">
+            <div class="toggle-list">
+              <div class="toggle-row"><span>Create rollback snapshot</span><span class="switch"></span></div>
+              <div class="toggle-row"><span>Pause low-confidence actions</span><span class="switch"></span></div>
+              <div class="toggle-row"><span>Protect recent folders</span><span class="switch"></span></div>
+              <div class="toggle-row" style="border-bottom:none;"><span>Require approval before apply</span><span class="switch"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Delight Metrics</div>
+            <div class="badge violet">Animated</div>
+          </div>
+          <div class="card-body">
+            <div class="detail-list">
+              <div class="detail-item"><span class="key">Confidence ring</span><span class="val">98.4%</span></div>
+              <div class="detail-item"><span class="key">Folder complexity</span><span class="val">trending down</span></div>
+              <div class="detail-item"><span class="key">Narrated states</span><span class="val">7 scenes</span></div>
+            </div>
+            <div class="spark-track" id="sparkTrack">
+              <div class="spark-bar"></div><div class="spark-bar"></div><div class="spark-bar"></div><div class="spark-bar"></div><div class="spark-bar"></div><div class="spark-bar"></div><div class="spark-bar"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Presenter Actions</div>
+          </div>
+          <div class="card-body">
+            <div class="footer-actions" style="flex-direction:column; align-items:stretch;">
+              <button class="btn btn-primary" id="advanceDemoBtn">Advance Demo State</button>
+              <button class="btn" id="replayNarrBtn">Replay Narration</button>
+              <button class="btn btn-ghost" id="resetDemoBtn">Reset Demo</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const data = {
+      screens: ["overview", "topology", "findings", "plan", "preview", "execution", "results"],
+      steps: [
+        "Overview",
+        "Open account",
+        "Inspect topology",
+        "Review findings",
+        "Generate plan",
+        "Preview actions",
+        "Run cleanup",
+        "Review results"
+      ],
+      accounts: [
+        {
+          id: "gmail-personal",
+          name: "Gmail Personal",
+          provider: "Gmail",
+          folders: 142,
+          unused: 31,
+          duplicates: 9,
+          status: "High complexity",
+          statusKind: "danger",
+          complexity: 78,
+          rules: 4,
+          stale: 31,
+          reduction: "142 → 61"
+        },
+        {
+          id: "outlook-work",
+          name: "Outlook Work",
+          provider: "Outlook",
+          folders: 87,
+          unused: 14,
+          duplicates: 7,
+          status: "Needs review",
+          statusKind: "warn",
+          complexity: 61,
+          rules: 3,
+          stale: 14,
+          reduction: "87 → 54"
+        },
+        {
+          id: "yahoo-backup",
+          name: "Yahoo Backup",
+          provider: "Yahoo",
+          folders: 26,
+          unused: 9,
+          duplicates: 2,
+          status: "Moderate",
+          statusKind: "warn",
+          complexity: 43,
+          rules: 0,
+          stale: 9,
+          reduction: "26 → 15"
+        },
+        {
+          id: "icloud",
+          name: "iCloud",
+          provider: "iCloud",
+          folders: 41,
+          unused: 6,
+          duplicates: 5,
+          status: "Needs review",
+          statusKind: "warn",
+          complexity: 57,
+          rules: 2,
+          stale: 6,
+          reduction: "41 → 28"
+        }
+      ],
+      folderNodes: [
+        { id: "f-inbox", label: "Inbox", children: [
+          { id: "f-action", label: "Action Needed" },
+          { id: "f-receipts", label: "Receipts", children: [
+            { id: "f-receipts-2024", label: "Receipts 2024", flag: "stale" },
+            { id: "f-shopping", label: "Shopping Receipts", flag: "dup" },
+            { id: "f-bills", label: "Bills & Receipts", flag: "dup" }
+          ]},
+          { id: "f-travel", label: "Travel", children: [
+            { id: "f-trips", label: "Trips", flag: "dup" },
+            { id: "f-travel-plans", label: "Travel Plans", flag: "dup", selected: true },
+            { id: "f-confirmations", label: "Confirmations", flag: "merge" }
+          ]},
+          { id: "f-clients", label: "Clients", children: [
+            { id: "f-active", label: "Active", children: [
+              { id: "f-2024", label: "2024", children: [
+                { id: "f-q3", label: "Q3", flag: "deep" }
+              ]}
+            ]},
+            { id: "f-former", label: "Former Clients", flag: "stale" }
+          ]},
+          { id: "f-newsletters", label: "Newsletters", flag: "stale" },
+          { id: "f-readlater", label: "Read Later", flag: "stale" },
+          { id: "f-misc", label: "Misc", flag: "rule" }
+        ]}
+      ],
+      inspection: {
+        "f-travel-plans": [
+          ["Status", "Overlaps with Travel and Trips"],
+          ["Semantic overlap", "87%"],
+          ["Last unique usage", "8 months ago"],
+          ["Linked rule", "Rule #4 routes airline confirmations here"]
+        ],
+        "f-shopping": [
+          ["Status", "Duplicate intent"],
+          ["Semantic overlap", "94% with Receipts"],
+          ["Last unique usage", "11 months ago"],
+          ["Linked rule", "None"]
+        ],
+        "f-q3": [
+          ["Status", "Over-nested structure"],
+          ["Depth", "4 levels"],
+          ["Messages", "740"],
+          ["Risk", "High filing friction"]
+        ]
+      },
+      findings: [
+        { id: 1, name: "Receipts 2024", type: "Stale", confidence: 98, action: "Merge into Purchases", selected: true, impact: 412 },
+        { id: 2, name: "Shopping Receipts", type: "Duplicate intent", confidence: 94, action: "Merge into Purchases", selected: true, impact: 221 },
+        { id: 3, name: "Bills & Receipts", type: "Duplicate intent", confidence: 91, action: "Merge into Purchases", selected: true, impact: 187 },
+        { id: 4, name: "Trips", type: "Duplicate intent", confidence: 89, action: "Merge into Travel", selected: true, impact: 129 },
+        { id: 5, name: "Travel Plans", type: "Overlapping purpose", confidence: 87, action: "Merge into Travel", selected: true, impact: 214 },
+        { id: 6, name: "Confirmations", type: "Overlapping purpose", confidence: 82, action: "Merge into Travel", selected: true, impact: 96 },
+        { id: 7, name: "Former Clients", type: "Stale", confidence: 96, action: "Archive / Freeze", selected: true, impact: 340 },
+        { id: 8, name: "Rule #4 → Travel Plans", type: "Orphan-prone rule", confidence: 93, action: "Retarget to Travel", selected: true, impact: 1 },
+        { id: 9, name: "Newsletters", type: "Low-value retention", confidence: 78, action: "Archive / Compress", selected: false, impact: 1750 },
+        { id: 10, name: "Active > 2024 > Q3", type: "Over-nested", confidence: 85, action: "Flatten under Clients", selected: false, impact: 740 }
+      ],
+      previewRows: [
+        ["Merge ‘Receipts 2024’", "412 emails", "98%", "Target: Purchases"],
+        ["Merge ‘Shopping Receipts’", "221 emails", "94%", "Target: Purchases"],
+        ["Merge ‘Bills & Receipts’", "187 emails", "91%", "Target: Purchases"],
+        ["Merge ‘Trips’", "129 emails", "89%", "Target: Travel"],
+        ["Merge ‘Travel Plans’", "214 emails", "87%", "Target: Travel"],
+        ["Update Rule #4", "1 rule", "93%", "Travel Plans → Travel"]
+      ],
+      keep: ["Inbox", "Action Needed", "Clients", "Finance", "Travel", "Personal", "Family", "Purchases", "Archive"],
+      purchase: ["Receipts 2024", "Shopping Receipts", "Bills & Receipts"],
+      travel: ["Trips", "Travel Plans", "Confirmations"],
+      remove: ["Untitled Folder", "Old Folder Copy", "EmptyTemp"],
+      activity: [
+        "Connected 4 accounts and normalized folder models.",
+        "Detected 58 stale folders and 23 duplicate intent clusters.",
+        "Generated cleanup plan for Gmail Personal.",
+        "Preview snapshot prepared. No changes applied yet.",
+        "Rollback checkpoint available for all high-confidence actions."
+      ],
+      narration: {
+        overview: "Connected 4 accounts. Detected 296 folders across providers. Fifty-eight folders appear inactive, 23 folder groups overlap by name or purpose, and 11 rules point to destinations the user no longer checks. Recommended next step: open Gmail Personal and review topology.",
+        topology: "This account shows structural drift caused by stale folders, duplicate filing paths, and inherited rules. The fastest win is collapsing receipt-related folders and travel-related folders first, then flattening deep client branches.",
+        findings: "I have queued the safest changes first. Most recommendations are above ninety percent confidence because they combine inactivity, semantic overlap, and automation usage. This keeps the cleanup explainable instead of magical.",
+        plan: "The proposed model keeps only a few durable categories and routes everything else into clear homes. The plan removes dead structure without touching protected or recently active folders.",
+        preview: "Every action is previewed before execution. The system shows how many messages will move, which rules will change, and confirms that a rollback snapshot exists before anything is applied.",
+        execution: "Cleanup is proceeding normally. Snapshot created, permissions validated, low-confidence actions paused, and rule rewrites applied only after their targets were confirmed healthy.",
+        results: "The account is now flatter, easier to maintain, and safer for automation. The wow moment is not just fewer folders. It is that the system explains what changed and why it is safer now."
+      },
+      executionLog: [
+        "Snapshot created",
+        "Validated folder permissions",
+        "Merged ‘Receipts 2024’ → ‘Purchases’",
+        "Merged ‘Shopping Receipts’ → ‘Purchases’",
+        "Merged ‘Bills & Receipts’ → ‘Purchases’",
+        "Updated Rule #2",
+        "Updated Rule #4",
+        "Processing ‘Travel Plans’ → ‘Travel’",
+        "Flattening nested client path"
+      ]
+    };
+
+    const state = {
+      currentScreen: "overview",
+      currentAccount: data.accounts[0].id,
+      selectedFolder: "f-travel-plans",
+      executionStarted: false,
+      executionComplete: false
+    };
+
+    const el = {
+      accountList: document.getElementById('accountList'),
+      overviewTable: document.querySelector('#overviewTable tbody'),
+      stepList: document.getElementById('stepList'),
+      screenTabs: document.getElementById('screenTabs'),
+      narration: document.getElementById('narration'),
+      topologyNarr: document.getElementById('topologyNarr'),
+      planNarr: document.getElementById('planNarr'),
+      executionNarr: document.getElementById('executionNarr'),
+      selectedAccountTitle: document.getElementById('selectedAccountTitle'),
+      folderTree: document.getElementById('folderTree'),
+      inspectionPanel: document.getElementById('inspectionPanel'),
+      suggestedTarget: document.getElementById('suggestedTarget'),
+      suggestedImpact: document.getElementById('suggestedImpact'),
+      suggestedRules: document.getElementById('suggestedRules'),
+      findingsTable: document.querySelector('#findingsTable tbody'),
+      selectedChanges: document.getElementById('selectedChanges'),
+      foldersAffected: document.getElementById('foldersAffected'),
+      messagesAffected: document.getElementById('messagesAffected'),
+      avgConfidence: document.getElementById('avgConfidence'),
+      keepChips: document.getElementById('keepChips'),
+      purchaseChips: document.getElementById('purchaseChips'),
+      travelChips: document.getElementById('travelChips'),
+      deleteChips: document.getElementById('deleteChips'),
+      previewTable: document.querySelector('#previewTable tbody'),
+      activityFeed: document.getElementById('activityFeed'),
+      progressFill: document.getElementById('progressFill'),
+      progressPct: document.getElementById('progressPct'),
+      executionLog: document.getElementById('executionLog'),
+      executionStatus: document.getElementById('executionStatus'),
+      sparkTrack: document.getElementById('sparkTrack'),
+      executionAccount: document.getElementById('executionAccount')
+    };
+
+    const screenEls = Array.from(document.querySelectorAll('.screen'));
+    const tabButtons = [];
+    let typewriterToken = 0;
+
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function currentAccount() { return data.accounts.find(a => a.id === state.currentAccount); }
+
+    function renderAccounts() {
+      el.accountList.innerHTML = '';
+      data.accounts.forEach(account => {
+        const div = document.createElement('div');
+        div.className = 'account' + (account.id === state.currentAccount ? ' active' : '');
+        div.innerHTML = `
+          <div class="account-top">
+            <div>
+              <div class="account-name">${account.name}</div>
+              <div class="account-meta">${account.provider}</div>
+            </div>
+            <span class="badge ${account.statusKind === 'danger' ? 'danger' : 'warn'}">${account.status}</span>
+          </div>
+          <div class="account-meta">${account.folders} folders · ${account.unused} unused · ${account.duplicates} duplicate patterns</div>
+          <div class="account-stats">
+            <div class="mini-stat"><div class="label">Complexity</div><div class="value">${account.complexity}%</div></div>
+            <div class="mini-stat"><div class="label">Rules</div><div class="value">${account.rules}</div></div>
+            <div class="mini-stat"><div class="label">Target</div><div class="value">${account.reduction}</div></div>
+          </div>`;
+        div.addEventListener('click', () => {
+          state.currentAccount = account.id;
+          updateForAccount();
+          renderAccounts();
+          renderOverviewTable();
+        });
+        el.accountList.appendChild(div);
+      });
+    }
+
+    function renderOverviewTable() {
+      el.overviewTable.innerHTML = '';
+      data.accounts.forEach(account => {
+        const tr = document.createElement('tr');
+        if (account.id === state.currentAccount) tr.classList.add('row-highlight');
+        tr.innerHTML = `
+          <td>${account.name}</td>
+          <td>${account.folders}</td>
+          <td>${account.unused}</td>
+          <td>${account.duplicates}</td>
+          <td><span class="badge ${account.statusKind === 'danger' ? 'danger' : 'warn'}">${account.status}</span></td>
+          <td><button class="btn small ${account.id === state.currentAccount ? 'btn-primary' : ''}">Open</button></td>`;
+        tr.querySelector('button').addEventListener('click', () => {
+          state.currentAccount = account.id;
+          updateForAccount();
+          renderAccounts();
+          renderOverviewTable();
+          setScreen('topology');
+        });
+        el.overviewTable.appendChild(tr);
+      });
+    }
+
+    function renderSteps() {
+      el.stepList.innerHTML = '';
+      data.steps.forEach((step, index) => {
+        const div = document.createElement('div');
+        div.className = 'step-pill' + (index === data.screens.indexOf(state.currentScreen) ? ' active' : '');
+        div.innerHTML = `<span class="step-num">${index + 1}</span><span>${step}</span>`;
+        el.stepList.appendChild(div);
+      });
+    }
+
+    function renderTabs() {
+      el.screenTabs.innerHTML = '';
+      data.screens.forEach(screen => {
+        const b = document.createElement('button');
+        b.className = 'tab' + (screen === state.currentScreen ? ' active' : '');
+        b.textContent = screen;
+        b.addEventListener('click', () => setScreen(screen));
+        el.screenTabs.appendChild(b);
+        tabButtons.push(b);
+      });
+    }
+
+    function setScreen(screen) {
+      state.currentScreen = screen;
+      screenEls.forEach(s => s.classList.toggle('active', s.dataset.screen === screen));
+      Array.from(el.screenTabs.children).forEach(b => b.classList.toggle('active', b.textContent === screen));
+      renderSteps();
+      replayNarration();
+      if (screen === 'execution' && !state.executionStarted) startExecution();
+    }
+
+    function replayNarration() {
+      const token = ++typewriterToken;
+      const targetMap = {
+        overview: el.narration,
+        topology: el.topologyNarr,
+        findings: el.narration,
+        plan: el.planNarr,
+        preview: el.narration,
+        execution: el.executionNarr,
+        results: el.narration
+      };
+      [el.narration, el.topologyNarr, el.planNarr, el.executionNarr].forEach(node => node.textContent = '');
+      const target = targetMap[state.currentScreen] || el.narration;
+      typeText(target, data.narration[state.currentScreen] || '', token, 16);
+    }
+
+    async function typeText(node, text, token, speed = 22) {
+      node.textContent = '';
+      for (const ch of text) {
+        if (token !== typewriterToken) return;
+        node.textContent += ch;
+        await new Promise(r => setTimeout(r, speed));
+      }
+    }
+
+    function renderTreeNode(node, parentEl) {
+      const li = document.createElement('li');
+      const row = document.createElement('div');
+      row.className = 'tree-node' + (state.selectedFolder === node.id ? ' selected' : '');
+      row.innerHTML = `<span class="dot"></span><span>${node.label}</span>${node.flag ? `<span class="flag ${node.flag}">${node.flag}</span>` : ''}`;
+      row.addEventListener('click', () => {
+        state.selectedFolder = node.id;
+        renderTree();
+        renderInspection();
+      });
+      li.appendChild(row);
+      if (node.children?.length) {
+        const ul = document.createElement('ul');
+        node.children.forEach(child => renderTreeNode(child, ul));
+        li.appendChild(ul);
+      }
+      parentEl.appendChild(li);
+    }
+
+    function renderTree() {
+      el.folderTree.innerHTML = '';
+      data.folderNodes.forEach(node => renderTreeNode(node, el.folderTree));
+    }
+
+    function renderInspection() {
+      const info = data.inspection[state.selectedFolder] || data.inspection['f-travel-plans'];
+      el.inspectionPanel.innerHTML = '';
+      info.forEach(([k, v]) => {
+        const div = document.createElement('div');
+        div.className = 'detail-item';
+        div.innerHTML = `<span class="key">${k}</span><span class="val">${v}</span>`;
+        el.inspectionPanel.appendChild(div);
+      });
+      const map = {
+        'f-travel-plans': ['Travel', '214', '1 linked rule'],
+        'f-shopping': ['Purchases', '221', 'No linked rules'],
+        'f-q3': ['Clients', '740', '0 rule updates']
+      };
+      const [target, impact, rules] = map[state.selectedFolder] || map['f-travel-plans'];
+      el.suggestedTarget.textContent = target;
+      el.suggestedImpact.textContent = impact;
+      el.suggestedRules.textContent = rules;
+    }
+
+    function renderFindings() {
+      el.findingsTable.innerHTML = '';
+      data.findings.forEach((f) => {
+        const tr = document.createElement('tr');
+        tr.className = 'queue-row' + (f.selected ? ' row-highlight' : '');
+        tr.innerHTML = `
+          <td><input type="checkbox" ${f.selected ? 'checked' : ''}></td>
+          <td>${f.name}</td>
+          <td>${f.type}</td>
+          <td>${f.confidence}%</td>
+          <td>${f.action}</td>
+          <td><button class="btn small">Inspect</button></td>`;
+        tr.querySelector('input').addEventListener('change', (e) => {
+          f.selected = e.target.checked;
+          renderFindings();
+          refreshFindingStats();
+        });
+        tr.querySelector('button').addEventListener('click', () => setScreen('topology'));
+        el.findingsTable.appendChild(tr);
+      });
+      refreshFindingStats();
+    }
+
+    function refreshFindingStats() {
+      const selected = data.findings.filter(f => f.selected);
+      const messages = selected.reduce((sum, f) => sum + f.impact, 0);
+      const avg = selected.length ? Math.round(selected.reduce((s, f) => s + f.confidence, 0) / selected.length) : 0;
+      el.selectedChanges.textContent = selected.length;
+      el.foldersAffected.textContent = Math.min(selected.length + 3, 11);
+      el.messagesAffected.textContent = messages > 1000 ? (messages/1000).toFixed(1) + 'k' : messages;
+      el.avgConfidence.textContent = avg + '%';
+    }
+
+    function renderChips(target, arr) {
+      target.innerHTML = '';
+      arr.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'chip';
+        div.textContent = v;
+        target.appendChild(div);
+      });
+    }
+
+    function renderPreview() {
+      el.previewTable.innerHTML = '';
+      data.previewRows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td>`;
+        el.previewTable.appendChild(tr);
+      });
+    }
+
+    function renderActivity() {
+      el.activityFeed.innerHTML = '';
+      data.activity.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        el.activityFeed.appendChild(li);
+      });
+    }
+
+    function updateForAccount() {
+      const acc = currentAccount();
+      document.getElementById('complexityScore').textContent = acc.complexity + '%';
+      document.getElementById('foldersReview').textContent = acc.stale + acc.duplicates;
+      document.getElementById('rulesRisk').textContent = acc.rules;
+      document.getElementById('projectedReduction').textContent = acc.reduction;
+      el.selectedAccountTitle.textContent = acc.name;
+      el.executionAccount.textContent = acc.name;
+    }
+
+    function animateCount(elm, end, duration = 1200) {
+      const start = 0;
+      const t0 = performance.now();
+      function tick(now) {
+        const t = Math.min((now - t0) / duration, 1);
+        const val = Math.round(start + (end - start) * easeOutCubic(t));
+        elm.textContent = val;
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function drawTrendChart() {
+      const svg = document.getElementById('trendChart');
+      const w = 460, h = 170, p = {l: 36, r: 14, t: 18, b: 26};
+      const vals = [61, 64, 67, 71, 76, 78];
+      const labels = ['Scan 1','2','3','4','5','Now'];
+      const max = 85, min = 55;
+      const x = i => p.l + i * ((w - p.l - p.r) / (vals.length - 1));
+      const y = v => p.t + (max - v) / (max - min) * (h - p.t - p.b);
+      let grid = '';
+      for (let i = 0; i < 4; i++) {
+        const gy = p.t + i * ((h - p.t - p.b)/3);
+        grid += `<line class="chart-grid" x1="${p.l}" y1="${gy}" x2="${w-p.r}" y2="${gy}"/>`;
+      }
+      let path = '';
+      vals.forEach((v,i) => path += `${i ? 'L' : 'M'} ${x(i)} ${y(v)} `);
+      const area = path + `L ${x(vals.length-1)} ${h-p.b} L ${x(0)} ${h-p.b} Z`;
+      svg.innerHTML = `
+        ${grid}
+        <line class="chart-axis" x1="${p.l}" y1="${h-p.b}" x2="${w-p.r}" y2="${h-p.b}"/>
+        <path d="${area}" fill="rgba(139,92,246,0.12)"></path>
+        <path id="trendPath" d="${path}" fill="none" stroke="url(#trendGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="trendGrad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#818cf8"/>
+            <stop offset="100%" stop-color="#fb7185"/>
+          </linearGradient>
+        </defs>
+        ${vals.map((v,i)=>`<circle class="trend-point" cx="${x(i)}" cy="${y(v)}" r="0" fill="${i===vals.length-1 ? '#fb7185' : '#a78bfa'}"></circle>`).join('')}
+        ${labels.map((lab,i)=>`<text class="chart-label" x="${x(i)}" y="${h-8}" text-anchor="middle">${lab}</text>`).join('')}
+        <text class="chart-value" x="${x(vals.length-1)}" y="${y(vals[vals.length-1]) - 12}" text-anchor="end">78 complexity</text>`;
+      const pathEl = document.getElementById('trendPath');
+      const len = pathEl.getTotalLength();
+      pathEl.style.strokeDasharray = len;
+      pathEl.style.strokeDashoffset = len;
+      pathEl.getBoundingClientRect();
+      pathEl.style.transition = 'stroke-dashoffset 1.2s var(--ease)';
+      requestAnimationFrame(() => pathEl.style.strokeDashoffset = '0');
+      svg.querySelectorAll('.trend-point').forEach((point, i) => {
+        setTimeout(() => {
+          point.setAttribute('r', i === vals.length-1 ? 5.5 : 4.5);
+          point.style.transition = 'r .3s ease';
+        }, 250 + i * 140);
+      });
+    }
+
+    function polar(cx, cy, r, a) {
+      const rad = (a - 90) * Math.PI / 180;
+      return {x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad)};
+    }
+    function arc(cx, cy, r, start, end) {
+      const s = polar(cx, cy, r, end), e = polar(cx, cy, r, start);
+      const large = end - start <= 180 ? 0 : 1;
+      return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 0 ${e.x} ${e.y}`;
+    }
+    function drawDonut(progress=0) {
+      const svg = document.getElementById('donutChart');
+      const items = [
+        {label:'Core', value: 61, color:'#10b981'},
+        {label:'Stale', value: 22, color:'#f59e0b'},
+        {label:'Duplicate', value: 11, color:'#fb7185'},
+        {label:'Rule conflicts', value: 6, color:'#38bdf8'}
+      ];
+      const total = items.reduce((s, i) => s + i.value, 0);
+      let angle = 0;
+      const cx = 110, cy = 112, r = 70;
+      svg.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="18"></circle>`;
+      items.forEach(item => {
+        const slice = (item.value/total) * 360 * progress;
+        const start = angle;
+        const end = angle + slice;
+        if (slice > 0.1) svg.innerHTML += `<path d="${arc(cx,cy,r,start,end)}" fill="none" stroke="${item.color}" stroke-width="18" stroke-linecap="butt"></path>`;
+        angle += slice;
+      });
+      svg.innerHTML += `
+        <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#eef2ff" font-size="28" font-weight="800">100</text>
+        <text x="${cx}" y="${cy + 18}" text-anchor="middle" fill="#94a3b8" font-size="12">flagged signals</text>
+        <text x="200" y="54" fill="#94a3b8" font-size="11">Core keepers 61</text>
+        <text x="200" y="76" fill="#94a3b8" font-size="11">Stale 22</text>
+        <text x="200" y="98" fill="#94a3b8" font-size="11">Duplicate 11</text>
+        <text x="200" y="120" fill="#94a3b8" font-size="11">Rule conflicts 6</text>`;
+    }
+    function animateDonut() {
+      const start = performance.now();
+      const dur = 1200;
+      function tick(now) {
+        const t = Math.min((now - start) / dur, 1);
+        drawDonut(easeOutCubic(t));
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function drawRecoveryChart() {
+      const svg = document.getElementById('recoveryChart');
+      const w=300,h=180,p={l:24,r:12,t:18,b:26};
+      const vals = state.executionComplete ? [20, 28, 41, 57, 73, 88, 96] : [20, 24, 31, 45, 58, 66, 74];
+      const max=100,min=0;
+      const x=i=>p.l + i*((w-p.l-p.r)/(vals.length-1));
+      const y=v=>p.t + (max-v)/(max-min)*(h-p.t-p.b);
+      let path=''; vals.forEach((v,i)=> path += `${i?'L':'M'} ${x(i)} ${y(v)} `);
+      svg.innerHTML = `
+        ${[0,1,2,3].map(i=>{const gy=p.t+i*((h-p.t-p.b)/3); return `<line class='chart-grid' x1='${p.l}' y1='${gy}' x2='${w-p.r}' y2='${gy}'/>`;}).join('')}
+        <line class='chart-axis' x1='${p.l}' y1='${h-p.b}' x2='${w-p.r}' y2='${h-p.b}'/>
+        <path d='${path}' fill='none' stroke='url(#recGrad)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/>
+        <defs><linearGradient id='recGrad' x1='0' x2='1'><stop offset='0%' stop-color='#a78bfa'/><stop offset='100%' stop-color='#10b981'/></linearGradient></defs>
+        ${vals.map((v,i)=>`<circle cx='${x(i)}' cy='${y(v)}' r='4' fill='${i===vals.length-1 ? '#10b981':'#818cf8'}'></circle>`).join('')}
+        ${vals.map((v,i)=>`<text class='chart-label' x='${x(i)}' y='${h-8}' text-anchor='middle'>t${i+1}</text>`).join('')}
+        <text class='chart-value' x='${w-p.r}' y='${y(vals[vals.length-1])-10}' text-anchor='end'>${vals[vals.length-1]}% healthy throughput</text>`;
+    }
+
+    function populateExecutionLog(currentStep = -1) {
+      el.executionLog.innerHTML = '';
+      data.executionLog.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        if (i < currentStep) li.classList.add('done');
+        if (i === currentStep && !state.executionComplete) li.classList.add('current');
+        if (state.executionComplete) li.classList.add('done');
+        el.executionLog.appendChild(li);
+      });
+    }
+
+    function startExecution() {
+      state.executionStarted = true;
+      state.executionComplete = false;
+      const steps = data.executionLog.length;
+      let i = 0;
+      populateExecutionLog(-1);
+      drawRecoveryChart();
+      replayNarration();
+      const interval = setInterval(() => {
+        i++;
+        const pct = Math.min(Math.round((i / steps) * 100), 100);
+        el.progressFill.style.width = pct + '%';
+        el.progressPct.textContent = pct + '%';
+        populateExecutionLog(Math.min(i - 1, steps - 1));
+        if (i >= steps) {
+          clearInterval(interval);
+          state.executionComplete = true;
+          el.executionStatus.textContent = 'Resolved';
+          el.executionStatus.className = 'badge ok';
+          populateExecutionLog(steps);
+          el.progressFill.style.width = '100%';
+          el.progressPct.textContent = '100%';
+          drawRecoveryChart();
+          setTimeout(() => {
+            typewriterToken++;
+            el.executionNarr.textContent = '';
+            typeText(el.executionNarr, 'Cleanup completed successfully. Duplicate receipt and travel folders were consolidated, rules were retargeted safely, and a rollback checkpoint remains available. The account is ready for before-and-after review.', typewriterToken, 16);
+          }, 250);
+        }
+      }, 520);
+    }
+
+    function resetExecution() {
+      state.executionStarted = false;
+      state.executionComplete = false;
+      el.progressFill.style.width = '0%';
+      el.progressPct.textContent = '0%';
+      el.executionStatus.textContent = 'Running';
+      el.executionStatus.className = 'badge ok';
+      populateExecutionLog(-1);
+      drawRecoveryChart();
+    }
+
+    function animateSparkBars() {
+      const vals = [18, 24, 36, 48, 58, 69, 84];
+      Array.from(el.sparkTrack.children).forEach((bar, i) => {
+        setTimeout(() => { bar.style.height = vals[i] + '%'; }, 120 + i * 90);
+      });
+    }
+
+    function renderPreviewButtons() {
+      document.querySelectorAll('[data-goto]').forEach(btn => btn.addEventListener('click', () => setScreen(btn.dataset.goto)));
+    }
+
+    function bindActions() {
+      document.getElementById('applyCleanupBtn').addEventListener('click', () => { resetExecution(); setScreen('execution'); });
+      document.getElementById('advanceDemoBtn').addEventListener('click', () => {
+        const idx = data.screens.indexOf(state.currentScreen);
+        setScreen(data.screens[Math.min(idx + 1, data.screens.length - 1)]);
+      });
+      document.getElementById('replayNarrBtn').addEventListener('click', replayNarration);
+      document.getElementById('resetDemoBtn').addEventListener('click', () => {
+        state.currentAccount = data.accounts[0].id;
+        state.selectedFolder = 'f-travel-plans';
+        data.findings.forEach((f, i) => f.selected = i < 8);
+        resetExecution();
+        renderAccounts(); renderOverviewTable(); renderTree(); renderInspection(); renderFindings(); updateForAccount();
+        setScreen('overview');
+      });
+      document.getElementById('scanAllBtn').addEventListener('click', () => {
+        animateDonut();
+        drawTrendChart();
+        replayNarration();
+      });
+      document.getElementById('previewMergeBtn').addEventListener('click', () => setScreen('preview'));
+      document.getElementById('nextAccountBtn').addEventListener('click', () => {
+        const idx = data.accounts.findIndex(a => a.id === state.currentAccount);
+        state.currentAccount = data.accounts[(idx + 1) % data.accounts.length].id;
+        updateForAccount();
+        renderAccounts(); renderOverviewTable();
+        setScreen('overview');
+      });
+    }
+
+    function init() {
+      renderTabs();
+      renderSteps();
+      renderAccounts();
+      renderOverviewTable();
+      renderTree();
+      renderInspection();
+      renderFindings();
+      renderChips(el.keepChips, data.keep);
+      renderChips(el.purchaseChips, data.purchase);
+      renderChips(el.travelChips, data.travel);
+      renderChips(el.deleteChips, data.remove);
+      renderPreview();
+      renderActivity();
+      updateForAccount();
+      renderPreviewButtons();
+      bindActions();
+      drawTrendChart();
+      animateDonut();
+      drawRecoveryChart();
+      animateSparkBars();
+      replayNarration();
+      populateExecutionLog(-1);
+      document.querySelectorAll('[data-count]').forEach(node => animateCount(node, Number(node.dataset.count)));
+    }
+
+    init();
+  </script>
+</body>
+</html>

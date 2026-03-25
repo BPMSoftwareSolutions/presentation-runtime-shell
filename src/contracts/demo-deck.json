@@ -1,0 +1,72 @@
+{
+  "id": "demo-deck",
+  "title": "AI Presentation System Demo",
+  "theme": {
+    "shell": "dark",
+    "accent": "violet",
+    "presenterPosition": "left"
+  },
+  "settings": {
+    "typingSpeedMs": 24,
+    "waitForIframeReadyTimeoutMs": 8000,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1800,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "title": "Opening",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "This presentation is not pre-built.", "pauseMs": 700 },
+          { "text": "It is being generated...", "pauseMs": 900 },
+          { "text": "as you watch it.", "pauseMs": 600 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/opening/index.html",
+        "reloadOnEnter": true,
+        "waitForReady": false
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "scene-02",
+      "title": "Question framing",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Why did margin drop?", "pauseMs": 800 },
+          { "text": "What changed?", "pauseMs": 700 },
+          { "text": "Let's test labor cost first.", "pauseMs": 500 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/lab/index.html",
+        "reloadOnEnter": true,
+        "waitForReady": false
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "scene-03",
+      "title": "Conclusion",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Operating profit drops by 18%.", "pauseMs": 700 },
+          { "text": "Labor is the dominant driver.", "pauseMs": 400 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/summary/index.html",
+        "reloadOnEnter": true,
+        "waitForReady": false
+      },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

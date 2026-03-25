@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Step 3 — Grouping Suggestion</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    .scene { position: relative; height: 100%; width: 100%; padding: 22px 28px; display: flex; flex-direction: column; gap: 16px; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 18px;
+      background: rgba(255,255,255,0.035);
+      opacity: 0; animation: reveal 0.6s 0.1s ease forwards;
+    }
+    .step-badge {
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;
+      border: 1px solid rgba(32,201,151,0.30); background: rgba(32,201,151,0.10); color: #20c997;
+    }
+    .topbar-title { font-size: 13px; font-weight: 700; color: #edf4ff; }
+    .spacer { flex: 1; }
+    .badge-green {
+      padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(32,201,151,0.30); background: rgba(32,201,151,0.10); color: #20c997;
+    }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; min-height: 0; }
+
+    .group-card {
+      border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; animation: reveal 0.6s ease forwards;
+    }
+    .group-card--green { border-color: rgba(32,201,151,0.22); background: linear-gradient(180deg, rgba(32,201,151,0.07), rgba(32,201,151,0.02)); }
+    .group-card--violet { border-color: rgba(167,139,250,0.22); background: linear-gradient(180deg, rgba(167,139,250,0.07), rgba(167,139,250,0.02)); }
+
+    .group-header {
+      display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+    }
+    .group-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: #20c997; box-shadow: 0 0 10px rgba(32,201,151,0.55); }
+    .dot-violet { background: #a78bfa; box-shadow: 0 0 10px rgba(167,139,250,0.55); }
+    .dot-amber  { background: #f5b94c; box-shadow: 0 0 10px rgba(245,185,76,0.55); }
+    .group-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 800; }
+    .title-green  { color: #20c997; }
+    .title-violet { color: #a78bfa; }
+    .title-amber  { color: #f5b94c; }
+    .group-count { margin-left: auto; font-size: 11px; color: #70819a; }
+
+    .group-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+
+    .member-row {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+      border-radius: 11px; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800;
+    }
+    .av-green  { background: rgba(32,201,151,0.15); color: #20c997; border: 1px solid rgba(32,201,151,0.25); }
+    .av-violet { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.25); }
+    .av-blue   { background: rgba(86,216,255,0.15); color: #56d8ff; border: 1px solid rgba(86,216,255,0.25); }
+    .av-amber  { background: rgba(245,185,76,0.15); color: #f5b94c; border: 1px solid rgba(245,185,76,0.25); }
+    .av-rose   { background: rgba(255,125,184,0.15); color: #ff7db8; border: 1px solid rgba(255,125,184,0.25); }
+
+    .member-name { font-size: 13px; font-weight: 700; color: #edf4ff; }
+    .member-grade { margin-left: auto; font-size: 11px; color: #70819a; }
+
+    .note-row {
+      margin-top: auto; padding: 10px 12px; border-radius: 11px;
+      border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.025);
+      font-size: 12px; color: #70819a; line-height: 1.5;
+    }
+
+    /* AI note */
+    .ai-note {
+      border: 1px solid rgba(167,139,250,0.22); border-radius: 16px;
+      background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(86,216,255,0.05));
+      padding: 16px 20px; display: flex; align-items: flex-start; gap: 12px;
+      opacity: 0; animation: reveal 0.6s 0.55s ease forwards;
+    }
+    .ai-orb {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 3px;
+      background: radial-gradient(circle, #e2d9ff 0%, #a78bfa 60%, transparent 70%);
+      box-shadow: 0 0 14px rgba(167,139,250,0.70);
+    }
+    .ai-note-text { font-size: 14px; color: #c4b5fd; line-height: 1.6; font-weight: 500; }
+
+    /* Footer */
+    .footer {
+      padding: 14px 18px; border: 1px solid rgba(32,201,151,0.20); border-radius: 14px;
+      background: rgba(32,201,151,0.06); text-align: center;
+      font-size: 14px; font-weight: 700; color: #4eefc7;
+      opacity: 0; animation: reveal 0.6s 0.70s ease forwards;
+    }
+
+    @keyframes reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="step-badge">STEP 3</span>
+      <span class="topbar-title">Grouping Suggestion</span>
+      <div class="spacer"></div>
+      <span class="badge-green">Efficiency Maximized</span>
+    </div>
+
+    <div class="main-grid">
+      <!-- Group A -->
+      <div class="group-card group-card--green" style="animation-delay:0.20s">
+        <div class="group-header">
+          <div class="group-dot dot-green"></div>
+          <span class="group-title title-green">Group A — Grade 3</span>
+          <span class="group-count">2 students</span>
+        </div>
+        <div class="group-body">
+          <div class="member-row">
+            <div class="avatar av-blue">E</div>
+            <span class="member-name">Emma</span>
+            <span class="member-grade">Grade 3</span>
+          </div>
+          <div class="member-row">
+            <div class="avatar av-violet">L</div>
+            <span class="member-name">Liam</span>
+            <span class="member-grade">Grade 3</span>
+          </div>
+          <div class="note-row">Same grade level · compatible schedule · 120 min/wk each</div>
+        </div>
+      </div>
+
+      <!-- Group B -->
+      <div class="group-card" style="animation-delay:0.27s; border-color:rgba(86,216,255,0.20); background: linear-gradient(180deg, rgba(86,216,255,0.06), rgba(86,216,255,0.02));">
+        <div class="group-header">
+          <div class="group-dot" style="background:#56d8ff;box-shadow:0 0 10px rgba(86,216,255,0.55);"></div>
+          <span class="group-title" style="color:#56d8ff;">Group B — Grade 4</span>
+          <span class="group-count">1 student</span>
+        </div>
+        <div class="group-body">
+          <div class="member-row">
+            <div class="avatar av-green">S</div>
+            <span class="member-name">Sophia</span>
+            <span class="member-grade">Grade 4</span>
+          </div>
+          <div class="note-row">No compatible Grade 4 group partner currently. Solo session.</div>
+        </div>
+      </div>
+
+      <!-- 1:1 Required -->
+      <div class="group-card group-card--violet" style="animation-delay:0.34s">
+        <div class="group-header">
+          <div class="group-dot dot-violet"></div>
+          <span class="group-title title-violet">1:1 Required</span>
+          <span class="group-count">2 students</span>
+        </div>
+        <div class="group-body">
+          <div class="member-row">
+            <div class="avatar av-rose">A</div>
+            <span class="member-name">Ava</span>
+            <span class="member-grade">Grade 4</span>
+          </div>
+          <div class="member-row">
+            <div class="avatar av-amber">N</div>
+            <span class="member-name">Noah</span>
+            <span class="member-grade">Grade 5</span>
+          </div>
+          <div class="note-row">Grade difference + time constraints prevent grouping</div>
+        </div>
+      </div>
+
+      <!-- Notes panel -->
+      <div style="display:flex;flex-direction:column;gap:10px;opacity:0;animation:reveal 0.5s 0.41s ease forwards;">
+        <div class="ai-note" style="flex:1;animation:none;opacity:1;">
+          <div class="ai-orb"></div>
+          <div class="ai-note-text">
+            "Grouping Emma and Liam maximizes efficiency while respecting grade alignment. Sophia stays solo until a compatible Grade 4 student is added."
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer"><span id="fnarr"></span></div>
+  </div>
+  <script>
+    (async () => {
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(1300);
+      const el = document.getElementById('fnarr');
+      for (const ch of '"This removes the hardest mental step."') { el.textContent += ch; await sleep(22); }
+    })();
+  </script>
+</body>
+</html>

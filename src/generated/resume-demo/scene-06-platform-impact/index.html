@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edward Jones Impact</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #08101d; --surface: rgba(255,255,255,0.04); --surface-2: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.08); --text: #eef2ff; --muted: #94a3b8; --dim: #64748b; --violet: #a78bfa; --green: #10b981; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+    .scene { position: relative; height: 100%; padding: 34px 38px; display: flex; flex-direction: column; gap: 18px; }
+    .grid-lines { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 48px 48px; }
+    .orb { position: absolute; width: 360px; height: 360px; right: -90px; bottom: -80px; border-radius: 50%; filter: blur(90px); background: radial-gradient(circle, rgba(16,185,129,0.12), transparent 70%); }
+    .topbar { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: end; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--violet); margin-bottom: 6px; }
+    .scene-title { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; }
+    .scene-subtitle { margin-top: 7px; color: var(--muted); font-size: 14px; }
+    .badge { padding: 8px 12px; border-radius: 999px; font-size: 12px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.22); color: #bbf7d0; }
+    .content { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 18px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
+    .panel-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim); margin-bottom: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .kpi-card { padding: 16px; border-radius: 18px; background: var(--surface-2); border: 1px solid rgba(255,255,255,0.08); }
+    .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .kpi-value { font-size: 30px; font-weight: 700; letter-spacing: -0.04em; }
+    .kpi-delta { margin-top: 6px; font-size: 12px; color: #86efac; }
+    .list { display: grid; gap: 11px; }
+    .list-item { padding: 12px 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid rgba(255,255,255,0.08); font-size: 14px; line-height: 1.45; }
+    .timeline { margin-top: 16px; display: grid; gap: 10px; }
+    .timeline-item { display: grid; grid-template-columns: 82px 1fr; gap: 12px; align-items: center; }
+    .timeline-year { color: var(--violet); font-size: 12px; }
+    .timeline-bar { height: 8px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; }
+    .timeline-fill { height: 100%; width: 0; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 999px; }
+    .footer { position: relative; z-index: 1; padding: 13px 16px; border-radius: 16px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.18); color: #d1fae5; font-size: 14px; }
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+    <div class="orb"></div>
+    <header class="topbar" data-reveal>
+      <div>
+        <div class="eyebrow">Edward Jones • Outcome</div>
+        <div class="scene-title">Business Impact</div>
+        <div class="scene-subtitle">The architecture shift changed delivery mechanics, not just technical diagrams.</div>
+      </div>
+      <div class="badge">Impact</div>
+    </header>
+    <main class="content">
+      <section class="panel" data-reveal>
+        <div class="panel-title">Delivery Metrics</div>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">Release Time</div><div class="kpi-value metric-value">50%</div><div class="kpi-delta">reduction through continuous delivery</div></div>
+          <div class="kpi-card"><div class="kpi-label">Agile Teams</div><div class="kpi-value metric-value">13</div><div class="kpi-delta">operating with clearer boundaries</div></div>
+          <div class="kpi-card"><div class="kpi-label">Deployment Risk</div><div class="kpi-value">Down</div><div class="kpi-delta">safer releases through service isolation</div></div>
+          <div class="kpi-card"><div class="kpi-label">Developer Velocity</div><div class="kpi-value">Up</div><div class="kpi-delta">less waiting on cross-team coordination</div></div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item"><div class="timeline-year">Before</div><div class="timeline-bar"><div class="timeline-fill" data-target="100"></div></div></div>
+          <div class="timeline-item"><div class="timeline-year">After</div><div class="timeline-bar"><div class="timeline-fill" data-target="50"></div></div></div>
+        </div>
+      </section>
+      <section class="panel" data-reveal>
+        <div class="panel-title">Organizational Effect</div>
+        <div class="list">
+          <div class="list-item">Technical delivery governance moved from informal coordination to explicit standards and quality signals.</div>
+          <div class="list-item">Platform leadership aligned modernization OKRs with throughput, reliability, and built-in quality.</div>
+          <div class="list-item">Architecture alignment reduced technical debt drag and improved team-level decision speed.</div>
+          <div class="list-item">Mentorship and coaching strengthened leads, managers, and delivery consistency across the platform.</div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer" data-reveal>Architecture is not structure. It is the removal of friction.</footer>
+  </div>
+  <script>
+    document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+      el.style.animationDelay = `${0.12 + i * 0.14}s`;
+    });
+    document.querySelectorAll('.timeline-fill[data-target]').forEach((el, i) => {
+      setTimeout(() => {
+        el.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.width = `${el.dataset.target}%`;
+      }, 450 + i * 150);
+    });
+    document.querySelectorAll('.metric-value').forEach(el => {
+      const raw = el.textContent.trim();
+      const match = raw.match(/^(\d+)(.*)$/);
+      if (!match) return;
+      const target = Number(match[1]);
+      const suffix = match[2];
+      const start = performance.now() + 450;
+      const duration = 900;
+      el.textContent = `0${suffix}`;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = `${Math.round(target * eased)}${suffix}`;
+        if (t < 1) requestAnimationFrame(tick);
+      })(performance.now());
+    });
+    window.parent.postMessage({ type: 'iframe:ready' }, '*');
+  </script>
+</body>
+</html>

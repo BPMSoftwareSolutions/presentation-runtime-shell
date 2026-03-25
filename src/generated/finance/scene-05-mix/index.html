@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profitability Mix Analysis</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0; font-size: 11px;
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .topbar-title { font-weight: 700; font-size: 11px; letter-spacing: 0.1em; color: #818cf8; }
+    .topbar-meta { color: #94a3b8; }
+    .topbar-meta strong { color: #eef2ff; }
+    .mode-badge { margin-left: auto; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 10px; border-radius: 99px; background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.3); color: #818cf8; }
+
+    /* Narration bar */
+    .narration-bar {
+      display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+      background: rgba(129,140,248,0.04); border-bottom: 1px solid rgba(129,140,248,0.1);
+      font-size: 12px; color: #94a3b8; flex-shrink: 0;
+      opacity: 0; animation: reveal-in 0.5s 0.15s ease forwards;
+    }
+    .narr-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #475569; border: 1px solid rgba(129,140,248,0.25); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #818cf8; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Two-panel body */
+    .body { flex: 1; display: grid; grid-template-columns: 1.2fr 1fr; gap: 1px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .panel { background: #08101d; padding: 14px 16px; overflow: hidden; }
+    .panel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: #818cf8; margin-bottom: 12px; font-weight: 600; }
+
+    /* Mix comparison table */
+    .mix-header {
+      display: grid; grid-template-columns: 1fr 70px 70px 80px;
+      font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: #475569;
+      padding: 0 6px 6px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 4px;
+    }
+    .mix-header span:not(:first-child) { text-align: right; }
+    .mix-row {
+      display: grid; grid-template-columns: 1fr 70px 70px 80px;
+      align-items: center; padding: 7px 6px; border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 11px;
+    }
+    .mix-row:last-child { border-bottom: none; }
+    .mix-name { color: #94a3b8; }
+    .mix-num  { text-align: right; font-family: monospace; color: #eef2ff; }
+    .mix-down { color: #ef4444; }
+    .mix-up   { color: #10b981; }
+    .mix-same { color: #475569; }
+    .mix-quality { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+    .q-arc    { width: 20px; height: 20px; flex-shrink: 0; }
+    .q-high   { color: #10b981; font-size: 10px; }
+    .q-med    { color: #f59e0b; font-size: 10px; }
+    .q-low    { color: #ef4444; font-size: 10px; }
+
+    /* Mix interpretation */
+    .interp-block {
+      margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 12px;
+    }
+    .interp-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: #475569; margin-bottom: 8px; }
+    .interp-item { font-size: 11px; color: #94a3b8; padding: 3px 0; line-height: 1.5; }
+    .interp-item::before { content: "→ "; color: #475569; }
+
+    /* Driver tree */
+    .driver-tree { font-family: monospace; font-size: 12px; line-height: 2.1; }
+    .tree-root   { color: #a78bfa; font-weight: 700; margin-bottom: 2px; font-size: 13px; }
+    .tree-branch { display: flex; align-items: center; gap: 8px; }
+    .tree-child  { display: flex; align-items: center; gap: 8px; padding-left: 16px; }
+    .tree-conn   { color: #334155; min-width: 20px; }
+    .tree-name   { color: #94a3b8; flex: 1; }
+    .tree-dim    { color: #475569; flex: 1; }
+    .tree-pos    { color: #10b981; min-width: 56px; text-align: right; }
+    .tree-neg    { color: #ef4444; min-width: 56px; text-align: right; }
+
+    /* AI note at bottom of right panel */
+    .analyst-note {
+      margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.07);
+      font-family: monospace; font-size: 11px; line-height: 1.85;
+    }
+    .t-line       { color: #94a3b8; }
+    .t-line--dim  { color: #475569; }
+    .t-line--ok   { color: #10b981; }
+    .t-prompt     { color: #4b5563; }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.35s ease forwards; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="topbar">
+      <span class="topbar-title">PROFITABILITY MIX ANALYSIS</span>
+      <span class="topbar-meta">Segment: <strong>Retail</strong> &nbsp;·&nbsp; Period: <strong>Mar 2026</strong></span>
+      <span class="mode-badge">Mix Drill-down</span>
+    </div>
+
+    <div class="narration-bar">
+      <span class="narr-label">AI Analyst</span>
+      <span id="narr"></span><span class="cursor"></span>
+    </div>
+
+    <div class="body">
+      <!-- Left: Mix table -->
+      <div class="panel">
+        <div class="panel-label">Category / Offering Mix</div>
+
+        <div class="mix-header" data-reveal>
+          <span>Category</span>
+          <span>Last Period</span>
+          <span>Current</span>
+          <span>Quality</span>
+        </div>
+
+        <div class="mix-row" data-reveal>
+          <span class="mix-name">Staffing Services</span>
+          <span class="mix-num">42%</span>
+          <span class="mix-num mix-down">39% ↓</span>
+          <span class="mix-quality">
+            <svg class="q-arc" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/>
+              <circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3.2"
+                      stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="39"/>
+            </svg>
+            <span class="q-low">Low</span>
+          </span>
+        </div>
+        <div class="mix-row" data-reveal>
+          <span class="mix-name">Consulting</span>
+          <span class="mix-num">28%</span>
+          <span class="mix-num mix-up">31% ↑</span>
+          <span class="mix-quality">
+            <svg class="q-arc" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/>
+              <circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.2"
+                      stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="31"/>
+            </svg>
+            <span class="q-high">High</span>
+          </span>
+        </div>
+        <div class="mix-row" data-reveal>
+          <span class="mix-name">Managed Ops</span>
+          <span class="mix-num">18%</span>
+          <span class="mix-num mix-down">17% ↓</span>
+          <span class="mix-quality">
+            <svg class="q-arc" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/>
+              <circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="3.2"
+                      stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="17"/>
+            </svg>
+            <span class="q-med">Medium</span>
+          </span>
+        </div>
+        <div class="mix-row" data-reveal>
+          <span class="mix-name">Back Office Support</span>
+          <span class="mix-num">12%</span>
+          <span class="mix-num mix-up">13% ↑</span>
+          <span class="mix-quality">
+            <svg class="q-arc" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/>
+              <circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3.2"
+                      stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="13"/>
+            </svg>
+            <span class="q-low">Low</span>
+          </span>
+        </div>
+
+        <div class="interp-block" data-reveal>
+          <div class="interp-label">Mix Interpretation</div>
+          <div class="interp-item">Share shifted toward lower-margin categories</div>
+          <div class="interp-item">Higher revenue growth did not equal higher profit</div>
+          <div class="interp-item">Mix is diluting gross margin by an estimated -$60K</div>
+        </div>
+      </div>
+
+      <!-- Right: Driver tree + AI note -->
+      <div class="panel">
+        <div class="panel-label">Visual Driver Tree</div>
+
+        <div class="driver-tree">
+          <div class="tree-root" data-reveal>Revenue</div>
+          <div class="tree-branch" data-reveal>
+            <span class="tree-conn">├─</span>
+            <span class="tree-name">Price</span>
+            <span class="tree-pos">+$140K</span>
+          </div>
+          <div class="tree-branch" data-reveal>
+            <span class="tree-conn">├─</span>
+            <span class="tree-name">Volume</span>
+            <span class="tree-pos">+$170K</span>
+          </div>
+          <div class="tree-branch" data-reveal>
+            <span class="tree-conn">└─</span>
+            <span class="tree-name">Mix</span>
+            <span class="tree-neg">-$60K</span>
+          </div>
+          <div class="tree-child" data-reveal>
+            <span class="tree-conn">└─</span>
+            <span class="tree-dim">Low-margin share ↑</span>
+          </div>
+        </div>
+
+        <div class="analyst-note" data-reveal>
+          <div class="t-line t-line--dim"><span class="t-prompt">&gt; </span>mix causality confirmed</div>
+          <div class="t-line"><span class="t-prompt">&gt; </span>low-margin share increased 4 pts</div>
+          <div class="t-line"><span class="t-prompt">&gt; </span>consulting growth insufficient offset</div>
+          <div class="t-line t-line--ok"><span class="t-prompt">&gt; </span>action: shift sales mix toward consulting</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.1}s`;
+    });
+
+    // Arc gauge animations
+    document.querySelectorAll('.arc-fill[data-pct]').forEach(el => {
+      const pct = parseFloat(el.dataset.pct);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0');
+      const start = performance.now() + (revealDelay + 0.4) * 1000;
+      const duration = 900;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.setAttribute('stroke-dasharray', `${(pct * eased).toFixed(2)} 100`);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.setAttribute('stroke-dasharray', `${pct} 100`);
+      })(performance.now());
+    });
+
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "The mix is the story.", pauseMs: 700 },
+        { text: " More revenue — from lower-margin work.", pauseMs: 800 },
+        { text: " That's what compressed the gross margin.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+  </script>
+</body>
+</html>

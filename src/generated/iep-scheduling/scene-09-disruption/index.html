@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disruption — New Student</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; background: #07111f; color: #edf4ff;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+      pointer-events: none;
+    }
+
+    /* Pulsing red glow orb */
+    .alert-orb {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,106,106,0.08), transparent 70%);
+      filter: blur(40px);
+      animation: pulse-orb 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse-orb {
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    .scene {
+      position: relative; height: 100%; width: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 20px; padding: 40px;
+    }
+
+    /* Alert banner */
+    .alert-banner {
+      display: flex; align-items: center; gap: 14px; padding: 16px 24px;
+      border: 1px solid rgba(255,106,106,0.40); border-radius: 16px;
+      background: rgba(255,106,106,0.12); max-width: 560px; width: 100%;
+      opacity: 0; animation: slide-down 0.6s 0.1s ease forwards;
+    }
+    .alert-icon { font-size: 22px; flex-shrink: 0; }
+    .alert-title { font-size: 16px; font-weight: 800; color: #ff8f8f; }
+    .alert-sub { font-size: 12px; color: #ff8f8f; opacity: 0.7; margin-top: 2px; }
+
+    /* Student card */
+    .student-card {
+      max-width: 560px; width: 100%;
+      border: 1px solid rgba(255,255,255,0.10); border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      overflow: hidden;
+      opacity: 0; animation: slide-up 0.7s 0.3s ease forwards;
+    }
+    .card-header {
+      display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.025);
+    }
+    .new-avatar {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800;
+      background: rgba(86,216,255,0.15); color: #56d8ff; border: 2px solid rgba(86,216,255,0.35);
+    }
+    .card-name { font-size: 20px; font-weight: 800; color: #edf4ff; }
+    .card-sub { font-size: 12px; color: #70819a; margin-top: 2px; }
+    .new-badge {
+      margin-left: auto; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800;
+      border: 1px solid rgba(86,216,255,0.35); background: rgba(86,216,255,0.12); color: #56d8ff;
+    }
+
+    .card-body { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .detail-item {
+      display: flex; flex-direction: column; gap: 4px; padding: 12px 14px;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+    .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: #4d5f77; font-weight: 700; }
+    .detail-value { font-size: 14px; font-weight: 700; color: #edf4ff; }
+    .detail-value--green { color: #20c997; }
+    .detail-value--cyan  { color: #56d8ff; }
+
+    /* System message */
+    .system-msg {
+      max-width: 560px; width: 100%;
+      display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+      border: 1px solid rgba(167,139,250,0.25); border-radius: 14px;
+      background: rgba(167,139,250,0.07);
+      opacity: 0; animation: slide-up 0.6s 0.55s ease forwards;
+    }
+    .sys-orb {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      background: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.7);
+      animation: blink 1.2s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+    .sys-text { font-size: 13px; color: #c4b5fd; font-weight: 600; }
+
+    @keyframes slide-down { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slide-up   { from { opacity: 0; transform: translateY(16px);  } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="alert-orb"></div>
+
+    <div class="alert-banner">
+      <span class="alert-icon">🚨</span>
+      <div>
+        <div class="alert-title">New Student Added</div>
+        <div class="alert-sub">Schedule rebalancing required</div>
+      </div>
+    </div>
+
+    <div class="student-card">
+      <div class="card-header">
+        <div class="new-avatar">M</div>
+        <div>
+          <div class="card-name">Mason</div>
+          <div class="card-sub">New enrollment</div>
+        </div>
+        <span class="new-badge">New</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-item">
+          <div class="detail-label">Grade</div>
+          <div class="detail-value">Grade 3</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Support Type</div>
+          <div class="detail-value">Reading Support</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Minutes / Week</div>
+          <div class="detail-value detail-value--cyan">120 min/wk</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Can Group</div>
+          <div class="detail-value detail-value--green">YES</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="system-msg">
+      <div class="sys-orb"></div>
+      <span class="sys-text">"New constraint introduced. Rebalancing required."</span>
+    </div>
+  </div>
+</body>
+</html>

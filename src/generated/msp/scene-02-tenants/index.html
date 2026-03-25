@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Managed Tenants</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; position: relative; padding: 24px 32px; }
+
+    .grid-lines {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* Command strip */
+    .command-strip {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 720px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; overflow: hidden;
+    }
+    .strip-stat {
+      background: rgba(8,16,29,0.95);
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .strip-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #475569; }
+    .strip-value { font-size: 20px; font-weight: 700; color: #eef2ff; letter-spacing: -0.02em; }
+    .strip-value--warn { color: #f59e0b; }
+    .strip-sub { font-size: 10px; color: #334155; }
+
+    /* Tenant cards */
+    .tenants {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 720px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .tenant {
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      overflow: hidden;
+    }
+    .tenant--warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.03); }
+    .tenant--ok   { border-color: rgba(16,185,129,0.2); }
+
+    .tenant-header {
+      padding: 11px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .tenant--warn .tenant-header { border-bottom-color: rgba(245,158,11,0.15); background: rgba(245,158,11,0.04); }
+    .tenant--ok   .tenant-header { background: rgba(16,185,129,0.04); }
+
+    .tenant-name { font-size: 12px; font-weight: 700; color: #eef2ff; }
+    .tenant-badge {
+      font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .badge--ok   { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+    .badge--warn { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+    .tenant-metrics { padding: 10px 14px; display: flex; flex-direction: column; gap: 7px; }
+
+    .metric-row { display: flex; justify-content: space-between; align-items: center; }
+    .metric-key { font-size: 10px; color: #475569; }
+    .metric-val { font-size: 11px; font-weight: 600; color: #94a3b8; }
+    .metric-val--green { color: #10b981; }
+    .metric-val--warn  { color: #f59e0b; }
+    .metric-val--red   { color: #ef4444; }
+
+    .trend { font-size: 10px; margin-left: 3px; }
+    .trend--up   { color: #ef4444; }
+    .trend--down { color: #10b981; }
+
+    @keyframes reveal-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.45s ease forwards; }
+
+    .narration {
+      position: relative; z-index: 1; width: 100%; max-width: 720px;
+      padding: 14px 20px; border: 1px solid rgba(139,92,246,0.18); border-radius: 10px;
+      background: rgba(139,92,246,0.04);
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .narration-eyebrow { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d28d9; margin-bottom: 8px; }
+    .narration-text { font-size: 13px; line-height: 1.7; color: #94a3b8; min-height: 22px; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #a78bfa; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .gauge-wrap { display: flex; align-items: center; gap: 6px; }
+    .arc-gauge { width: 22px; height: 22px; flex-shrink: 0; }
+    .margin-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+    .margin-track { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .margin-fill { height: 100%; border-radius: 2px; width: 0; }
+    .margin-fill--pos { background: #10b981; }
+    .margin-fill--neg { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+
+    <div class="narration">
+      <div class="narration-eyebrow">AI Operator</div>
+      <div class="narration-text"><span id="narr"></span><span class="cursor"></span></div>
+    </div>
+
+    <div class="command-strip" data-reveal>
+      <div class="strip-stat">
+        <div class="strip-label">Sites managed</div>
+        <div class="strip-value">424</div>
+        <div class="strip-sub">across 3 tenants</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Daily events</div>
+        <div class="strip-value">8.3M</div>
+        <div class="strip-sub">↑ 6% vs yesterday</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Active incidents</div>
+        <div class="strip-value strip-value--warn">4</div>
+        <div class="strip-sub">Beta Retail: 3 open</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Portfolio MRR</div>
+        <div class="strip-value">$412k</div>
+        <div class="strip-sub">under management</div>
+      </div>
+    </div>
+
+    <div class="tenants">
+
+      <!-- Acme Corp — calm, stable, green -->
+      <div class="tenant tenant--ok" data-reveal>
+        <div class="tenant-header">
+          <span class="tenant-name">Acme Corp</span>
+          <span class="tenant-badge badge--ok">Healthy</span>
+        </div>
+        <div class="tenant-metrics">
+          <div class="metric-row"><span class="metric-key">Locations</span><span class="metric-val">124</span></div>
+          <div class="metric-row"><span class="metric-key">Daily events</span><span class="metric-val">2.4M</span></div>
+          <div class="metric-row"><span class="metric-key">Uptime</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="99.96"/></svg><span class="metric-val metric-val--green">99.96%</span></div></div>
+          <div class="metric-row"><span class="metric-key">Active incidents</span><span class="metric-val metric-val--green">0</span></div>
+          <div class="metric-row"><span class="metric-key">MRR</span><span class="metric-val">$182k</span></div>
+          <div class="metric-row"><span class="metric-key">Margin</span><div class="margin-wrap"><div class="margin-track"><div class="margin-fill margin-fill--pos" data-target="72"></div></div><span class="metric-val metric-val--green">+18%</span></div></div>
+        </div>
+      </div>
+
+      <!-- Beta Retail — at risk, problem emerging -->
+      <div class="tenant tenant--warn" data-reveal>
+        <div class="tenant-header">
+          <span class="tenant-name">Beta Retail</span>
+          <span class="tenant-badge badge--warn">At Risk</span>
+        </div>
+        <div class="tenant-metrics">
+          <div class="metric-row"><span class="metric-key">Locations</span><span class="metric-val">86</span></div>
+          <div class="metric-row"><span class="metric-key">Daily events</span><span class="metric-val">1.8M</span></div>
+          <div class="metric-row"><span class="metric-key">Active incidents</span><span class="metric-val metric-val--red">3<span class="trend trend--up"> ↑</span></span></div>
+          <div class="metric-row"><span class="metric-key">SLA risk</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="12"/></svg><span class="metric-val metric-val--warn">12%</span></div></div>
+          <div class="metric-row"><span class="metric-key">Ticket volume</span><span class="metric-val metric-val--warn">+34%<span class="trend trend--up"> ↑</span></span></div>
+          <div class="metric-row"><span class="metric-key">Margin</span><div class="margin-wrap"><div class="margin-track"><div class="margin-fill margin-fill--neg" data-target="16"></div></div><span class="metric-val metric-val--red">−4%</span></div></div>
+        </div>
+      </div>
+
+      <!-- Gamma Health — stable, costs contained -->
+      <div class="tenant" data-reveal>
+        <div class="tenant-header">
+          <span class="tenant-name">Gamma Health</span>
+          <span class="tenant-badge badge--ok">Stable</span>
+        </div>
+        <div class="tenant-metrics">
+          <div class="metric-row"><span class="metric-key">Endpoints</span><span class="metric-val">214</span></div>
+          <div class="metric-row"><span class="metric-key">Daily events</span><span class="metric-val">4.1M</span></div>
+          <div class="metric-row"><span class="metric-key">Config drift</span><span class="metric-val metric-val--warn">1 alert</span></div>
+          <div class="metric-row"><span class="metric-key">Compliance</span><div class="gauge-wrap"><svg class="arc-gauge" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.2"/><circle class="arc-fill" cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.2" stroke-dasharray="0 100" stroke-linecap="butt" transform="rotate(-90 18 18)" data-pct="98.7"/></svg><span class="metric-val metric-val--green">98.7%</span></div></div>
+          <div class="metric-row"><span class="metric-key">Monthly cost</span><span class="metric-val">$94k</span></div>
+          <div class="metric-row"><span class="metric-key">Incidents</span><span class="metric-val metric-val--green">trending down<span class="trend trend--down"> ↓</span></span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script>
+    // Stagger reveal
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.18}s`;
+    });
+
+    // Count-up animation for numeric values
+    // Operates on text nodes directly so child spans (trend arrows) are preserved
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Three managed tenants.", pauseMs: 700 },
+        { text: " Acme Corp. Beta Retail. Gamma Health.", pauseMs: 800 },
+        { text: " Everything green — except Beta Retail.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    // Arc gauge animations
+    document.querySelectorAll('.arc-fill[data-pct]').forEach(el => {
+      const pct = parseFloat(el.dataset.pct);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0');
+      const start = performance.now() + (revealDelay + 0.4) * 1000;
+      const duration = 1000;
+      (function tick(now) {
+        if (now < start) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.setAttribute('stroke-dasharray', `${(pct * eased).toFixed(2)} 100`);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.setAttribute('stroke-dasharray', `${pct} 100`);
+      })(performance.now());
+    });
+
+    // Margin bar animations
+    document.querySelectorAll('.margin-fill[data-target]').forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      const revealEl = el.closest('[data-reveal]') || el;
+      const delay = parseFloat(revealEl.style.animationDelay || '0') + 0.4;
+      setTimeout(() => {
+        el.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.width = target + '%';
+      }, delay * 1000);
+    });
+
+    document.querySelectorAll(".metric-val, .strip-value").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+
+      const raw = textNode.textContent.trim();
+      // Match optional prefix (+, -, −, $), a number (int or decimal), then any suffix
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+
+      const prefix  = match[1];
+      const endVal  = parseFloat(match[2]);
+      const suffix  = match[3];
+      const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
+
+      if (isNaN(endVal)) return;
+
+      // Start counting after this element's reveal animation begins + a short offset
+      const revealEl   = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0');
+      const countStart  = performance.now() + (revealDelay + 0.25) * 1000;
+      const duration    = 900; // ms
+
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+
+      function tick(now) {
+        if (now < countStart) { requestAnimationFrame(tick); return; }
+        const t      = Math.min((now - countStart) / duration, 1);
+        const eased  = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        textNode.textContent = prefix + (endVal * eased).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      }
+      requestAnimationFrame(tick);
+    });
+  </script>
+</body>
+</html>

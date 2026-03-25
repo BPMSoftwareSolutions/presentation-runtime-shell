@@ -1,0 +1,179 @@
+.ps-player {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+}
+
+.ps-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.ps-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 8;
+  transform: translate(-50%, -50%);
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.64);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+.ps-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0));
+}
+
+.ps-title {
+  max-width: min(78vw, 900px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ps-counter {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.ps-controls {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 7;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(8, 8, 8, 0.78);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.controls-visible .ps-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ps-controls button {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ps-controls button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.ps-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ps-scene-label {
+  max-width: min(42vw, 420px);
+  padding: 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.ps-end-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 9;
+  transform: translate(-50%, -50%);
+  width: min(90vw, 360px);
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.7);
+  text-align: center;
+}
+
+.ps-end-card p {
+  margin: 0 0 10px;
+}
+
+.ps-end-card button {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.ps-end-card button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.ps-not-found {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.is-hidden {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .ps-header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .ps-title {
+    font-size: 13px;
+    max-width: 68vw;
+  }
+
+  .ps-controls {
+    bottom: 10px;
+    gap: 8px;
+    width: calc(100vw - 20px);
+    justify-content: center;
+  }
+
+  .ps-scene-label {
+    max-width: 38vw;
+    font-size: 12px;
+  }
+}

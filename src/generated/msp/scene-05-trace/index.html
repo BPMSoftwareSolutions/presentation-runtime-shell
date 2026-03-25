@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trace Path</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; overflow: hidden; }
+
+    .scene { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; position: relative; }
+
+    .grid-lines {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .eyebrow { position: relative; z-index: 1; font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #a78bfa; margin-bottom: 12px; }
+    .corr { position: relative; z-index: 1; font-family: monospace; font-size: 11px; color: #4b5563; margin-bottom: 20px; }
+    .corr span { color: #818cf8; }
+
+    .trace { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; width: 100%; max-width: 520px; }
+
+    .node-wrap { display: flex; align-items: center; gap: 12px; width: 100%; }
+
+    .node {
+      padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+      width: 200px; flex-shrink: 0; color: #eef2ff;
+    }
+    .node--ok   { border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.06); }
+    .node--warn { border-color: rgba(245,158,11,0.3);  background: rgba(245,158,11,0.06); }
+    .node--fail { border-color: rgba(239,68,68,0.35);  background: rgba(239,68,68,0.08); color: #f87171; }
+
+    .node-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+    .badge--ok       { background: rgba(16,185,129,0.12); color: #10b981; }
+    .badge--degraded { background: rgba(245,158,11,0.1);  color: #f59e0b; }
+    .badge--down     { background: rgba(239,68,68,0.12);  color: #ef4444; }
+
+    .node-stats { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+    .node-stat-val { font-family: monospace; font-size: 11px; color: #475569; }
+    .node-stat-val--ok   { color: #10b981; }
+    .node-stat-val--warn { color: #f59e0b; }
+    .node-stat-val--red  { color: #ef4444; }
+    .node-stat-sub { font-size: 9px; color: #334155; font-family: monospace; }
+
+    .arrow { padding: 4px 0 4px 100px; }
+    .arrow-line { width: 2px; height: 18px; background: rgba(129,140,248,0.3); }
+
+    .failure-boundary {
+      margin-top: 10px; padding: 8px 16px; border-radius: 6px;
+      border: 1px dashed rgba(239,68,68,0.3); background: rgba(239,68,68,0.05);
+      font-size: 11px; color: #ef4444; font-family: monospace;
+      position: relative; z-index: 1; width: 100%; max-width: 520px;
+    }
+
+    @keyframes reveal-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    [data-reveal] { opacity: 0; animation: reveal-in 0.4s ease forwards; }
+
+    .narration {
+      position: relative; z-index: 1; width: 100%; max-width: 520px;
+      padding: 14px 20px; border: 1px solid rgba(139,92,246,0.18); border-radius: 10px;
+      background: rgba(139,92,246,0.04);
+      opacity: 0; animation: reveal-in 0.5s 0.1s ease forwards;
+    }
+    .narration-eyebrow { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: #6d28d9; margin-bottom: 8px; }
+    .narration-text { font-size: 13px; line-height: 1.7; color: #94a3b8; min-height: 22px; }
+    .cursor { display: inline-block; width: 2px; height: 0.85em; background: #a78bfa; margin-left: 1px; vertical-align: text-bottom; animation: blink-cursor 0.75s step-end infinite; }
+    @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .traffic-bar-wrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+    .traffic-track { width: 56px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .traffic-fill { height: 100%; border-radius: 2px; width: 0; }
+    .traffic-fill--ok   { background: #10b981; }
+    .traffic-fill--warn { background: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="grid-lines"></div>
+    <div class="narration">
+      <div class="narration-eyebrow">AI Operator</div>
+      <div class="narration-text"><span id="narr"></span><span class="cursor"></span></div>
+    </div>
+
+    <div class="eyebrow" data-reveal>Correlation Trace</div>
+    <div class="corr" data-reveal>correlation_id: <span>f91aa220</span></div>
+
+    <div class="trace">
+      <div class="node-wrap" data-reveal>
+        <div class="node node--ok">cart-ui</div>
+        <span class="node-badge badge--ok">OK</span>
+        <div class="node-stats">
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill traffic-fill--ok" data-target="100"></div></div><span class="node-stat-val node-stat-val--ok">1.2k req/min</span></div>
+          <span class="node-stat-sub">normal traffic</span>
+        </div>
+      </div>
+
+      <div class="arrow" data-reveal><div class="arrow-line"></div></div>
+
+      <div class="node-wrap" data-reveal>
+        <div class="node node--warn">checkout-service</div>
+        <span class="node-badge badge--degraded">Degraded</span>
+        <div class="node-stats">
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill traffic-fill--warn" data-target="70"></div></div><span class="node-stat-val node-stat-val--warn">842 req/min</span></div>
+          <span class="node-stat-sub">↓34% · 2.4s latency</span>
+        </div>
+      </div>
+
+      <div class="arrow" data-reveal><div class="arrow-line"></div></div>
+
+      <div class="node-wrap" data-reveal>
+        <div class="node node--fail">inventory-service</div>
+        <span class="node-badge badge--down">DOWN</span>
+        <div class="node-stats">
+          <div class="traffic-bar-wrap"><div class="traffic-track"><div class="traffic-fill" data-target="0"></div></div><span class="node-stat-val node-stat-val--red">0 req/min</span></div>
+          <span class="node-stat-sub">2.1k msgs queued</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="failure-boundary" data-reveal>
+      ✕ failure boundary — no cascade beyond inventory-service · payments and cart-ui isolated
+    </div>
+  </div>
+  <script>
+    (async function() {
+      const el = document.getElementById('narr');
+      const lines = [
+        { text: "Here is the correlation trace.", pauseMs: 700 },
+        { text: " The failure boundary is exact.", pauseMs: 600 },
+        { text: " No cascade. No guessing.", pauseMs: 0 }
+      ];
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      await sleep(400);
+      for (const { text, pauseMs } of lines) {
+        for (const ch of text) { el.textContent += ch; await sleep(22); }
+        if (pauseMs) await sleep(pauseMs);
+      }
+    })();
+
+    document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+      el.style.animationDelay = `${0.2 + i * 0.22}s`;
+    });
+
+    document.querySelectorAll('.traffic-fill[data-target]').forEach(el => {
+      const target = parseFloat(el.dataset.target);
+      if (target === 0) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const delay = parseFloat(revealEl.style.animationDelay || '0.2') + 0.3;
+      setTimeout(() => {
+        el.style.transition = 'width 0.9s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.width = target + '%';
+      }, delay * 1000);
+    });
+
+    document.querySelectorAll(".node-stat-val").forEach(el => {
+      const textNode = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (!textNode) return;
+      const raw = textNode.textContent.trim();
+      const match = raw.match(/^([+\u2212\-$]?)(\d+\.?\d*)(.*)$/);
+      if (!match) return;
+      const prefix = match[1], endVal = parseFloat(match[2]), suffix = match[3];
+      const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
+      if (isNaN(endVal)) return;
+      const revealEl = el.closest('[data-reveal]') || el;
+      const revealDelay = parseFloat(revealEl.style.animationDelay || '0.2');
+      const countStart = performance.now() + (revealDelay + 0.25) * 1000;
+      const duration = 900;
+      textNode.textContent = prefix + (0).toFixed(decimals) + suffix;
+      (function tick(now) {
+        if (now < countStart) { requestAnimationFrame(tick); return; }
+        const t = Math.min((now - countStart) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + (endVal * eased).toFixed(decimals) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else textNode.textContent = prefix + endVal.toFixed(decimals) + suffix;
+      })(performance.now());
+    });
+  </script>
+</body>
+</html>
