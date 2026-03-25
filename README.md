@@ -20,7 +20,8 @@ npx serve .
 python -m http.server 8080
 ```
 
-The app boots, seeds any missing decks from `/src/contracts/`, and routes to `#/library`.
+The app boots, seeds any missing decks from `/src/contracts/`, and routes to `#/library` by default.
+If the URL hash matches `#/present/:id`, the app skips the authoring shell entirely and opens the deck in link-only presentation mode.
 
 All data persists to **browser localStorage** under the key `prs_library`.
 
@@ -38,7 +39,10 @@ A single slide — one iframe-hosted HTML file paired with a presenter script (b
 A JSON file in `/src/contracts/` that defines a full presentation. Seeded into the store on first load. See [`skills/deck-json-reference.md`](skills/deck-json-reference.md) for the full schema.
 
 ### Runtime
-The engine that drives playback: loads the deck, navigates iframes, runs the presenter typewriter, and waits for advance conditions. Lives as a singleton across screen transitions.
+The engine that drives playback: loads the deck, navigates iframes, runs the presenter typewriter, and waits for advance conditions. Lives as a singleton across screen transitions and is reused by workspace, fullscreen, and link-only presentation mode.
+
+### Link-Only Mode
+A stripped presentation player mounted at `#/present/:id`. It opens a single deck directly, hides all library/workspace chrome, and exposes only scene navigation controls for client-facing playback.
 
 ### Edit Intent
 A per-scene text field describing what the scene should accomplish. Used as context for AI-assisted scene regeneration.
@@ -55,7 +59,8 @@ presentation-runtime-shell/
 │   └── screens/
 │       ├── library.css
 │       ├── workspace.css
-│       └── import-scene.css
+│       ├── import-scene.css
+│       └── present.css
 ├── src/
 │   ├── main.js                   # Bootstrap: store → router → shell → screens
 │   ├── core/
@@ -71,10 +76,12 @@ presentation-runtime-shell/
 │   ├── screens/
 │   │   ├── library.js            # #/library — presentation grid
 │   │   ├── workspace.js          # #/presentation/:id — editor + canvas
-│   │   └── import-scene.js       # #/presentation/:id/import
+│   │   ├── import-scene.js       # #/presentation/:id/import
+│   │   └── present.js            # #/present/:id — link-only player
 │   ├── ui/
 │   │   ├── app-shell.js          # Persistent frame: top bar + left nav
 │   │   ├── layout-manager.js     # Workspace / split / fullscreen modes
+│   │   ├── transport-controller.js # Shared transport bindings for runtime-driven controls
 │   │   ├── inspector-panel.js    # Right rail: scene metadata + settings
 │   │   ├── scene-list.js         # Left rail: scene navigator
 │   │   └── ...
@@ -98,6 +105,7 @@ presentation-runtime-shell/
 - Browse, search, and filter presentations
 - Create, duplicate, archive, or delete decks
 - Open any deck into the workspace
+- Copy a shareable presentation link from the card overflow menu or detail panel
 
 ### Workspace (`#/presentation/:id`)
 The main authoring and presenting environment. Three columns:
@@ -109,6 +117,25 @@ The main authoring and presenting environment. Three columns:
 | | Transport controls | Advance rule |
 | | Edit Intent textarea | Presentation settings |
 | | Edit Text / Import Scene | Actions |
+
+Top bar actions:
+
+| Action | Description |
+|--------|-------------|
+| `Preview ▾` | Switch between workspace and split layouts |
+| `Copy Link` | Copies a shareable `#/present/:id` URL to the clipboard |
+| `Copy Config` | Copies the current shared deck settings JSON for the active presentation |
+| `Export Config` | Downloads a `*.shared-overrides.json` file for the active presentation |
+| `Import Config` | Loads a previously exported shared overrides JSON file into the current browser session |
+| `Present` | Opens fullscreen presentation mode |
+
+### Link-Only Player (`#/present/:id`)
+- Opens directly into a single deck with no shell, library, or workspace navigation
+- Shows a loading overlay until the first scene iframe finishes loading
+- Displays scene title, scene counter, and client-safe transport controls only
+- Auto-hides controls after 3 seconds of inactivity and reveals them on pointer or keyboard interaction
+- Shows a centered end card with `Watch again` when the deck completes
+- Respects the presentation setting `presentControlsPosition` (`top` or `bottom`), configurable from the workspace inspector
 
 ### Layout Modes
 Switch via the **Preview ▾** dropdown or **Present** button:
@@ -124,7 +151,7 @@ Switch via the **Preview ▾** dropdown or **Present** button:
 ## Playback & Transport
 
 ### Transport Controls
-Available in both the workspace canvas and the fullscreen HUD:
+Workspace and fullscreen provide the full transport set:
 
 | Button | Action |
 |--------|--------|
@@ -133,6 +160,29 @@ Available in both the workspace canvas and the fullscreen HUD:
 | `▶ / ⏸` | **Play/Pause** — pauses the typewriter mid-narration; resumes from exactly where it stopped. Also acts as "advance" when waiting between scenes. |
 | `›` | Next scene |
 | `»` | Jump to last scene |
+
+Link-only mode exposes a reduced transport set for client playback:
+
+| Button | Action |
+|--------|--------|
+| `«` | Jump to first scene |
+| `‹` | Previous scene |
+| `›` | Next scene |
+| `»` | Jump to last scene |
+
+### Copy Link
+Each deck can generate a shareable URL in this format:
+
+```text
+index.html#/present/<deck-id>
+```
+
+Entry points:
+- Library card overflow menu
+- Library detail panel
+- Workspace top bar
+
+Clipboard writes use the browser Clipboard API with a `prompt()` fallback when clipboard access is unavailable.
 
 ### Keyboard Shortcuts
 Active in **Split** and **Fullscreen** modes:
@@ -144,6 +194,15 @@ Active in **Split** and **Fullscreen** modes:
 | `r` | Replay current scene |
 | `s` | Skip typing (flush narration instantly) |
 | `Esc` | Exit split / fullscreen → workspace |
+
+In **Link-Only** mode:
+
+| Key | Action |
+|-----|--------|
+| `Space` / `→` | Next scene |
+| `←` | Previous scene |
+
+`Esc` is intentionally ignored in link-only mode so the shared player does not expose a route back into the authoring experience.
 
 ### Playback Modes
 
@@ -217,3 +276,29 @@ runtime.setPlaybackMode(mode)   // "interactive" | "autoplay" | "capture"
 runtime.subscribe(fn)           // Subscribe to state changes → returns unsubscribe fn
 runtime.attachTo(iframeEl)      // Re-point runtime at a different iframe
 ```
+
+---
+
+## Shareable Presentations
+
+Use `Copy Link` from the library or workspace to generate a client-safe presentation URL.
+
+Behavior of shared links:
+- Route format: `#/present/:id`
+- Invalid ids render a full-screen `Presentation not found.` state
+- The player starts on scene 1 automatically
+- The client can navigate scenes but cannot access workspace or library UI from within the player
+- When the final scene completes, the player shows `Presentation complete` with a `Watch again` button
+
+## Shared Deck Settings
+
+Presentation-owned settings such as link-only controls position, playback mode, typing speed, start delay, and end-card duration are modeled as shared deck settings.
+
+Current persistence boundary:
+- The app can load shared defaults from [src/contracts/shared-overrides.json](src/contracts/shared-overrides.json)
+- The app can edit those settings in the workspace inspector
+- The app can export or copy those settings as JSON
+- The app can import a previously exported JSON file back into the browser session
+- The app cannot write changes directly back to workspace files on disk from the browser
+
+That means persistence outside the browser is currently intentional and manual: export the JSON and share or commit it, then re-import or reload it where needed.
