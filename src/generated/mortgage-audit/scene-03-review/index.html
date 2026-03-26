@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Used in Closing?</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--violet:#a78bfa}
+.scene{height:100%;padding:32px 44px;position:relative;display:flex;flex-direction:column;gap:18px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.orb1{position:absolute;width:400px;height:400px;right:-80px;top:-100px;border-radius:50%;filter:blur(110px);background:radial-gradient(circle,rgba(14,165,233,.12),transparent 70%)}
+
+.head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex:none}
+.head-title{font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.head-badge{padding:8px 18px;border-radius:999px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#7dd3fc;font-size:13px;letter-spacing:.08em;font-weight:600}
+
+.main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:20px;min-height:0}
+
+/* Review Queue */
+.queue-panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.queue-panel h3{font-size:14px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+
+/* Review Card */
+.review-card{border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column;gap:14px;transition:border-color .4s ease,box-shadow .4s ease,background .4s ease}
+.review-card.confirmed{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.06);box-shadow:0 0 22px rgba(16,185,129,.1)}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start}
+.card-title{font-size:15px;font-weight:600;color:#e2e8f0}
+.card-meta{font-size:12px;color:var(--muted);padding:3px 10px;border-radius:999px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#fcd34d;white-space:nowrap}
+.radio-group{display:flex;flex-direction:column;gap:8px}
+.radio-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);cursor:pointer;transition:all .25s ease}
+.radio-opt.selected{border-color:rgba(14,165,233,.45);background:rgba(14,165,233,.08)}
+.radio-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex:none;display:grid;place-items:center;transition:all .25s ease}
+.radio-opt.selected .radio-dot{border-color:var(--sky)}
+.radio-dot-inner{width:8px;height:8px;border-radius:50%;background:var(--sky);display:none}
+.radio-opt.selected .radio-dot-inner{display:block}
+.radio-label{font-size:13px;color:#cbd5e1}
+.card-actions{display:flex;gap:10px}
+.btn-primary{flex:1;padding:10px 14px;border-radius:12px;background:var(--sky);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s ease;letter-spacing:.04em}
+.btn-primary:hover{background:#38bdf8;box-shadow:0 0 18px rgba(14,165,233,.35)}
+.btn-primary.confirmed{background:var(--green);box-shadow:0 0 18px rgba(16,185,129,.3)}
+.btn-secondary{padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s ease}
+.btn-secondary:hover{background:rgba(255,255,255,.09)}
+.confirm-msg{font-size:12px;color:#6ee7b7;display:none;align-items:center;gap:6px}
+.confirm-msg.shown{display:flex}
+
+/* Status Board */
+.board-panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:20px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.board-panel h3{font-size:14px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.board-cols{flex:1;display:grid;grid-template-rows:1fr 1fr 1fr;gap:10px}
+.board-col{border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.board-col-green{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2)}
+.board-col-neutral{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.board-col-amber{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)}
+.col-hd{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.col-hd-green{color:#6ee7b7}
+.col-hd-neutral{color:var(--muted)}
+.col-hd-amber{color:#fcd34d}
+.board-items{display:flex;flex-direction:column;gap:5px}
+.board-doc{font-size:12px;color:#94a3b8;padding:4px 8px;border-radius:8px;transition:all .35s ease;opacity:0;transform:translateY(5px)}
+.board-doc.shown{opacity:1;transform:none}
+.board-doc.highlight{background:rgba(16,185,129,.1);color:#a7f3d0;box-shadow:0 0 10px rgba(16,185,129,.12)}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb1"></div>
+
+  <div class="head" data-reveal>
+    <div class="head-title">Used in Closing?</div>
+    <div class="head-badge">Reviewer Confirmation</div>
+  </div>
+
+  <div class="main">
+    <div class="queue-panel" data-reveal>
+      <h3>Review Queue</h3>
+
+      <!-- Card 1: Closing Disclosure -->
+      <div class="review-card" id="card-1">
+        <div class="card-head">
+          <div class="card-title">Closing Disclosure</div>
+          <div class="card-meta">2 versions found</div>
+        </div>
+        <div class="radio-group">
+          <div class="radio-opt" id="cd-v2" onclick="selectRadio('cd','v2')">
+            <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+            <div class="radio-label">DISC-CD-V2 &mdash; revised (not final)</div>
+          </div>
+          <div class="radio-opt selected" id="cd-v3" onclick="selectRadio('cd','v3')">
+            <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+            <div class="radio-label">DISC-CD-V3 &mdash; final signed</div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-primary" id="btn-cd" onclick="confirmCard('cd')">Mark as Used in Closing</button>
+          <button class="btn-secondary">Archive V2</button>
+        </div>
+        <div class="confirm-msg" id="msg-cd">&#10003; Closing Disclosure V3 confirmed as closing record</div>
+      </div>
+
+      <!-- Card 2: Note -->
+      <div class="review-card" id="card-2">
+        <div class="card-head">
+          <div class="card-title">Note</div>
+          <div class="card-meta">2 versions found</div>
+        </div>
+        <div class="radio-group">
+          <div class="radio-opt" id="note-v1" onclick="selectRadio('note','v1')">
+            <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+            <div class="radio-label">NOTE-V1 &mdash; unsigned</div>
+          </div>
+          <div class="radio-opt selected" id="note-v2" onclick="selectRadio('note','v2')">
+            <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+            <div class="radio-label">NOTE-V2 &mdash; signed final</div>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-primary" id="btn-note" onclick="confirmCard('note')">Mark as Used in Closing</button>
+          <button class="btn-secondary">Supersede Unsigned</button>
+        </div>
+        <div class="confirm-msg" id="msg-note">&#10003; Signed Note V2 confirmed as closing record</div>
+      </div>
+    </div>
+
+    <div class="board-panel" data-reveal id="board-panel">
+      <h3>Status Board</h3>
+      <div class="board-cols">
+        <div class="board-col board-col-green">
+          <div class="col-hd col-hd-green">Used in Closing</div>
+          <div class="board-items">
+            <div class="board-doc" id="bd-cd" data-group="used">Closing Disclosure</div>
+            <div class="board-doc" id="bd-note" data-group="used">Note</div>
+            <div class="board-doc" id="bd-payoff" data-group="used">Payoff Letter</div>
+            <div class="board-doc" id="bd-title" data-group="used">Title Commitment</div>
+          </div>
+        </div>
+        <div class="board-col board-col-neutral">
+          <div class="col-hd col-hd-neutral">Not Used / Ancillary</div>
+          <div class="board-items">
+            <div class="board-doc" id="bd-escrow" data-group="anc">Escrow Worksheet</div>
+            <div class="board-doc" id="bd-addendum" data-group="anc">Misc Addendum</div>
+            <div class="board-doc" id="bd-compliance" data-group="anc">Compliance Notice</div>
+          </div>
+        </div>
+        <div class="board-col board-col-amber">
+          <div class="col-hd col-hd-amber">Needs Review</div>
+          <div class="board-items">
+            <div class="board-doc" id="bd-wiring" data-group="review">Wiring Instructions OLD</div>
+            <div class="board-doc" id="bd-scan" data-group="review">Random Scan 003</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  revealEls.forEach(function(el, i){
+    el.style.animationDelay = (0.1 + i * 0.13) + 's';
+  });
+  function revealDelay(idx){ return (0.1 + idx * 0.13) * 1000; }
+  var REVEAL_DUR = 550;
+
+  // Stagger board docs after board panel reveals (index 2)
+  var boardStart = revealDelay(2) + REVEAL_DUR + 100;
+  var boardDocs = document.querySelectorAll('.board-doc');
+  boardDocs.forEach(function(doc, i){
+    setTimeout(function(){ doc.classList.add('shown'); }, boardStart + i * 80);
+  });
+
+  // Radio selection
+  window.selectRadio = function(group, version){
+    var opts = document.querySelectorAll('[id^="' + group + '-"]');
+    opts.forEach(function(opt){ opt.classList.remove('selected'); });
+    document.getElementById(group + '-' + version).classList.add('selected');
+  };
+
+  var confirmed = {cd: false, note: false};
+
+  window.confirmCard = function(group){
+    if(confirmed[group]) return;
+    confirmed[group] = true;
+
+    var card = document.getElementById('card-' + (group === 'cd' ? '1' : '2'));
+    var btn = document.getElementById('btn-' + group);
+    var msg = document.getElementById('msg-' + group);
+    var boardDoc = document.getElementById('bd-' + (group === 'cd' ? 'cd' : 'note'));
+
+    card.classList.add('confirmed');
+    btn.textContent = '\u2713 Confirmed';
+    btn.classList.add('confirmed');
+    btn.disabled = true;
+    msg.classList.add('shown');
+
+    // Highlight matching board entry
+    setTimeout(function(){
+      boardDoc.classList.add('highlight');
+    }, 300);
+  };
+
+  // Auto-demo: confirm both cards sequentially if not clicked
+  var autoDemoFired = false;
+  setTimeout(function(){
+    if(!confirmed.cd && !autoDemoFired){
+      autoDemoFired = true;
+      confirmCard('cd');
+      setTimeout(function(){ confirmCard('note'); }, 900);
+    }
+  }, 2800);
+})();
+</script>
+</body>
+</html>

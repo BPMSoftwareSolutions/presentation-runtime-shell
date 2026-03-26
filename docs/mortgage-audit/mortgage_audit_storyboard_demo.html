@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mortgage Audit Storyboard Demo</title>
+      <style>
+      :root {
+        --bg: #f5f7fb;
+        --surface: #ffffff;
+        --surface-alt: #f8fafc;
+        --text: #162033;
+        --muted: #5b667a;
+        --line: #d9e1ee;
+        --primary: #2f5bea;
+        --primary-soft: #eaf0ff;
+        --success: #18794e;
+        --success-soft: #eaf7f0;
+        --warn: #9a6700;
+        --warn-soft: #fff5db;
+        --danger: #b42318;
+        --danger-soft: #feeceb;
+        --shadow: 0 18px 40px rgba(18, 31, 53, 0.08);
+        --radius-xl: 28px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+        --max-width: 1240px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(180deg, #f7f9fc 0%, #eef3fb 100%);
+        color: var(--text);
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.85rem 1.2rem;
+        background: var(--primary);
+        color: #fff;
+        transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+        box-shadow: 0 10px 24px rgba(47, 91, 234, 0.22);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(47, 91, 234, 0.28);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      main {
+        width: min(var(--max-width), calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 2rem 0 3rem;
+      }
+
+      #demo-header {
+        display: grid;
+        gap: 0.9rem;
+        padding: 2rem;
+        margin-bottom: 1.25rem;
+        border-radius: var(--radius-xl);
+        background: radial-gradient(circle at top left, #f7f9ff 0%, #ffffff 55%, #f5f8ff 100%);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(217, 225, 238, 0.75);
+      }
+
+      #demo-header h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+        max-width: 14ch;
+      }
+
+      #demo-header p {
+        margin: 0;
+        max-width: 68ch;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      #scene-navigation {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-bottom: 1.25rem;
+      }
+
+      #scene-navigation button {
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--text);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+
+      #scene-navigation button:hover {
+        box-shadow: 0 10px 22px rgba(18, 31, 53, 0.08);
+      }
+
+      #demo-shell {
+        position: relative;
+      }
+
+      .scene {
+        display: grid;
+        gap: 1.25rem;
+        padding: 2rem;
+        border-radius: var(--radius-xl);
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(217, 225, 238, 0.88);
+        box-shadow: var(--shadow);
+      }
+
+      .scene[hidden] {
+        display: none;
+      }
+
+      .scene > header {
+        display: grid;
+        gap: 0.4rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .scene > header p {
+        margin: 0;
+        color: var(--primary);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.8rem;
+      }
+
+      .scene > header h2 {
+        margin: 0;
+        font-size: clamp(1.6rem, 3vw, 2.5rem);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .scene > header > p:last-child {
+        color: var(--muted);
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      .scene section,
+      .scene article.review-card,
+      .scene article > article {
+        background: var(--surface-alt);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+      }
+
+      h3,
+      h4 {
+        margin-top: 0;
+      }
+
+      h3 {
+        margin-bottom: 0.9rem;
+        font-size: 1.1rem;
+      }
+
+      h4 {
+        margin-bottom: 0.65rem;
+        font-size: 1rem;
+      }
+
+      ul,
+      ol,
+      dl,
+      fieldset {
+        margin: 0;
+      }
+
+      ul,
+      ol {
+        padding-left: 1.2rem;
+      }
+
+      li + li {
+        margin-top: 0.45rem;
+      }
+
+      .loan-folder {
+        background: #fff;
+        border: 1px dashed #c4cee0;
+        border-radius: var(--radius-md);
+        padding: 1rem;
+      }
+
+      .loan-folder h4 {
+        margin-bottom: 0.8rem;
+      }
+
+      #scene-2,
+      #scene-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #scene-2 > header,
+      #scene-5 > header {
+        grid-column: 1 / -1;
+      }
+
+      #scene-3 .review-card + .review-card,
+      #scene-5 #scene-5-report-title,
+      #scene-5 #scene-5-filters-title,
+      #scene-5 #scene-5-questions-title,
+      #scene-5 #scene-5-timeline-title {
+        margin-top: 0;
+      }
+
+      form {
+        display: grid;
+        gap: 1rem;
+      }
+
+      fieldset {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        display: grid;
+        gap: 0.75rem;
+        background: #fff;
+      }
+
+      legend {
+        padding: 0 0.35rem;
+        font-weight: 700;
+      }
+
+      label {
+        display: grid;
+        gap: 0.35rem;
+        color: var(--text);
+      }
+
+      input[type="radio"] {
+        margin-right: 0.55rem;
+      }
+
+      .review-card form > div,
+      .quick-actions,
+      #scene-navigation {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .review-card button:nth-child(2),
+      .quick-actions button,
+      #scene-navigation button,
+      #audit-filters select {
+        background: #fff;
+        color: var(--text);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+
+      .status-board,
+      .routing-layout {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .status-board section,
+      .routing-layout section,
+      #scene-5-report-title + article,
+      #scene-5-report-title + article + article,
+      #scene-5-report-title + article + article + article,
+      #scene-5-report-title + article + article + article + article {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+      }
+
+      #scene-4-actions-title + button,
+      #generate-audit-report {
+        font-size: 1rem;
+        padding-inline: 1.4rem;
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.85rem;
+      }
+
+      dl div {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+      }
+
+      dt {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-bottom: 0.35rem;
+      }
+
+      dd {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      #scene-5-summary-title + dl div:last-child {
+        background: var(--success-soft);
+        border-color: #c5e7d3;
+      }
+
+      #audit-filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      select {
+        width: 100%;
+        border-radius: 12px;
+        padding: 0.8rem 0.9rem;
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--text);
+      }
+
+      #scene-5 section[aria-labelledby="scene-5-report-title"] {
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      #scene-5 section[aria-labelledby="scene-5-report-title"] article:nth-of-type(1) {
+        background: var(--success-soft);
+        border-color: #c5e7d3;
+      }
+
+      #scene-5 section[aria-labelledby="scene-5-report-title"] article:nth-of-type(2) {
+        background: #f8f9fc;
+      }
+
+      #scene-5 section[aria-labelledby="scene-5-report-title"] article:nth-of-type(3) {
+        background: var(--primary-soft);
+        border-color: #d8e2ff;
+      }
+
+      #scene-5 section[aria-labelledby="scene-5-report-title"] article:nth-of-type(4) {
+        background: var(--warn-soft);
+        border-color: #f4df9c;
+      }
+
+      #demo-footer {
+        margin-top: 1.25rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-lg);
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        box-shadow: var(--shadow);
+      }
+
+      @media (max-width: 900px) {
+        #scene-2,
+        #scene-5,
+        .status-board,
+        .routing-layout,
+        #audit-filters,
+        dl {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          font-size: 15px;
+        }
+
+        main {
+          width: min(100% - 1rem, var(--max-width));
+          padding-top: 1rem;
+        }
+
+        #demo-header,
+        .scene {
+          padding: 1.2rem;
+        }
+
+        button {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .review-card form > div,
+        .quick-actions,
+        #scene-navigation {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="storyboard-demo">
+      <header id="demo-header">
+        <h1>From Messy Loan File to Audit-Ready Closing Package</h1>
+        <p>
+          Interactive storyboard demo for mortgage closing document organization,
+          separation, and audit readiness.
+        </p>
+      </header>
+
+      <nav id="scene-navigation" aria-label="Storyboard scenes">
+        <button type="button" data-target="scene-1">1. Messy Intake</button>
+        <button type="button" data-target="scene-2">2. Identity + Classification</button>
+        <button type="button" data-target="scene-3">3. Used in Closing?</button>
+        <button type="button" data-target="scene-4">4. Separation of Record</button>
+        <button type="button" data-target="scene-5">5. Audit Report</button>
+      </nav>
+
+      <section id="demo-shell" aria-label="Storyboard presentation area">
+        <article id="scene-1" class="scene" data-scene="1">
+          <header>
+            <p>Scene 1</p>
+            <h2>Messy Loan File Intake</h2>
+            <p>
+              Everything is in one place, but nothing is clearly separated.
+            </p>
+          </header>
+
+          <section aria-labelledby="scene-1-folder-title">
+            <h3 id="scene-1-folder-title">Incoming Loan Folder</h3>
+            <div class="loan-folder">
+              <h4>Loan #48291</h4>
+              <ul>
+                <li>Closing Disclosure FINAL.pdf</li>
+                <li>Closing Disclosure revised.pdf</li>
+                <li>Borrower ID.pdf</li>
+                <li>Note_signed.pdf</li>
+                <li>Note_unsigned.pdf</li>
+                <li>Title Commitment.pdf</li>
+                <li>Wiring Instructions OLD.pdf</li>
+                <li>Payoff Letter.pdf</li>
+                <li>Escrow Worksheet.pdf</li>
+                <li>Misc Addendum draft.pdf</li>
+                <li>Compliance Notice.pdf</li>
+                <li>Random Scan 003.pdf</li>
+              </ul>
+            </div>
+          </section>
+
+          <section aria-labelledby="scene-1-risk-title">
+            <h3 id="scene-1-risk-title">Audit / Risk Question</h3>
+            <ul>
+              <li>Which documents were actually used to close?</li>
+              <li>Which documents were inactive or ancillary?</li>
+              <li>Which versions were final?</li>
+              <li>Can this be proven quickly during an audit?</li>
+            </ul>
+          </section>
+        </article>
+
+        <article id="scene-2" class="scene" data-scene="2" hidden>
+          <header>
+            <p>Scene 2</p>
+            <h2>Document Identity and Classification</h2>
+            <p>
+              The system assigns identity, recognizes type, and groups likely duplicates.
+            </p>
+          </header>
+
+          <section aria-labelledby="scene-2-flow-title">
+            <h3 id="scene-2-flow-title">Processing Flow</h3>
+            <ol>
+              <li>Ingest uploaded loan file documents</li>
+              <li>Classify document type</li>
+              <li>Assign document IDs</li>
+              <li>Group duplicates and versions</li>
+              <li>Prepare review-ready statuses</li>
+            </ol>
+          </section>
+
+          <section aria-labelledby="scene-2-tagged-title">
+            <h3 id="scene-2-tagged-title">Tagged Document Stack</h3>
+            <ul>
+              <li><strong>DISC-CD-V2</strong> — Closing Disclosure revised.pdf — Disclosure</li>
+              <li><strong>DISC-CD-V3</strong> — Closing Disclosure FINAL.pdf — Disclosure</li>
+              <li><strong>NOTE-V1</strong> — Note_unsigned.pdf — Note</li>
+              <li><strong>NOTE-V2</strong> — Note_signed.pdf — Note</li>
+              <li><strong>TITLE-01</strong> — Title Commitment.pdf — Title</li>
+              <li><strong>PAYOFF-01</strong> — Payoff Letter.pdf — Payoff</li>
+              <li><strong>ANC-ESC-01</strong> — Escrow Worksheet.pdf — Ancillary</li>
+              <li><strong>ANC-MISC-01</strong> — Misc Addendum draft.pdf — Ancillary</li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="scene-2-groups-title">
+            <h3 id="scene-2-groups-title">Duplicate / Version Groups</h3>
+            <ul>
+              <li>Closing Disclosure — 2 versions found</li>
+              <li>Note — signed and unsigned versions found</li>
+              <li>Wiring Instructions — possible outdated version detected</li>
+            </ul>
+          </section>
+        </article>
+
+        <article id="scene-3" class="scene" data-scene="3" hidden>
+          <header>
+            <p>Scene 3</p>
+            <h2>Used in Closing?</h2>
+            <p>
+              The reviewer confirms what actually mattered in the closing.
+            </p>
+          </header>
+
+          <section aria-labelledby="scene-3-review-title">
+            <h3 id="scene-3-review-title">Review Queue</h3>
+
+            <article class="review-card">
+              <h4>Closing Disclosure</h4>
+              <p>Versions found: 2</p>
+              <form>
+                <fieldset>
+                  <legend>Select the version used in closing</legend>
+                  <label>
+                    <input type="radio" name="closing-disclosure" />
+                    V2 — revised, older, not final
+                  </label>
+                  <label>
+                    <input type="radio" name="closing-disclosure" checked />
+                    V3 — final, signed, used in closing
+                  </label>
+                </fieldset>
+                <div>
+                  <button type="button">Mark as Used in Closing</button>
+                  <button type="button">Archive Other Version</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="review-card">
+              <h4>Note</h4>
+              <p>Versions found: 2</p>
+              <form>
+                <fieldset>
+                  <legend>Select the version used in closing</legend>
+                  <label>
+                    <input type="radio" name="note-version" />
+                    V1 — unsigned
+                  </label>
+                  <label>
+                    <input type="radio" name="note-version" checked />
+                    V2 — signed, final
+                  </label>
+                </fieldset>
+                <div>
+                  <button type="button">Mark as Used in Closing</button>
+                  <button type="button">Supersede Unsigned</button>
+                </div>
+              </form>
+            </article>
+          </section>
+
+          <section aria-labelledby="scene-3-board-title">
+            <h3 id="scene-3-board-title">Status Board</h3>
+            <div class="status-board">
+              <section>
+                <h4>Used in Closing</h4>
+                <ul>
+                  <li>Closing Disclosure</li>
+                  <li>Note</li>
+                  <li>Payoff Letter</li>
+                  <li>Title Commitment</li>
+                </ul>
+              </section>
+              <section>
+                <h4>Not Used / Ancillary</h4>
+                <ul>
+                  <li>Escrow Worksheet</li>
+                  <li>Misc Addendum draft</li>
+                  <li>Compliance Notice</li>
+                </ul>
+              </section>
+              <section>
+                <h4>Needs Review</h4>
+                <ul>
+                  <li>Wiring Instructions OLD</li>
+                  <li>Random Scan 003</li>
+                </ul>
+              </section>
+            </div>
+          </section>
+        </article>
+
+        <article id="scene-4" class="scene" data-scene="4" hidden>
+          <header>
+            <p>Scene 4</p>
+            <h2>Separation of Record</h2>
+            <p>
+              The system produces a clean closing package and a separate inactive archive.
+            </p>
+          </header>
+
+          <section aria-labelledby="scene-4-routing-title">
+            <h3 id="scene-4-routing-title">Finalized File Routing</h3>
+            <div class="routing-layout">
+              <section>
+                <h4>Closing Package</h4>
+                <ul>
+                  <li>Closing Disclosure</li>
+                  <li>Signed Note</li>
+                  <li>Payoff Letter</li>
+                  <li>Title Commitment</li>
+                </ul>
+              </section>
+
+              <section>
+                <h4>Inactive / Ancillary Archive</h4>
+                <ul>
+                  <li>Escrow Worksheet</li>
+                  <li>Draft Addendum</li>
+                  <li>Compliance Notice</li>
+                </ul>
+              </section>
+
+              <section>
+                <h4>Exceptions / Policy Review</h4>
+                <ul>
+                  <li>Wiring Instructions OLD</li>
+                  <li>Random Scan 003</li>
+                </ul>
+              </section>
+            </div>
+          </section>
+
+          <section aria-labelledby="scene-4-actions-title">
+            <h3 id="scene-4-actions-title">Primary Action</h3>
+            <button type="button" id="generate-audit-report">
+              Generate Audit Report
+            </button>
+          </section>
+        </article>
+
+        <article id="scene-5" class="scene" data-scene="5" hidden>
+          <header>
+            <p>Scene 5</p>
+            <h2>Audit-Ready in One Click</h2>
+            <p>
+              At any moment, the file can explain what was used, what was excluded, and why.
+            </p>
+          </header>
+
+          <section aria-labelledby="scene-5-summary-title">
+            <h3 id="scene-5-summary-title">Loan #48291 Audit Summary</h3>
+            <dl>
+              <div>
+                <dt>Total documents received</dt>
+                <dd>12</dd>
+              </div>
+              <div>
+                <dt>Used in closing</dt>
+                <dd>4</dd>
+              </div>
+              <div>
+                <dt>Archived as inactive / ancillary</dt>
+                <dd>3</dd>
+              </div>
+              <div>
+                <dt>Superseded / duplicate</dt>
+                <dd>3</dd>
+              </div>
+              <div>
+                <dt>Exceptions reviewed</dt>
+                <dd>2</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>Audit-Ready</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section aria-labelledby="scene-5-report-title">
+            <h3 id="scene-5-report-title">Audit Report</h3>
+            <article>
+              <h4>Closing Documents (Used)</h4>
+              <ul>
+                <li>Closing Disclosure (final signed)</li>
+                <li>Note (signed)</li>
+                <li>Payoff Letter</li>
+                <li>Title Commitment</li>
+              </ul>
+            </article>
+
+            <article>
+              <h4>Excluded / Inactive</h4>
+              <ul>
+                <li>Escrow Worksheet — ancillary</li>
+                <li>Addendum draft — not used</li>
+                <li>Compliance Notice — informational</li>
+              </ul>
+            </article>
+
+            <article>
+              <h4>Superseded</h4>
+              <ul>
+                <li>Closing Disclosure V2 — replaced by final</li>
+                <li>Unsigned Note — replaced by signed version</li>
+              </ul>
+            </article>
+
+            <article>
+              <h4>Exceptions Reviewed</h4>
+              <ul>
+                <li>Wiring Instructions OLD — flagged and reviewed</li>
+              </ul>
+            </article>
+          </section>
+
+          <section aria-labelledby="scene-5-filters-title">
+            <h3 id="scene-5-filters-title">Optional Drill-Down Filters</h3>
+            <form id="audit-filters">
+              <label>
+                Document Type
+                <select name="document-type">
+                  <option value="all">All</option>
+                  <option value="disclosure">Disclosure</option>
+                  <option value="note">Note</option>
+                  <option value="title">Title</option>
+                  <option value="payoff">Payoff</option>
+                  <option value="ancillary">Ancillary</option>
+                </select>
+              </label>
+
+              <label>
+                Status
+                <select name="status">
+                  <option value="all">All</option>
+                  <option value="used">Used in Closing</option>
+                  <option value="inactive">Inactive / Ancillary</option>
+                  <option value="superseded">Superseded</option>
+                  <option value="exceptions">Exceptions</option>
+                </select>
+              </label>
+
+              <label>
+                Date
+                <select name="date-range">
+                  <option value="all">All Dates</option>
+                  <option value="intake">Intake Date</option>
+                  <option value="review">Review Actions</option>
+                  <option value="finalized">Finalized Date</option>
+                </select>
+              </label>
+
+              <label>
+                Reviewer
+                <select name="reviewer">
+                  <option value="all">All Reviewers</option>
+                  <option value="roni">Roni</option>
+                  <option value="processor">Processor</option>
+                  <option value="system">System</option>
+                </select>
+              </label>
+            </form>
+          </section>
+
+          <section aria-labelledby="scene-5-questions-title">
+            <h3 id="scene-5-questions-title">Quick Audit Questions</h3>
+            <div class="quick-actions">
+              <button type="button">Show Excluded Documents</button>
+              <button type="button">Show Final Signed Versions</button>
+              <button type="button">Show All Disclosures</button>
+              <button type="button">Show Decision History</button>
+            </div>
+          </section>
+
+          <section aria-labelledby="scene-5-timeline-title">
+            <h3 id="scene-5-timeline-title">Timeline / Chain of Custody</h3>
+            <ol>
+              <li>09:14 AM — Documents ingested</li>
+              <li>09:15 AM — System classified documents</li>
+              <li>09:17 AM — Duplicate groups created</li>
+              <li>09:21 AM — Closing Disclosure V3 marked as final</li>
+              <li>09:22 AM — Unsigned Note marked superseded</li>
+              <li>09:24 AM — Ancillary documents separated</li>
+              <li>09:25 AM — Audit-ready closing package generated</li>
+            </ol>
+          </section>
+        </article>
+      </section>
+
+      <footer id="demo-footer">
+        <p>
+          Demo focus: classify, separate, verify, and prove what was used in closing.
+        </p>
+      </footer>
+    </main>
+
+    <script>
+      const sceneButtons = document.querySelectorAll('[data-target]');
+      const scenes = document.querySelectorAll('.scene');
+
+      function showScene(sceneId) {
+        scenes.forEach((scene) => {
+          scene.hidden = scene.id !== sceneId;
+        });
+      }
+
+      sceneButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          showScene(button.dataset.target);
+        });
+      });
+
+      const generateAuditReportButton = document.getElementById('generate-audit-report');
+      if (generateAuditReportButton) {
+        generateAuditReportButton.addEventListener('click', () => {
+          showScene('scene-5');
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -4,5 +4,6 @@
   "./src/contracts/finance-demo-deck.json",
   "./src/contracts/iep-scheduling-demo-v2.json",
   "./src/contracts/resume-demo-deck.json",
-  "./src/contracts/fleetops-demo.json"
+  "./src/contracts/fleetops-demo.json",
+  "./src/contracts/mortgage-audit-demo.json"
 ]

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Messy Loan File Intake</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--violet:#a78bfa}
+.scene{height:100%;padding:32px 44px;position:relative;display:flex;flex-direction:column;gap:20px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.orb1{position:absolute;width:500px;height:500px;right:-100px;top:-160px;border-radius:50%;filter:blur(120px);background:radial-gradient(circle,rgba(14,165,233,.12),transparent 70%)}
+.orb2{position:absolute;width:360px;height:360px;left:-80px;bottom:-80px;border-radius:50%;filter:blur(100px);background:radial-gradient(circle,rgba(239,68,68,.08),transparent 70%)}
+
+/* Head */
+.head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex:none}
+.head-title{font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.loan-badge{padding:8px 18px;border-radius:999px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#7dd3fc;font-size:13px;letter-spacing:.1em;font-weight:600}
+
+/* Main 2-col */
+.main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1.55fr 1fr;gap:20px;min-height:0}
+
+/* Folder panel */
+.folder-panel{border:1px dashed rgba(14,165,233,.35);border-radius:24px;background:rgba(14,165,233,.04);padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.panel-head{display:flex;justify-content:space-between;align-items:center}
+.panel-head h3{font-size:15px;color:#bae6fd;letter-spacing:.08em;text-transform:uppercase}
+.doc-count{font-size:12px;color:var(--muted);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border)}
+.docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+/* Doc row */
+.doc-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);opacity:0;transform:translateY(8px);transition:opacity .35s ease,transform .35s ease}
+.doc-row.shown{opacity:1;transform:none}
+.pdf-icon{flex:none;width:26px;height:26px;border-radius:7px;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.2);display:grid;place-items:center;font-size:11px;color:#7dd3fc;font-weight:700}
+.doc-name{flex:1;font-size:11.5px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{flex:none;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:999px;text-transform:uppercase}
+.tag-green{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
+.tag-amber{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#fcd34d}
+.tag-red{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+.tag-neutral{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.2);color:#94a3b8}
+
+/* Risk panel */
+.risk-panel{border:1px solid rgba(239,68,68,.28);border-radius:24px;background:rgba(239,68,68,.04);padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.risk-panel h3{font-size:15px;color:#fca5a5;letter-spacing:.08em;text-transform:uppercase}
+.risk-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.risk-items{display:flex;flex-direction:column;gap:10px}
+.risk-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.16);opacity:0;transform:translateX(10px);transition:opacity .35s ease,transform .35s ease}
+.risk-item.shown{opacity:1;transform:none}
+.risk-icon{flex:none;width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);display:grid;place-items:center;font-size:12px;color:#fca5a5;font-weight:700}
+.risk-text{font-size:13px;color:#fecaca;line-height:1.45}
+
+/* Footer */
+.footer{position:relative;z-index:1;padding:16px 22px;border:1px solid rgba(245,158,11,.28);border-radius:18px;background:rgba(245,158,11,.07);display:flex;justify-content:space-between;align-items:center;flex:none}
+.footer-main{font-size:16px;color:#fde68a;font-weight:600}
+.footer-muted{font-size:14px;color:var(--muted)}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb1"></div>
+  <div class="orb2"></div>
+
+  <div class="head" data-reveal>
+    <div class="head-title">Messy Loan File Intake</div>
+    <div class="loan-badge">Loan #48291</div>
+  </div>
+
+  <div class="main">
+    <div class="folder-panel" data-reveal id="folder-panel">
+      <div class="panel-head">
+        <h3>Loan Folder — Incoming Documents</h3>
+        <div class="doc-count">12 files</div>
+      </div>
+      <div class="docs-grid" id="docs-grid">
+        <div class="doc-row" data-doc="0"><div class="pdf-icon">PDF</div><div class="doc-name">Closing Disclosure FINAL.pdf</div><div class="tag tag-green">FINAL</div></div>
+        <div class="doc-row" data-doc="1"><div class="pdf-icon">PDF</div><div class="doc-name">Closing Disclosure revised.pdf</div><div class="tag tag-amber">V2</div></div>
+        <div class="doc-row" data-doc="2"><div class="pdf-icon">PDF</div><div class="doc-name">Borrower ID.pdf</div><div class="tag tag-neutral">—</div></div>
+        <div class="doc-row" data-doc="3"><div class="pdf-icon">PDF</div><div class="doc-name">Note_signed.pdf</div><div class="tag tag-green">SIGNED</div></div>
+        <div class="doc-row" data-doc="4"><div class="pdf-icon">PDF</div><div class="doc-name">Note_unsigned.pdf</div><div class="tag tag-red">UNSIGNED</div></div>
+        <div class="doc-row" data-doc="5"><div class="pdf-icon">PDF</div><div class="doc-name">Title Commitment.pdf</div><div class="tag tag-neutral">—</div></div>
+        <div class="doc-row" data-doc="6"><div class="pdf-icon">PDF</div><div class="doc-name">Wiring Instructions OLD.pdf</div><div class="tag tag-red">OLD</div></div>
+        <div class="doc-row" data-doc="7"><div class="pdf-icon">PDF</div><div class="doc-name">Payoff Letter.pdf</div><div class="tag tag-neutral">—</div></div>
+        <div class="doc-row" data-doc="8"><div class="pdf-icon">PDF</div><div class="doc-name">Escrow Worksheet.pdf</div><div class="tag tag-neutral">—</div></div>
+        <div class="doc-row" data-doc="9"><div class="pdf-icon">PDF</div><div class="doc-name">Misc Addendum draft.pdf</div><div class="tag tag-amber">DRAFT</div></div>
+        <div class="doc-row" data-doc="10"><div class="pdf-icon">PDF</div><div class="doc-name">Compliance Notice.pdf</div><div class="tag tag-neutral">—</div></div>
+        <div class="doc-row" data-doc="11"><div class="pdf-icon">PDF</div><div class="doc-name">Random Scan 003.pdf</div><div class="tag tag-amber">?</div></div>
+      </div>
+    </div>
+
+    <div class="risk-panel" data-reveal id="risk-panel">
+      <div>
+        <h3>Auditor Concerns</h3>
+        <div class="risk-sub">What an auditor sees without a governed process</div>
+      </div>
+      <div class="risk-items">
+        <div class="risk-item" data-risk="0">
+          <div class="risk-icon">!</div>
+          <div class="risk-text">Which version of the Closing Disclosure was actually used at closing?</div>
+        </div>
+        <div class="risk-item" data-risk="1">
+          <div class="risk-icon">!</div>
+          <div class="risk-text">Was the signed Note the version executed at closing, or the unsigned draft?</div>
+        </div>
+        <div class="risk-item" data-risk="2">
+          <div class="risk-icon">!</div>
+          <div class="risk-text">Wiring instructions flagged as OLD — were updated instructions used?</div>
+        </div>
+        <div class="risk-item" data-risk="3">
+          <div class="risk-icon">!</div>
+          <div class="risk-text">Random Scan 003 has no classification — is this document relevant to the loan?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer" data-reveal>
+    <div class="footer-main">Everything is in one place.</div>
+    <div class="footer-muted">But nothing is clearly separated.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  revealEls.forEach(function(el, i){
+    el.style.animationDelay = (0.1 + i * 0.13) + 's';
+  });
+
+  function revealDelay(idx){ return (0.1 + idx * 0.13) * 1000; }
+  var REVEAL_DUR = 550;
+
+  // Stagger doc rows after folder panel reveals (index 1)
+  var folderRevealTime = revealDelay(1) + REVEAL_DUR;
+  var docRows = document.querySelectorAll('.doc-row');
+  docRows.forEach(function(row, i){
+    setTimeout(function(){ row.classList.add('shown'); }, folderRevealTime + i * 65);
+  });
+
+  // Stagger risk items after risk panel reveals (index 2)
+  var riskRevealTime = revealDelay(2) + REVEAL_DUR;
+  var riskItems = document.querySelectorAll('.risk-item');
+  riskItems.forEach(function(item, i){
+    setTimeout(function(){ item.classList.add('shown'); }, riskRevealTime + i * 130);
+  });
+})();
+</script>
+</body>
+</html>

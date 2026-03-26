@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Separation of Record</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444}
+.scene{height:100%;padding:32px 44px;position:relative;display:flex;flex-direction:column;gap:20px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.orb1{position:absolute;width:440px;height:440px;left:50%;top:-120px;transform:translateX(-50%);border-radius:50%;filter:blur(130px);background:radial-gradient(circle,rgba(14,165,233,.1),transparent 70%)}
+
+.head{position:relative;z-index:1;display:flex;flex-direction:column;gap:4px;flex:none}
+.head-title{font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.head-sub{font-size:13px;color:var(--muted)}
+
+.main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;min-height:0}
+
+/* Bucket columns */
+.bucket{border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.bucket-green{border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.06)}
+.bucket-neutral{border:1px solid rgba(148,163,184,.18);background:rgba(255,255,255,.03)}
+.bucket-amber{border:1px solid rgba(245,158,11,.28);background:rgba(245,158,11,.05)}
+.bucket-head{display:flex;flex-direction:column;gap:6px}
+.bucket-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.bucket-label-green{color:#6ee7b7}
+.bucket-label-neutral{color:var(--muted)}
+.bucket-label-amber{color:#fcd34d}
+.bucket-name{font-size:14px;font-weight:700;color:#e2e8f0;line-height:1.3}
+.count-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-top:4px}
+.count-green{background:rgba(16,185,129,.18);color:#6ee7b7}
+.count-neutral{background:rgba(148,163,184,.15);color:#94a3b8}
+.count-amber{background:rgba(245,158,11,.15);color:#fcd34d}
+.divider{height:1px;background:rgba(255,255,255,.07)}
+.bucket-docs{display:flex;flex-direction:column;gap:8px}
+.bucket-doc{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}
+.bucket-doc.shown{opacity:1;transform:none}
+.doc-marker{flex:none;font-size:14px;width:22px;text-align:center}
+.doc-label{font-size:13px;color:#cbd5e1;line-height:1.3}
+
+/* CTA footer */
+.cta-area{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;flex:none;padding-bottom:4px}
+.cta-label{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.cta-btn{padding:12px 32px;border-radius:999px;background:var(--sky);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.06em;transition:all .3s ease;box-shadow:0 4px 20px rgba(14,165,233,.25)}
+.cta-btn:hover{background:#38bdf8;box-shadow:0 6px 28px rgba(14,165,233,.4)}
+.cta-btn.generated{background:var(--green);box-shadow:0 4px 20px rgba(16,185,129,.3)}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb1"></div>
+
+  <div class="head" data-reveal>
+    <div class="head-title">Separation of Record</div>
+    <div class="head-sub">Every document has been routed to its correct destination.</div>
+  </div>
+
+  <div class="main">
+    <!-- Bucket 1: Closing Package -->
+    <div class="bucket bucket-green" data-reveal id="bucket-1">
+      <div class="bucket-head">
+        <div class="bucket-label bucket-label-green">Closing Package</div>
+        <div class="bucket-name">Used in Closing</div>
+        <div class="count-badge count-green">4 documents</div>
+      </div>
+      <div class="divider"></div>
+      <div class="bucket-docs">
+        <div class="bucket-doc" data-b="1" data-i="0"><div class="doc-marker">&#10003;</div><div class="doc-label">Closing Disclosure (final)</div></div>
+        <div class="bucket-doc" data-b="1" data-i="1"><div class="doc-marker">&#10003;</div><div class="doc-label">Signed Note</div></div>
+        <div class="bucket-doc" data-b="1" data-i="2"><div class="doc-marker">&#10003;</div><div class="doc-label">Payoff Letter</div></div>
+        <div class="bucket-doc" data-b="1" data-i="3"><div class="doc-marker">&#10003;</div><div class="doc-label">Title Commitment</div></div>
+      </div>
+    </div>
+
+    <!-- Bucket 2: Inactive Archive -->
+    <div class="bucket bucket-neutral" data-reveal id="bucket-2">
+      <div class="bucket-head">
+        <div class="bucket-label bucket-label-neutral">Inactive Archive</div>
+        <div class="bucket-name">Not Used</div>
+        <div class="count-badge count-neutral">3 documents</div>
+      </div>
+      <div class="divider"></div>
+      <div class="bucket-docs">
+        <div class="bucket-doc" data-b="2" data-i="0"><div class="doc-marker">&#128193;</div><div class="doc-label">Escrow Worksheet</div></div>
+        <div class="bucket-doc" data-b="2" data-i="1"><div class="doc-marker">&#128193;</div><div class="doc-label">Draft Addendum</div></div>
+        <div class="bucket-doc" data-b="2" data-i="2"><div class="doc-marker">&#128193;</div><div class="doc-label">Compliance Notice</div></div>
+      </div>
+    </div>
+
+    <!-- Bucket 3: Exceptions -->
+    <div class="bucket bucket-amber" data-reveal id="bucket-3">
+      <div class="bucket-head">
+        <div class="bucket-label bucket-label-amber">Exceptions</div>
+        <div class="bucket-name">Policy Review</div>
+        <div class="count-badge count-amber">2 documents</div>
+      </div>
+      <div class="divider"></div>
+      <div class="bucket-docs">
+        <div class="bucket-doc" data-b="3" data-i="0"><div class="doc-marker">&#9888;</div><div class="doc-label">Wiring Instructions OLD</div></div>
+        <div class="bucket-doc" data-b="3" data-i="1"><div class="doc-marker">&#9888;</div><div class="doc-label">Random Scan 003</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-area" data-reveal>
+    <div class="cta-label">Closing package is clean and verified</div>
+    <button class="cta-btn" id="cta-btn" onclick="generateReport()">Generate Audit Report &rarr;</button>
+  </div>
+</div>
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  revealEls.forEach(function(el, i){
+    el.style.animationDelay = (0.1 + i * 0.13) + 's';
+  });
+  function revealDelay(idx){ return (0.1 + idx * 0.13) * 1000; }
+  var REVEAL_DUR = 550;
+
+  // Animate docs in each bucket after their parent reveals
+  // Buckets are index 1, 2, 3 in data-reveal order
+  [1,2,3].forEach(function(bucketIdx, i){
+    var bucketRevealTime = revealDelay(bucketIdx) + REVEAL_DUR + 100;
+    var docs = document.querySelectorAll('[data-b="' + bucketIdx + '"]');
+    docs.forEach(function(doc, j){
+      setTimeout(function(){ doc.classList.add('shown'); }, bucketRevealTime + j * 90);
+    });
+  });
+
+  var reportGenerated = false;
+  window.generateReport = function(){
+    if(reportGenerated) return;
+    reportGenerated = true;
+    var btn = document.getElementById('cta-btn');
+    btn.textContent = '\u2713 Audit Report Generated';
+    btn.classList.add('generated');
+  };
+
+  // Auto-demo after 3s
+  setTimeout(function(){
+    if(!reportGenerated) generateReport();
+  }, 3500);
+})();
+</script>
+</body>
+</html>

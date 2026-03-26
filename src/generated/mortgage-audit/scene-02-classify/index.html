@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Document Identity + Classification</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--violet:#a78bfa;--teal:#14b8a6}
+.scene{height:100%;padding:32px 44px;position:relative;display:flex;flex-direction:column;gap:20px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.orb1{position:absolute;width:420px;height:420px;right:-60px;top:-120px;border-radius:50%;filter:blur(110px);background:radial-gradient(circle,rgba(14,165,233,.14),transparent 70%)}
+.orb2{position:absolute;width:320px;height:320px;left:-60px;bottom:-60px;border-radius:50%;filter:blur(90px);background:radial-gradient(circle,rgba(20,184,166,.1),transparent 70%)}
+
+.head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex:none}
+.head-title{font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.head-badge{padding:8px 18px;border-radius:999px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#7dd3fc;font-size:13px;letter-spacing:.08em;font-weight:600}
+
+.main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:.62fr 1fr;gap:20px;min-height:0}
+
+/* Flow panel */
+.flow-panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:22px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.flow-panel h3{font-size:14px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.flow-steps{flex:1;display:flex;flex-direction:column;justify-content:space-around;position:relative;padding-left:14px}
+.flow-line{position:absolute;left:22px;top:20px;bottom:20px;width:2px;background:rgba(255,255,255,.07)}
+.flow-step{display:flex;align-items:flex-start;gap:14px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);position:relative;transition:all .5s ease}
+.flow-step.active{border-color:rgba(14,165,233,.5);background:rgba(14,165,233,.08);box-shadow:0 0 18px rgba(14,165,233,.12)}
+.step-num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;border:2px solid rgba(255,255,255,.12);color:var(--muted);background:rgba(255,255,255,.04);transition:all .5s ease}
+.flow-step.active .step-num{border-color:var(--sky);color:#7dd3fc;background:rgba(14,165,233,.18);box-shadow:0 0 12px rgba(14,165,233,.3)}
+.step-text{font-size:13px;color:var(--muted);line-height:1.4;padding-top:5px;transition:color .5s ease}
+.flow-step.active .step-text{color:#bae6fd}
+.step-done .step-num{border-color:var(--green);color:#6ee7b7;background:rgba(16,185,129,.15)}
+.step-done .step-text{color:#a7f3d0}
+
+/* Stack panel */
+.stack-panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:22px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.stack-head{display:flex;justify-content:space-between;align-items:center}
+.stack-panel h3{font-size:14px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.col-labels{display:grid;grid-template-columns:90px 1fr 100px;gap:8px;padding:0 10px}
+.col-label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.stack-items{flex:1;display:flex;flex-direction:column;gap:7px;overflow:hidden}
+.stack-item{display:grid;grid-template-columns:90px 1fr 100px;gap:8px;align-items:center;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);opacity:0;transform:translateX(18px);transition:opacity .35s ease,transform .35s ease}
+.stack-item.shown{opacity:1;transform:none}
+.id-badge{font-size:11px;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.07);color:#cbd5e1;white-space:nowrap;text-align:center;font-family:ui-monospace,monospace}
+.doc-filename{font-size:12px;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.type-badge{font-size:10px;font-weight:700;letter-spacing:.07em;padding:3px 10px;border-radius:999px;text-align:center;white-space:nowrap}
+.type-disc{background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#7dd3fc}
+.type-note{background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);color:#c4b5fd}
+.type-title{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#6ee7b7}
+.type-payoff{background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.28);color:#5eead4}
+.type-anc{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fcd34d}
+
+/* Footer */
+.footer{position:relative;z-index:1;padding:14px 20px;border:1px solid rgba(245,158,11,.25);border-radius:18px;background:rgba(245,158,11,.06);display:flex;align-items:center;gap:16px;flex:none;flex-wrap:wrap}
+.footer-label{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.group-chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{font-size:12px;padding:5px 13px;border-radius:999px;font-weight:600;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease}
+.chip.shown{opacity:1;transform:none}
+.chip-amber{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#fcd34d}
+.chip-red{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);color:#fca5a5}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb1"></div>
+  <div class="orb2"></div>
+
+  <div class="head" data-reveal>
+    <div class="head-title">Document Identity + Classification</div>
+    <div class="head-badge">12 docs &rarr; 8 tagged</div>
+  </div>
+
+  <div class="main">
+    <div class="flow-panel" data-reveal id="flow-panel">
+      <h3>Processing Flow</h3>
+      <div class="flow-steps">
+        <div class="flow-line"></div>
+        <div class="flow-step" id="step-0"><div class="step-num">1</div><div class="step-text">Ingest documents</div></div>
+        <div class="flow-step" id="step-1"><div class="step-num">2</div><div class="step-text">Classify document type</div></div>
+        <div class="flow-step" id="step-2"><div class="step-num">3</div><div class="step-text">Assign unique IDs</div></div>
+        <div class="flow-step" id="step-3"><div class="step-num">4</div><div class="step-text">Group duplicates and versions</div></div>
+        <div class="flow-step" id="step-4"><div class="step-num">5</div><div class="step-text">Prepare review-ready statuses</div></div>
+      </div>
+    </div>
+
+    <div class="stack-panel" data-reveal id="stack-panel">
+      <div class="stack-head">
+        <h3>Tagged Document Stack</h3>
+      </div>
+      <div class="col-labels">
+        <div class="col-label">ID</div>
+        <div class="col-label">Filename</div>
+        <div class="col-label">Type</div>
+      </div>
+      <div class="stack-items">
+        <div class="stack-item" data-item="0"><div class="id-badge">DISC-CD-V2</div><div class="doc-filename">Closing Disclosure revised.pdf</div><div class="type-badge type-disc">Disclosure</div></div>
+        <div class="stack-item" data-item="1"><div class="id-badge">DISC-CD-V3</div><div class="doc-filename">Closing Disclosure FINAL.pdf</div><div class="type-badge type-disc">Disclosure</div></div>
+        <div class="stack-item" data-item="2"><div class="id-badge">NOTE-V1</div><div class="doc-filename">Note_unsigned.pdf</div><div class="type-badge type-note">Note</div></div>
+        <div class="stack-item" data-item="3"><div class="id-badge">NOTE-V2</div><div class="doc-filename">Note_signed.pdf</div><div class="type-badge type-note">Note</div></div>
+        <div class="stack-item" data-item="4"><div class="id-badge">TITLE-01</div><div class="doc-filename">Title Commitment.pdf</div><div class="type-badge type-title">Title</div></div>
+        <div class="stack-item" data-item="5"><div class="id-badge">PAYOFF-01</div><div class="doc-filename">Payoff Letter.pdf</div><div class="type-badge type-payoff">Payoff</div></div>
+        <div class="stack-item" data-item="6"><div class="id-badge">ANC-ESC-01</div><div class="doc-filename">Escrow Worksheet.pdf</div><div class="type-badge type-anc">Ancillary</div></div>
+        <div class="stack-item" data-item="7"><div class="id-badge">ANC-MISC-01</div><div class="doc-filename">Misc Addendum draft.pdf</div><div class="type-badge type-anc">Ancillary</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer" data-reveal id="footer-row">
+    <div class="footer-label">Version Groups</div>
+    <div class="group-chips">
+      <div class="chip chip-amber" id="chip-0">Closing Disclosure &mdash; 2 versions</div>
+      <div class="chip chip-amber" id="chip-1">Note &mdash; signed + unsigned</div>
+      <div class="chip chip-red" id="chip-2">Wiring Instructions &mdash; possible outdated version</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  revealEls.forEach(function(el, i){
+    el.style.animationDelay = (0.1 + i * 0.13) + 's';
+  });
+  function revealDelay(idx){ return (0.1 + idx * 0.13) * 1000; }
+  var REVEAL_DUR = 550;
+
+  var STEPS = 5;
+  var stepEls = [];
+  for(var s = 0; s < STEPS; s++) stepEls.push(document.getElementById('step-' + s));
+
+  // Animate processing steps sequentially after flow panel reveals (index 1)
+  var flowStart = revealDelay(1) + REVEAL_DUR + 200;
+  var stepDur = 520;
+  for(var i = 0; i < STEPS; i++){
+    (function(idx){
+      // Activate step
+      setTimeout(function(){
+        stepEls[idx].classList.add('active');
+      }, flowStart + idx * stepDur);
+      // Mark previous as done
+      if(idx > 0){
+        setTimeout(function(){
+          stepEls[idx-1].classList.remove('active');
+          stepEls[idx-1].classList.add('step-done');
+        }, flowStart + idx * stepDur);
+      }
+    })(i);
+  }
+  // Mark last step done
+  setTimeout(function(){
+    stepEls[STEPS-1].classList.remove('active');
+    stepEls[STEPS-1].classList.add('step-done');
+  }, flowStart + STEPS * stepDur);
+
+  // Stagger stack items after stack panel reveals (index 2)
+  var stackStart = revealDelay(2) + REVEAL_DUR + 100;
+  var stackItems = document.querySelectorAll('.stack-item');
+  stackItems.forEach(function(item, i){
+    setTimeout(function(){ item.classList.add('shown'); }, stackStart + i * 80);
+  });
+
+  // Footer chips after footer reveals (index 3)
+  var footerStart = revealDelay(3) + REVEAL_DUR + 100;
+  ['chip-0','chip-1','chip-2'].forEach(function(id, i){
+    setTimeout(function(){ document.getElementById(id).classList.add('shown'); }, footerStart + i * 180);
+  });
+})();
+</script>
+</body>
+</html>

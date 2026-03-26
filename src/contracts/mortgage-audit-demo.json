@@ -1,0 +1,98 @@
+{
+  "id": "mortgage-audit-demo",
+  "title": "Mortgage Closing Document Audit",
+  "status": "ready",
+  "theme": {
+    "shell": "dark",
+    "accent": "sky",
+    "presenterPosition": "left"
+  },
+  "settings": {
+    "typingSpeedMs": 20,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1600,
+    "waitForIframeReadyTimeoutMs": 8000,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "mortgage-01",
+      "title": "Messy Loan File Intake",
+      "type": "narrative",
+      "editIntent": "Open with the pain state — a real loan file folder with 12 documents, no version control, and zero separation. Make the auditor questions feel visceral and familiar to anyone who has worked in mortgage compliance.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "This is what a loan folder actually looks like when it arrives.", "pauseMs": 700 },
+          { "text": " Twelve documents. No clear separation. No version control.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/mortgage-audit/scene-01-intake/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "mortgage-02",
+      "title": "Document Identity and Classification",
+      "type": "framework",
+      "editIntent": "Show order emerging from chaos. The system automatically classifies every document, assigns a traceable ID, and groups version conflicts — no human instruction needed. Focus on the transformation from 12 unordered files to 8 tagged, categorized records.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "The system does not need to be told what to look for.", "pauseMs": 700 },
+          { "text": " It identifies each document, assigns a traceable ID, and surfaces every version conflict automatically.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/mortgage-audit/scene-02-classify/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "mortgage-03",
+      "title": "Used in Closing?",
+      "type": "narrative",
+      "editIntent": "Show the human review step where a reviewer confirms which version of each conflicting document was actually used at closing. The interaction should feel lightweight and decisive — not a heavy form, but a fast confirmation layer on top of machine-surfaced conflicts.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "The system found the version conflicts.", "pauseMs": 600 },
+          { "text": " Now the reviewer confirms what actually mattered.", "pauseMs": 600 },
+          { "text": " Human judgment, machine traceability.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/mortgage-audit/scene-03-review/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "mortgage-04",
+      "title": "Separation of Record",
+      "type": "framework",
+      "editIntent": "The aha moment — every document has a permanent, governed home. Three clean buckets: closing package, inactive archive, and exception queue. Nothing is mixed together. This is what a governed process looks like compared to a flat folder.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Every document now has a home.", "pauseMs": 600 },
+          { "text": " The closing package is clean.", "pauseMs": 500 },
+          { "text": " The inactive archive is separate.", "pauseMs": 500 },
+          { "text": " Nothing is mixed together.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/mortgage-audit/scene-04-separate/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "mortgage-05",
+      "title": "Audit-Ready Proof",
+      "type": "closing",
+      "editIntent": "Close with calm confidence. The file can explain itself — a complete chain of custody, all decisions logged, all counts accurate, and a one-click audit report. This scene should feel like the opposite of the opening chaos scene.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "At any moment, the file can explain itself.", "pauseMs": 700 },
+          { "text": " What was used. What was excluded. Who decided. Why.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/mortgage-audit/scene-05-audit/index.html" },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Audit-Ready Proof</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--violet:#a78bfa}
+.scene{height:100%;padding:28px 44px;position:relative;display:flex;flex-direction:column;gap:16px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.orb1{position:absolute;width:420px;height:420px;right:-80px;top:-100px;border-radius:50%;filter:blur(110px);background:radial-gradient(circle,rgba(16,185,129,.12),transparent 70%)}
+.orb2{position:absolute;width:280px;height:280px;left:-50px;bottom:-60px;border-radius:50%;filter:blur(90px);background:radial-gradient(circle,rgba(14,165,233,.08),transparent 70%)}
+
+.head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex:none}
+.head-title{font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.audit-badge{padding:8px 18px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);color:#6ee7b7;font-size:13px;letter-spacing:.1em;font-weight:700}
+@keyframes badge-glow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 0 6px rgba(16,185,129,.15),0 0 20px rgba(16,185,129,.1)}}
+.audit-badge.pulse{animation:badge-glow 2.4s ease-in-out infinite}
+
+.main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1.22fr 1fr;gap:20px;min-height:0}
+
+/* Left column */
+.left-col{display:flex;flex-direction:column;gap:14px;overflow:hidden}
+
+/* Summary section */
+.summary-panel{border:1px solid var(--border);border-radius:22px;background:rgba(255,255,255,.04);padding:18px}
+.section-label{font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat-cell{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.stat-lab{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:800}
+.stat-val-green{color:#34d399}
+.stat-val-default{color:#e2e8f0}
+.closing-status{grid-column:span 3;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.22)}
+.status-lab{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.status-pill{padding:4px 14px;border-radius:999px;background:rgba(16,185,129,.2);color:#6ee7b7;font-size:13px;font-weight:700;letter-spacing:.08em}
+
+/* Audit report mini-cards */
+.report-panel{border:1px solid var(--border);border-radius:22px;background:rgba(255,255,255,.04);padding:18px;flex:1;display:flex;flex-direction:column;gap:10px}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.mini-card{border-radius:14px;padding:11px 13px;display:flex;flex-direction:column;gap:6px}
+.mini-card-green{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.22)}
+.mini-card-neutral{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.mini-card-violet{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.22)}
+.mini-card-amber{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)}
+.mini-card-head{font-size:12px;font-weight:700}
+.mc-green{color:#6ee7b7}
+.mc-neutral{color:var(--muted)}
+.mc-violet{color:#c4b5fd}
+.mc-amber{color:#fcd34d}
+.mini-list{display:flex;flex-direction:column;gap:3px}
+.mini-list-item{font-size:11px;color:#94a3b8}
+
+/* Right column */
+.right-col{display:flex;flex-direction:column;gap:14px;overflow:hidden}
+
+/* Chain of Custody */
+.custody-panel{border:1px solid var(--border);border-radius:22px;background:rgba(255,255,255,.04);padding:18px;flex:1;display:flex;flex-direction:column;gap:10px}
+.timeline{display:flex;flex-direction:column;gap:6px}
+.tl-item{display:flex;align-items:flex-start;gap:10px;opacity:0;transform:translateX(10px);transition:opacity .35s ease,transform .35s ease}
+.tl-item.shown{opacity:1;transform:none}
+.tl-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--sky);margin-top:5px;box-shadow:0 0 6px rgba(14,165,233,.4)}
+.tl-time{font-size:11px;color:var(--muted);white-space:nowrap;font-family:ui-monospace,monospace;min-width:56px}
+.tl-text{font-size:12px;color:#cbd5e1;line-height:1.4}
+
+/* Quick audit chips */
+.quick-panel{border:1px solid var(--border);border-radius:22px;background:rgba(255,255,255,.04);padding:18px}
+.chips-wrap{display:flex;flex-direction:column;gap:8px}
+.chip-row{display:flex;gap:8px}
+.audit-chip{flex:1;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:12px;cursor:pointer;text-align:center;transition:all .2s ease;font-weight:500}
+.audit-chip:hover{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.3);color:#7dd3fc}
+.audit-chip.active{background:rgba(14,165,233,.12);border-color:rgba(14,165,233,.4);color:#bae6fd}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb1"></div>
+  <div class="orb2"></div>
+
+  <div class="head" data-reveal>
+    <div class="head-title">Audit-Ready Proof</div>
+    <div class="audit-badge" id="audit-badge">AUDIT-READY &#10003;</div>
+  </div>
+
+  <div class="main">
+    <div class="left-col">
+      <div class="summary-panel" data-reveal>
+        <div class="section-label">Loan #48291 &mdash; Audit Summary</div>
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <div class="stat-lab">Total received</div>
+            <div class="stat-val stat-val-default" id="sv-total">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-lab">Used in closing</div>
+            <div class="stat-val stat-val-green" id="sv-used">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-lab">Archived / ancillary</div>
+            <div class="stat-val stat-val-default" id="sv-archived">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-lab">Superseded / duplicate</div>
+            <div class="stat-val stat-val-default" id="sv-superseded">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-lab">Exceptions reviewed</div>
+            <div class="stat-val stat-val-default" id="sv-exceptions">0</div>
+          </div>
+          <div class="closing-status">
+            <div class="status-lab">Closing package status</div>
+            <div class="status-pill" id="status-pill">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-panel" data-reveal>
+        <div class="section-label">Audit Report</div>
+        <div class="report-grid">
+          <div class="mini-card mini-card-green">
+            <div class="mini-card-head mc-green">&#10003; Closing Documents (4)</div>
+            <div class="mini-list">
+              <div class="mini-list-item">Closing Disclosure</div>
+              <div class="mini-list-item">Note</div>
+              <div class="mini-list-item">Payoff Letter</div>
+              <div class="mini-list-item">Title Commitment</div>
+            </div>
+          </div>
+          <div class="mini-card mini-card-neutral">
+            <div class="mini-card-head mc-neutral">&#128193; Excluded / Inactive (3)</div>
+            <div class="mini-list">
+              <div class="mini-list-item">Escrow Worksheet</div>
+              <div class="mini-list-item">Addendum draft</div>
+              <div class="mini-list-item">Compliance Notice</div>
+            </div>
+          </div>
+          <div class="mini-card mini-card-violet">
+            <div class="mini-card-head mc-violet">&#8617; Superseded (2)</div>
+            <div class="mini-list">
+              <div class="mini-list-item">Closing Disclosure V2</div>
+              <div class="mini-list-item">Unsigned Note</div>
+            </div>
+          </div>
+          <div class="mini-card mini-card-amber">
+            <div class="mini-card-head mc-amber">&#9888; Exceptions Reviewed (1)</div>
+            <div class="mini-list">
+              <div class="mini-list-item">Wiring Instructions OLD</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="custody-panel" data-reveal>
+        <div class="section-label">Chain of Custody</div>
+        <div class="timeline">
+          <div class="tl-item" id="tl-0"><div class="tl-dot"></div><div class="tl-time">09:14 AM</div><div class="tl-text">Documents ingested</div></div>
+          <div class="tl-item" id="tl-1"><div class="tl-dot"></div><div class="tl-time">09:15 AM</div><div class="tl-text">System classified documents</div></div>
+          <div class="tl-item" id="tl-2"><div class="tl-dot"></div><div class="tl-time">09:17 AM</div><div class="tl-text">Duplicate groups created</div></div>
+          <div class="tl-item" id="tl-3"><div class="tl-dot"></div><div class="tl-time">09:21 AM</div><div class="tl-text">Closing Disclosure V3 marked as final</div></div>
+          <div class="tl-item" id="tl-4"><div class="tl-dot"></div><div class="tl-time">09:22 AM</div><div class="tl-text">Unsigned Note marked superseded</div></div>
+          <div class="tl-item" id="tl-5"><div class="tl-dot"></div><div class="tl-time">09:24 AM</div><div class="tl-text">Ancillary documents separated</div></div>
+          <div class="tl-item" id="tl-6"><div class="tl-dot"></div><div class="tl-time">09:25 AM</div><div class="tl-text">Audit-ready closing package generated</div></div>
+        </div>
+      </div>
+
+      <div class="quick-panel" data-reveal>
+        <div class="section-label">Quick Audit Questions</div>
+        <div class="chips-wrap">
+          <div class="chip-row">
+            <div class="audit-chip" onclick="this.classList.toggle('active')">Show Excluded Documents</div>
+            <div class="audit-chip" onclick="this.classList.toggle('active')">Show Final Signed Versions</div>
+          </div>
+          <div class="chip-row">
+            <div class="audit-chip" onclick="this.classList.toggle('active')">Show All Disclosures</div>
+            <div class="audit-chip" onclick="this.classList.toggle('active')">Show Decision History</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  revealEls.forEach(function(el, i){
+    el.style.animationDelay = (0.1 + i * 0.13) + 's';
+  });
+  function revealDelay(idx){ return (0.1 + idx * 0.13) * 1000; }
+  var REVEAL_DUR = 550;
+
+  // Count-up helper
+  function countUp(el, target, duration, suffix){
+    var start = performance.now();
+    function frame(now){
+      var t = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(eased * target) + (suffix || '');
+      if(t < 1) requestAnimationFrame(frame);
+      else el.textContent = target + (suffix || '');
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // Summary stats count-up after summary panel reveals (index 1)
+  var summaryStart = revealDelay(1) + REVEAL_DUR + 200;
+  var stats = [
+    {id:'sv-total', val:12, dur:800},
+    {id:'sv-used', val:4, dur:600},
+    {id:'sv-archived', val:3, dur:600},
+    {id:'sv-superseded', val:3, dur:600},
+    {id:'sv-exceptions', val:2, dur:500}
+  ];
+  stats.forEach(function(s, i){
+    setTimeout(function(){ countUp(document.getElementById(s.id), s.val, s.dur); }, summaryStart + i * 120);
+  });
+  // Status pill
+  setTimeout(function(){
+    var pill = document.getElementById('status-pill');
+    pill.textContent = 'AUDIT-READY';
+  }, summaryStart + stats.length * 120 + 200);
+
+  // Badge pulse after reveal
+  setTimeout(function(){
+    document.getElementById('audit-badge').classList.add('pulse');
+  }, revealDelay(0) + REVEAL_DUR + 400);
+
+  // Timeline events stagger after custody panel reveals (index 3)
+  var tlStart = revealDelay(3) + REVEAL_DUR + 100;
+  for(var i = 0; i < 7; i++){
+    (function(idx){
+      setTimeout(function(){ document.getElementById('tl-' + idx).classList.add('shown'); }, tlStart + idx * 140);
+    })(i);
+  }
+})();
+</script>
+</body>
+</html>

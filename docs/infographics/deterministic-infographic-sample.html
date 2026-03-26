@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deterministic Infographic Sample</title>
+  <style>
+    :root {
+      --bg: #f6f7f8;
+      --ink: #111111;
+      --muted: #5a6470;
+      --blue: #1457b8;
+      --line: #8e99a6;
+      --blob: #cfe7f8;
+      --grid: rgba(20,87,184,.12);
+      --slot: rgba(20,87,184,.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #e9edf1;
+      color: var(--ink);
+      padding: 24px;
+    }
+    .wrap {
+      max-width: 1480px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .panel {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.08);
+      padding: 20px;
+    }
+    .panel h1 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+    .panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .meta {
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid #e7eaee;
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+    .meta code {
+      background: #f4f6f8;
+      border-radius: 6px;
+      padding: 2px 6px;
+      color: #203040;
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .controls label {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stage {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.08);
+      padding: 16px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: var(--bg);
+      border-radius: 12px;
+    }
+    .grid-line { stroke: var(--grid); stroke-width: 1; }
+    .grid-label { fill: rgba(20,87,184,.55); font-size: 11px; font-weight: 600; }
+    .slot-box { fill: var(--slot); stroke: rgba(20,87,184,.35); stroke-dasharray: 6 6; }
+    .slot-label { fill: rgba(20,87,184,.85); font-size: 12px; font-weight: 700; }
+    .connector { stroke: var(--line); stroke-width: 2; fill: none; }
+    .num-circle { fill: white; stroke: var(--blue); stroke-width: 2; }
+    .num-text { fill: var(--blue); font-size: 16px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; }
+    .title-big { font-size: 38px; font-weight: 900; letter-spacing: -.04em; }
+    .title-blue { fill: var(--blue); }
+    .byline { font-size: 12px; font-weight: 700; fill: #444; letter-spacing: .08em; }
+    .item-title { font-size: 17px; font-weight: 900; }
+    .item-body { font-size: 12px; fill: #2f3740; }
+    .item-sub { font-size: 12px; font-weight: 800; }
+    .item-sub-blue { fill: var(--blue); }
+    .item-copy { font-size: 11px; fill: #2f3740; }
+    .center-quote { font-size: 34px; font-weight: 900; text-anchor: middle; }
+    .center-blue { fill: var(--blue); }
+    .center-attrib { font-size: 14px; font-weight: 700; text-anchor: middle; }
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+    .swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      vertical-align: -2px;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="panel">
+      <h1>Deterministic grid-first sample</h1>
+      <p>This is a small proof of concept for a <strong>radial infographic template</strong> where all object allocation is driven by a fixed canvas, a 16×16 grid, named slots, and precomputed connector anchors.</p>
+      <div class="controls">
+        <label><input type="checkbox" id="toggleGrid" checked> Show grid</label>
+        <label><input type="checkbox" id="toggleSlots" checked> Show slot boxes</label>
+        <label><input type="checkbox" id="toggleAnchors"> Show connector anchors</label>
+      </div>
+      <p>The point is not to perfectly mimic a designer's freeform layout. The point is to prove that a layout like this can be rendered <strong>consistently</strong> from a template contract.</p>
+      <div class="meta">
+        <div><strong>Canvas:</strong> <code>1600 × 1060</code></div>
+        <div><strong>Grid:</strong> <code>16 × 16</code></div>
+        <div><strong>Family:</strong> <code>radial-principles</code></div>
+        <div><strong>Template:</strong> <code>radial-7-v1</code></div>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <svg id="svg" viewBox="0 0 1600 1060" aria-label="Deterministic infographic sample"></svg>
+      <div class="legend">
+        <span><span class="swatch" style="background: rgba(20,87,184,.12)"></span>grid</span>
+        <span><span class="swatch" style="background: rgba(20,87,184,.08); border:1px dashed rgba(20,87,184,.35)"></span>named slot</span>
+        <span><span class="swatch" style="background: #cfe7f8"></span>center composition zone</span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const spec = {
+      canvas: { width: 1600, height: 1060 },
+      grid: { cols: 16, rows: 16, marginX: 70, marginY: 36, gutter: 0 },
+      title: {
+        line1: [
+          { text: '7 PRINCIPLES OF POWERFUL', fill: '#111111' },
+        ],
+        line2: [
+          { text: 'STORYTELLING', fill: '#1457b8' }
+        ],
+        byline: 'BY NATAN MOHART'
+      },
+      center: {
+        cx: 800, cy: 620,
+        rx: 255, ry: 165,
+        quoteLines: [
+          ['“The most'],
+          ['powerful person'],
+          ['in the world is'],
+          ['the ', 'storyteller.”']
+        ],
+        attribution: 'Steve Jobs'
+      },
+      slots: {
+        item1: { x: 470, y: 126, w: 280, h: 190, num: { x: 785, y: 88 }, lineFrom: { x: 675, y: 316 }, lineTo: { x: 738, y: 463 } },
+        item2: { x: 870, y: 126, w: 280, h: 190, num: { x: 1510, y: 250 }, lineFrom: { x: 1132, y: 316 }, lineTo: { x: 961, y: 455 } },
+        item3: { x: 1140, y: 510, w: 300, h: 195, num: { x: 1516, y: 652 }, lineFrom: { x: 1140, y: 611 }, lineTo: { x: 1048, y: 611 } },
+        item4: { x: 645, y: 844, w: 320, h: 160, num: { x: 1092, y: 985 }, lineFrom: { x: 858, y: 844 }, lineTo: { x: 840, y: 780 } },
+        item5: { x: 160, y: 820, w: 315, h: 180, num: { x: 300, y: 1015 }, lineFrom: { x: 390, y: 820 }, lineTo: { x: 621, y: 730 } },
+        item6: { x: 58, y: 550, w: 300, h: 180, num: { x: 20, y: 730 }, lineFrom: { x: 358, y: 635 }, lineTo: { x: 558, y: 610 } },
+        item7: { x: 110, y: 345, w: 300, h: 175, num: { x: 70, y: 285 }, lineFrom: { x: 410, y: 420 }, lineTo: { x: 590, y: 486 } }
+      },
+      items: {
+        item1: {
+          title: ['LEAVE A ', 'DECISION'], titleBlueIndex: 1,
+          body: 'A good story doesn\'t end with a lesson. It ends with a choice.',
+          why: 'Why it works:',
+          whyCopy: 'Stories shape behavior when they invite action.',
+          example: 'Example:',
+          exampleCopy: '“So the real question isn\'t what I did. It\'s what you\'ll do next time.”',
+          align: 'middle'
+        },
+        item2: {
+          title: ['START WITH ', 'TENSION'], titleBlueIndex: 1,
+          body: 'Don\'t start with emotion or facts. Start with inner or outer conflict.',
+          why: 'Why it works:',
+          whyCopy: 'The brain instantly engages when it senses a gap between “what is” and “what should be.”',
+          example: 'Example:',
+          exampleCopy: '“Everything looked successful on paper. But inside, I knew something was breaking.”',
+          align: 'middle'
+        },
+        item3: {
+          title: ['SPEAK IN ', 'IMAGES'], titleBlueIndex: 1,
+          body: 'Don\'t explain the idea. Show a scene the audience can visualize.',
+          why: 'Why it works:',
+          whyCopy: 'Images are processed faster than words and remembered longer.',
+          example: 'Example:',
+          exampleCopy: '“The room went quiet. Everyone avoided eye contact. That\'s when I knew the decision was wrong.”',
+          align: 'left'
+        },
+        item4: {
+          title: ['MAKE IT ', 'ABOUT THEM'], titleBlueIndex: 1,
+          body: 'The story should reflect the listener\'s inner world, not your ego.',
+          why: 'Why it works:',
+          whyCopy: 'People engage when they recognize themselves.',
+          example: 'Example:',
+          exampleCopy: '“If you\'ve ever felt stuck in a role that looks great on paper but feels unfamiliar...”',
+          align: 'center'
+        },
+        item5: {
+          title: ['SHOW THE ', 'STAKES'], titleBlueIndex: 1,
+          body: 'Show what can be lost, not just what can be gained.',
+          why: 'Why it works:',
+          whyCopy: 'Loss aversion is more powerful than promised rewards.',
+          example: 'Example:',
+          exampleCopy: '“Doing nothing felt safe. Until I realized it was the most expensive choice.”',
+          align: 'left'
+        },
+        item6: {
+          title: ['CLOSE THE LOOP'], titleBlueIndex: -1,
+          body: 'Return to the beginning of the story and show what changed.',
+          why: 'Why it works:',
+          whyCopy: 'Closed loops increase memorability and create a sense of completion.',
+          example: 'Example:',
+          exampleCopy: '“That fear I mentioned at the start never disappeared. But it stopped controlling me.”',
+          align: 'left'
+        },
+        item7: {
+          title: ['MAKE IT ', 'HUMAN'], titleBlueIndex: 1,
+          body: 'Show doubt, fear, or a mistake. Not a polished or perfect version of yourself.',
+          why: 'Why it works:',
+          whyCopy: 'People trust real experience, not performance.',
+          example: 'Example:',
+          exampleCopy: '“I didn\'t have the answer. And for the first time, I admitted it to my team.”',
+          align: 'left'
+        }
+      }
+    };
+
+    const svg = document.getElementById('svg');
+    const ns = 'http://www.w3.org/2000/svg';
+
+    function el(name, attrs = {}, text) {
+      const node = document.createElementNS(ns, name);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    function gridMetrics() {
+      const { width, height } = spec.canvas;
+      const { cols, rows, marginX, marginY } = spec.grid;
+      return {
+        cellW: (width - marginX * 2) / cols,
+        cellH: (height - marginY * 2) / rows,
+        marginX, marginY, cols, rows
+      };
+    }
+
+    function wrapText(text, maxChars) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = '';
+      for (const word of words) {
+        const next = line ? `${line} ${word}` : word;
+        if (next.length > maxChars) {
+          if (line) lines.push(line);
+          line = word;
+        } else {
+          line = next;
+        }
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function drawGrid() {
+      const g = el('g', { id: 'grid-layer' });
+      const { cellW, cellH, marginX, marginY, cols, rows } = gridMetrics();
+      for (let c = 0; c <= cols; c++) {
+        const x = marginX + c * cellW;
+        g.appendChild(el('line', { x1: x, y1: marginY, x2: x, y2: spec.canvas.height - marginY, class: 'grid-line' }));
+        if (c < cols) g.appendChild(el('text', { x: x + 6, y: marginY + 14, class: 'grid-label' }, String(c + 1)));
+      }
+      for (let r = 0; r <= rows; r++) {
+        const y = marginY + r * cellH;
+        g.appendChild(el('line', { x1: marginX, y1: y, x2: spec.canvas.width - marginX, y2: y, class: 'grid-line' }));
+        if (r < rows) g.appendChild(el('text', { x: marginX + 4, y: y - 6, class: 'grid-label' }, String(r + 1)));
+      }
+      return g;
+    }
+
+    function drawSlots() {
+      const g = el('g', { id: 'slot-layer' });
+      Object.entries(spec.slots).forEach(([id, s]) => {
+        g.appendChild(el('rect', { x: s.x, y: s.y, width: s.w, height: s.h, rx: 8, class: 'slot-box' }));
+        g.appendChild(el('text', { x: s.x + 10, y: s.y + 18, class: 'slot-label' }, id));
+      });
+      return g;
+    }
+
+    function drawTitle() {
+      const g = el('g');
+      let x = 140;
+      let y = 80;
+      const t1 = el('text', { x, y, class: 'title-big' });
+      spec.title.line1.forEach((part) => t1.appendChild(el('tspan', { fill: part.fill }, part.text)));
+      g.appendChild(t1);
+      const t2 = el('text', { x, y: y + 54, class: 'title-big title-blue' });
+      spec.title.line2.forEach((part) => t2.appendChild(el('tspan', { fill: part.fill }, part.text)));
+      g.appendChild(t2);
+      g.appendChild(el('text', { x: 640, y: y + 82, class: 'byline' }, spec.title.byline));
+      return g;
+    }
+
+    function drawBlob() {
+      const { cx, cy, rx, ry } = spec.center;
+      const points = [
+        [cx - 0.78*rx, cy - 0.62*ry],
+        [cx - 0.22*rx, cy - 1.00*ry],
+        [cx + 0.48*rx, cy - 0.88*ry],
+        [cx + 0.95*rx, cy - 0.22*ry],
+        [cx + 0.80*rx, cy + 0.62*ry],
+        [cx + 0.10*rx, cy + 0.98*ry],
+        [cx - 0.66*rx, cy + 0.76*ry],
+        [cx - 1.00*rx, cy + 0.10*ry],
+      ];
+      let d = `M ${points[0][0]} ${points[0][1]}`;
+      for (let i = 0; i < points.length; i++) {
+        const curr = points[i];
+        const next = points[(i + 1) % points.length];
+        const mx = (curr[0] + next[0]) / 2;
+        const my = (curr[1] + next[1]) / 2;
+        d += ` Q ${curr[0]} ${curr[1]} ${mx} ${my}`;
+      }
+      d += ' Z';
+      const g = el('g');
+      g.appendChild(el('path', { d, fill: '#cfe7f8', stroke: '#a2c6de', 'stroke-width': 2 }));
+      return g;
+    }
+
+    function drawCenterText() {
+      const { cx, cy, quoteLines, attribution } = spec.center;
+      const g = el('g');
+      const text = el('text', { x: cx, y: cy - 25, class: 'center-quote' });
+      quoteLines.forEach((lineParts, i) => {
+        const tspan = el('tspan', { x: cx, dy: i === 0 ? 0 : 38 });
+        lineParts.forEach((part, idx) => {
+          tspan.appendChild(el('tspan', { class: part === 'storyteller.”' ? 'center-blue' : '' }, part));
+        });
+        text.appendChild(tspan);
+      });
+      g.appendChild(text);
+      g.appendChild(el('text', { x: cx, y: cy + 98, class: 'center-attrib' }, attribution));
+      return g;
+    }
+
+    function drawConnector(slotId) {
+      const s = spec.slots[slotId];
+      return el('path', { class: 'connector', d: `M ${s.lineFrom.x} ${s.lineFrom.y} L ${s.lineTo.x} ${s.lineTo.y}` });
+    }
+
+    function drawNumber(slotId) {
+      const { x, y } = spec.slots[slotId].num;
+      const num = slotId.replace('item', '');
+      const g = el('g');
+      g.appendChild(el('circle', { cx: x, cy: y, r: 15, class: 'num-circle' }));
+      g.appendChild(el('text', { x, y, class: 'num-text' }, num));
+      return g;
+    }
+
+    function drawItem(slotId) {
+      const slot = spec.slots[slotId];
+      const item = spec.items[slotId];
+      const g = el('g');
+      let anchor = 'start';
+      let x = slot.x;
+      if (item.align === 'middle') {
+        anchor = 'middle';
+        x = slot.x + slot.w / 2;
+      } else if (item.align === 'center') {
+        anchor = 'middle';
+        x = slot.x + slot.w / 2;
+      }
+      let y = slot.y + 20;
+
+      const title = el('text', { x, y, class: 'item-title', 'text-anchor': anchor });
+      item.title.forEach((part, idx) => title.appendChild(el('tspan', { fill: idx === item.titleBlueIndex ? '#1457b8' : '#111111' }, part)));
+      g.appendChild(title);
+      y += 26;
+
+      wrapText(item.body, item.align === 'middle' ? 34 : 32).forEach((line, idx) => {
+        g.appendChild(el('text', { x, y: y + idx * 16, class: 'item-body', 'text-anchor': anchor }, line));
+      });
+      y += wrapText(item.body, item.align === 'middle' ? 34 : 32).length * 16 + 14;
+
+      g.appendChild(el('text', { x, y, class: 'item-sub', 'text-anchor': anchor }, item.why));
+      y += 16;
+      wrapText(item.whyCopy, item.align === 'middle' ? 33 : 30).forEach((line, idx) => {
+        g.appendChild(el('text', { x, y: y + idx * 15, class: 'item-copy', 'text-anchor': anchor }, line));
+      });
+      y += wrapText(item.whyCopy, item.align === 'middle' ? 33 : 30).length * 15 + 14;
+
+      g.appendChild(el('text', { x, y, class: 'item-sub', 'text-anchor': anchor }, item.example));
+      y += 16;
+      wrapText(item.exampleCopy, item.align === 'middle' ? 31 : 28).forEach((line, idx) => {
+        const txt = el('text', { x, y: y + idx * 15, class: 'item-copy', 'text-anchor': anchor });
+        txt.textContent = line;
+        g.appendChild(txt);
+      });
+      return g;
+    }
+
+    function drawAnchors() {
+      const g = el('g', { id: 'anchor-layer' });
+      Object.values(spec.slots).forEach((s) => {
+        [[s.lineFrom.x, s.lineFrom.y], [s.lineTo.x, s.lineTo.y]].forEach(([x, y]) => {
+          g.appendChild(el('circle', { cx: x, cy: y, r: 5, fill: '#ef4444' }));
+        });
+      });
+      return g;
+    }
+
+    function render() {
+      svg.innerHTML = '';
+      svg.appendChild(drawGrid());
+      svg.appendChild(drawSlots());
+      Object.keys(spec.slots).forEach((id) => svg.appendChild(drawConnector(id)));
+      svg.appendChild(drawBlob());
+      svg.appendChild(drawCenterText());
+      svg.appendChild(drawTitle());
+      Object.keys(spec.slots).forEach((id) => {
+        svg.appendChild(drawItem(id));
+        svg.appendChild(drawNumber(id));
+      });
+      svg.appendChild(drawAnchors());
+      updateVisibility();
+    }
+
+    function updateVisibility() {
+      const gridOn = document.getElementById('toggleGrid').checked;
+      const slotsOn = document.getElementById('toggleSlots').checked;
+      const anchorsOn = document.getElementById('toggleAnchors').checked;
+      document.getElementById('grid-layer').style.display = gridOn ? 'block' : 'none';
+      document.getElementById('slot-layer').style.display = slotsOn ? 'block' : 'none';
+      document.getElementById('anchor-layer').style.display = anchorsOn ? 'block' : 'none';
+    }
+
+    ['toggleGrid', 'toggleSlots', 'toggleAnchors'].forEach((id) => {
+      document.getElementById(id).addEventListener('change', updateVisibility);
+    });
+
+    render();
+  </script>
+</body>
+</html>
