@@ -22,8 +22,10 @@ function createNotFound(rootEl) {
   };
 }
 
-function createPresentSession({ id, store, rootEl }) {
-  const presentation = store.getById(id);
+function createPresentSession({ id, store, rootEl, deck: deckOverride }) {
+  // Use a pre-merged deck when provided (magic-link boot path); otherwise fall
+  // back to the store so the workspace fullscreen path continues to work.
+  const presentation = deckOverride ?? store.getById(id);
   if (!presentation) {
     return createNotFound(rootEl);
   }
@@ -193,7 +195,7 @@ function createPresentSession({ id, store, rootEl }) {
   };
 }
 
-export function mountPresent({ id, store, rootEl = document.getElementById("app") }) {
+export function mountPresent({ id, store, rootEl = document.getElementById("app"), deck, demoOverrides }) {
   if (!rootEl) {
     return { destroy() {} };
   }
@@ -202,6 +204,6 @@ export function mountPresent({ id, store, rootEl = document.getElementById("app"
     _activeSession.destroy();
   }
 
-  _activeSession = createPresentSession({ id, store, rootEl });
+  _activeSession = createPresentSession({ id, store, rootEl, deck, demoOverrides });
   return _activeSession;
 }

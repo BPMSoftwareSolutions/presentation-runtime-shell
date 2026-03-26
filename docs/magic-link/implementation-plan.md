@@ -39,7 +39,7 @@ flow or workspace UI depends on it.
 
 | Phase | Work |
 |---|---|
-| 1 | `magic-link.js` — decoder, sanitizer with value validation, merge, builder |
+| 1 | `magic-link.js` — UTF-8 encode/decode helpers, sanitizer with full value validation, merge, builder |
 | 2 | `main.js` — new `parsePresentId`, contract-first boot, gated fallback |
 | 3 | `workspace.js` — magic link generation, URL length warning |
 | 4 | Verification — confirm present mode has no inspector/store coupling |
@@ -61,7 +61,7 @@ and decodes it into a plain config object.
 #/present/{deckId}?cfg={BASE64URL_JSON}
 ```
 
-The `cfg` value is the JSON payload encoded as base64url: `+` → `-`, `/` → `_`,
+The `cfg` value is the UTF-8 JSON payload encoded as base64url: `+` → `-`, `/` → `_`,
 trailing `=` stripped. Padding is restored on decode.
 
 ### Payload schema
@@ -84,32 +84,50 @@ trailing `=` stripped. Padding is restored on decode.
   },
   "demo": {
     "tenant": "Beta Retail",
-    "incidentId": "INV-2024-0312"
+    "incidentId": "INV-2024-0312",
+    "scenario": "outage-response",
+    "filterPreset": "tier-1"
   }
 }
 ```
 
 All top-level keys are optional. Unknown keys are dropped. Invalid values for known
-keys are also dropped (value validation, not just key filtering — see below).
+keys are also dropped. **If a payload contains both valid and invalid keys, the valid
+subset is kept and the rest is silently dropped. The parser never returns a partial
+error — it either returns a sanitized config object or `null`.**
 
-### Implementation sketch
+### Encoding helpers
+
+`btoa` / `atob` operate on binary strings and fail for multi-byte Unicode characters.
+All encode/decode operations use `TextEncoder` / `TextDecoder` to be safe for non-ASCII
+values such as Unicode tenant names.
 
 ```js
 // src/core/magic-link.js
 
-// --- Allowed keys -----------------------------------------------------------
+function encodePayload(obj) {
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
 
-const ALLOWED_SETTINGS = new Set([
-  "presentControlsPosition", "playbackMode", "typingSpeedMs",
-  "betweenScenesMs", "autoAdvance", "startDelayMs", "endCardDurationMs",
-  "waitForIframeReadyTimeoutMs",
-]);
+function decodePayload(input) {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+```
 
-const ALLOWED_THEME = new Set(["accent", "shell", "presenterPosition"]);
+### Allowed keys and value validators
 
-const ALLOWED_DEMO = new Set(["tenant", "incidentId", "scenario", "filters"]);
-
-// --- Per-field value validators ---------------------------------------------
+```js
+// --- Settings ---------------------------------------------------------------
 
 const SETTINGS_VALIDATORS = {
   presentControlsPosition: (v) => ["top", "bottom"].includes(v),
@@ -122,24 +140,57 @@ const SETTINGS_VALIDATORS = {
   waitForIframeReadyTimeoutMs: (v) => Number.isFinite(v) && v > 0,
 };
 
-const DEMO_VALIDATORS = {
-  tenant:     (v) => typeof v === "string",
-  incidentId: (v) => typeof v === "string",
-  scenario:   (v) => typeof v === "string",
-  filters:    (v) => typeof v === "string",
+// --- Theme ------------------------------------------------------------------
+
+const THEME_VALIDATORS = {
+  accent:            (v) => typeof v === "string" && v.length > 0,
+  shell:             (v) => ["dark", "light"].includes(v),
+  presenterPosition: (v) => ["left", "right"].includes(v),
 };
 
-// --- Decoder ----------------------------------------------------------------
+// --- Demo -------------------------------------------------------------------
+// `filterPreset` is a scalar string token. If filter state needs structure
+// in the future, introduce a new key rather than changing this type.
 
-function decodeBase64Url(input) {
-  // Restore base64url → base64, then restore padding
-  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
-  return atob(padded);
+const DEMO_VALIDATORS = {
+  tenant:       (v) => typeof v === "string" && v.length > 0,
+  incidentId:   (v) => typeof v === "string" && v.length > 0,
+  scenario:     (v) => typeof v === "string" && v.length > 0,
+  filterPreset: (v) => typeof v === "string" && v.length > 0,
+};
+```
+
+### Sanitizer
+
+```js
+function sanitize(parsed) {
+  const out = {};
+
+  if (parsed.settings && typeof parsed.settings === "object") {
+    const entries = Object.entries(parsed.settings)
+      .filter(([k, v]) => k in SETTINGS_VALIDATORS && SETTINGS_VALIDATORS[k](v));
+    if (entries.length) out.settings = Object.fromEntries(entries);
+  }
+
+  if (parsed.theme && typeof parsed.theme === "object") {
+    const entries = Object.entries(parsed.theme)
+      .filter(([k, v]) => k in THEME_VALIDATORS && THEME_VALIDATORS[k](v));
+    if (entries.length) out.theme = Object.fromEntries(entries);
+  }
+
+  if (parsed.demo && typeof parsed.demo === "object") {
+    const entries = Object.entries(parsed.demo)
+      .filter(([k, v]) => k in DEMO_VALIDATORS && DEMO_VALIDATORS[k](v));
+    if (entries.length) out.demo = Object.fromEntries(entries);
+  }
+
+  return out;
 }
+```
 
-// --- Parser -----------------------------------------------------------------
+### Parser
 
+```js
 export function readMagicLinkConfig(hash) {
   // hash is the full window.location.hash, e.g. "#/present/foo?cfg=..."
   const qIndex = hash.indexOf("?");
@@ -150,38 +201,11 @@ export function readMagicLinkConfig(hash) {
   if (!raw) return null;
 
   try {
-    const json = decodeBase64Url(raw);
-    const parsed = JSON.parse(json);
+    const parsed = decodePayload(raw);
     return sanitize(parsed);
   } catch {
     return null;   // malformed — fall back to contract baseline
   }
-}
-
-// --- Sanitizer --------------------------------------------------------------
-
-function sanitize(parsed) {
-  const out = {};
-
-  if (parsed.settings && typeof parsed.settings === "object") {
-    const entries = Object.entries(parsed.settings)
-      .filter(([k, v]) => ALLOWED_SETTINGS.has(k) && SETTINGS_VALIDATORS[k]?.(v));
-    if (entries.length) out.settings = Object.fromEntries(entries);
-  }
-
-  if (parsed.theme && typeof parsed.theme === "object") {
-    // Theme values are free-form strings; only key filtering needed here
-    const entries = Object.entries(parsed.theme).filter(([k]) => ALLOWED_THEME.has(k));
-    if (entries.length) out.theme = Object.fromEntries(entries);
-  }
-
-  if (parsed.demo && typeof parsed.demo === "object") {
-    const entries = Object.entries(parsed.demo)
-      .filter(([k, v]) => ALLOWED_DEMO.has(k) && DEMO_VALIDATORS[k]?.(v));
-    if (entries.length) out.demo = Object.fromEntries(entries);
-  }
-
-  return out;
 }
 ```
 
@@ -190,14 +214,20 @@ function sanitize(parsed) {
 - Returns `null` on malformed base64
 - Returns `null` on valid base64 but invalid JSON
 - Handles base64 strings that require padding restoration (payload lengths of 1, 2, 3 mod 4)
-- Drops unknown settings keys
+- Drops unknown settings keys; keeps known valid ones (partial payload test)
 - Drops settings keys with wrong value types (`typingSpeedMs: "fast"` → dropped)
 - Drops settings keys with out-of-range enum values (`playbackMode: "sideways"` → dropped)
 - Keeps settings keys with valid values
+- Drops unknown theme keys
+- Drops theme values that fail validation (`shell: "banana"` → dropped)
+- Keeps theme keys with valid values
 - Drops unknown demo keys
-- Drops demo keys with non-primitive values
-- Keeps known demo keys with string values
+- Drops demo keys with non-string values
+- Keeps known demo keys with valid string values
+- Unicode values in `demo.tenant` round-trip correctly through encode/decode
 - Handles hash with no query string
+- `parsePresentId("#/present/foo?cfg=...")` returns `id === "foo"`
+- `parsePresentId("#/present/foo/bar")` returns `null`
 
 ---
 
@@ -219,27 +249,38 @@ Contract baseline is the normalized output of `loadContract` / `normalizeContrac
 `demoOverrides` is returned separately from the deck so the deck shape stays clean
 and there is no risk of accidental persistence.
 
-### Implementation sketch
+**`mergeDeck` always returns a fresh object** — even when there are no URL overrides —
+so downstream code cannot accidentally mutate the original contract deck in-place.
 
 ```js
 // src/core/magic-link.js (continued)
 
 export function mergeDeck(contractDeck, urlOverrides) {
-  if (!urlOverrides) return { deck: contractDeck, demoOverrides: null };
+  if (!urlOverrides) {
+    return {
+      deck: {
+        ...contractDeck,
+        settings: { ...(contractDeck.settings || {}) },
+        theme:    { ...(contractDeck.theme    || {}) },
+      },
+      demoOverrides: null,
+    };
+  }
 
-  const deck = {
-    ...contractDeck,
-    settings: {
-      ...contractDeck.settings,
-      ...(urlOverrides.settings || {}),
+  return {
+    deck: {
+      ...contractDeck,
+      settings: {
+        ...contractDeck.settings,
+        ...(urlOverrides.settings || {}),
+      },
+      theme: {
+        ...contractDeck.theme,
+        ...(urlOverrides.theme || {}),
+      },
     },
-    theme: {
-      ...contractDeck.theme,
-      ...(urlOverrides.theme || {}),
-    },
+    demoOverrides: urlOverrides.demo || null,
   };
-
-  return { deck, demoOverrides: urlOverrides.demo || null };
 }
 ```
 
@@ -254,14 +295,15 @@ const runtime = createDeckRuntime(deck, { demoOverrides, ...otherDeps });
 never touches the store or localStorage.
 
 **Tests to write:**
-- Returns original contract deck unchanged when `urlOverrides` is `null`
+- Returns a fresh deck object even when `urlOverrides` is `null` (not the same reference)
+- `mergeDeck` does not mutate `contractDeck`
 - `demoOverrides` is `null` when `urlOverrides` is `null`
 - Settings from URL override matching contract settings
 - Settings absent from URL keep contract value
 - Theme from URL overrides matching contract theme
 - `demoOverrides` is populated when `demo` key is present
 - `demoOverrides` is `null` when `demo` key is absent
-- Returned `deck` object has no `demoOverrides` property (clean shape)
+- Returned `deck` object has no extra properties beyond the contract shape
 
 ---
 
@@ -279,9 +321,9 @@ never touches the store or localStorage.
 ### New flow
 
 ```
-parsePresentId(hash)             → { id, rawHash }
-readMagicLinkConfig(rawHash)     → urlOverrides | null
-loadContract(contractUrl)        → contractDeck
+parsePresentId(hash)                  → { id, rawHash }
+readMagicLinkConfig(rawHash)          → urlOverrides | null
+loadContract(contractUrl)             → contractDeck
 mergeDeck(contractDeck, urlOverrides) → { deck, demoOverrides }
 createDeckRuntime(deck, { demoOverrides })
 runtime.start()
@@ -309,8 +351,10 @@ function parsePresentId(hash) {
 ### Changes to `bootPresentMode` (main.js:21-60)
 
 ```js
-// Temporary flag — remove after contract coverage reaches 100%
-const ALLOW_PRESENT_LOCAL_FALLBACK = true;
+// ALLOW_PRESENT_LOCAL_FALLBACK defaults to false.
+// Enable only temporarily during rollout if a contract file is missing for a known deck.
+// Remove this flag and its branch once contract coverage is complete.
+const ALLOW_PRESENT_LOCAL_FALLBACK = false;
 
 async function bootPresentMode({ id, rawHash }, store) {
   const contractUrl = `./src/contracts/${encodeURIComponent(id)}.json`;
@@ -336,10 +380,9 @@ async function bootPresentMode({ id, rawHash }, store) {
 }
 ```
 
-> **Fallback sunset:** `ALLOW_PRESENT_LOCAL_FALLBACK` is `true` during rollout only.
-> Set it to `false` once all decks that need to be directly presentable have a
-> corresponding contract file in `src/contracts/`. Once it is `false` and no issues
-> surface, delete the flag and the fallback branch entirely.
+> **Fallback usage:** set `ALLOW_PRESENT_LOCAL_FALLBACK = true` only if a specific deck
+> has no contract file yet and must remain presentable during rollout. Turn it back to
+> `false` once all decks have contracts. Delete the flag and fallback branch at that point.
 
 **Call-site change** (main.js:84):
 
@@ -367,12 +410,13 @@ if (presentTarget) {
 
 Replaces the bare `#/present/:id` link with one that encodes the current shareable
 settings into `?cfg=`. If no shareable overrides exist, returns a plain `#/present/:id`
-link without a `?cfg=` param.
+link with no `?cfg=` param.
 
-### Shareable config
+### API
 
-Only keys from the "keep in the magic link" list in `overview.md` are included.
-Author-only prefs (panel layout, collapsed sections, selected scene) are excluded.
+`buildMagicLink` takes explicit shareable inputs rather than the whole deck object.
+This keeps the shareable surface explicit and prevents accidental coupling to
+unrelated deck fields in the future.
 
 ```js
 // src/core/magic-link.js (continued)
@@ -386,32 +430,35 @@ const SHAREABLE_THEME = new Set(["accent", "shell", "presenterPosition"]);
 
 const MAGIC_LINK_WARN_LENGTH = 1800;
 
-export function buildMagicLink(baseUrl, deckId, deck) {
+/**
+ * @param {string} baseUrl  - e.g. `${location.origin}${location.pathname}`
+ * @param {string} deckId
+ * @param {{ settings?: object, theme?: object, demoOverrides?: object | null }} shareableConfig
+ */
+export function buildMagicLink(baseUrl, deckId, shareableConfig = {}) {
+  const { settings = {}, theme = {}, demoOverrides = null } = shareableConfig;
   const payload = {};
 
-  const settings = Object.fromEntries(
-    Object.entries(deck.settings || {}).filter(([k]) => SHAREABLE_SETTINGS.has(k))
+  const filteredSettings = Object.fromEntries(
+    Object.entries(settings).filter(([k]) => SHAREABLE_SETTINGS.has(k))
   );
-  if (Object.keys(settings).length) payload.settings = settings;
+  if (Object.keys(filteredSettings).length) payload.settings = filteredSettings;
 
-  const theme = Object.fromEntries(
-    Object.entries(deck.theme || {}).filter(([k]) => SHAREABLE_THEME.has(k))
+  const filteredTheme = Object.fromEntries(
+    Object.entries(theme).filter(([k]) => SHAREABLE_THEME.has(k))
   );
-  if (Object.keys(theme).length) payload.theme = theme;
+  if (Object.keys(filteredTheme).length) payload.theme = filteredTheme;
 
-  // No _demoOverrides on the deck shape; caller passes demo state explicitly if needed
-  // buildMagicLink(baseUrl, deckId, deck, demoOverrides?) could extend this later
+  if (demoOverrides && Object.keys(demoOverrides).length) {
+    payload.demo = demoOverrides;
+  }
 
-  // Return plain link when there are no shareable overrides
   const base = `${baseUrl}#/present/${encodeURIComponent(deckId)}`;
+
+  // Return a plain link when there are no shareable overrides
   if (!Object.keys(payload).length) return base;
 
-  const cfg = btoa(JSON.stringify(payload))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-
-  const link = `${base}?cfg=${cfg}`;
+  const link = `${base}?cfg=${encodePayload(payload)}`;
 
   if (link.length > MAGIC_LINK_WARN_LENGTH) {
     console.warn(
@@ -439,15 +486,21 @@ import { buildMagicLink } from "../core/magic-link.js";
 
 const deck = store.getById(id);
 const base = `${location.origin}${location.pathname}`;
-const link = buildMagicLink(base, id, deck);
+const link = buildMagicLink(base, id, {
+  settings: deck.settings,
+  theme: deck.theme,
+  // demoOverrides: pass if demo state should be included in the link
+});
 ```
 
 **Tests to write:**
 - Round-trip: `readMagicLinkConfig(new URL(buildMagicLink(...)).hash)` returns the same settings
 - Author-only keys are not present in the generated link
-- Empty payload returns plain `#/present/:id` with no `?cfg=` param
-- Settings-only payload omits `theme` key from encoded JSON
-- `console.warn` is called when the generated URL exceeds `MAGIC_LINK_WARN_LENGTH`
+- Empty `shareableConfig` returns plain `#/present/:id` with no `?cfg=` param
+- Payload with only settings omits `theme` key from encoded JSON
+- `console.warn` fires when generated URL exceeds `MAGIC_LINK_WARN_LENGTH`
+- `buildMagicLink` output omits `cfg` when every settings/theme value is filtered out
+- Unicode tenant name in `demoOverrides` round-trips correctly
 
 ---
 
@@ -459,7 +512,7 @@ verified before marking this step done.
 ### 5a. `bootPresentMode` must not read `prs_library` as the primary path
 
 Covered in step 3. The new flow only reaches `store.getById` through the explicitly
-gated fallback.
+gated fallback, which defaults to `false`.
 
 ### 5b. Inspector panel must not affect link-only playback
 
@@ -493,8 +546,8 @@ live outside `prs_library` and are not part of the magic link payload. No change
 
 | File | Change |
 |---|---|
-| `src/core/magic-link.js` | **New** — decoder, parser, sanitizer, merge, builder |
-| `src/main.js` | Update `parsePresentId` regex; update `bootPresentMode` to be contract-first with gated fallback |
+| `src/core/magic-link.js` | **New** — UTF-8 encode/decode helpers, parser, sanitizer, merge, builder |
+| `src/main.js` | Update `parsePresentId` regex; contract-first boot with off-by-default fallback |
 | `src/screens/workspace.js` | Replace bare present link with `buildMagicLink(...)` |
 | `src/core/contract-loader.js` | No change |
 | `src/core/library-store.js` | No change |

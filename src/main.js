@@ -1,18 +1,27 @@
 import { createRouter }       from "./core/router.js";
 import { createLibraryStore } from "./core/library-store.js";
+import { loadContract }       from "./core/contract-loader.js";
+import { readMagicLinkConfig, mergeDeck } from "./core/magic-link.js";
 import { mountAppShell }      from "./ui/app-shell.js";
 import { mountLibrary }       from "./screens/library.js";
 import { mountWorkspace }     from "./screens/workspace.js";
 import { mountImportScene }   from "./screens/import-scene.js";
 
+// ALLOW_PRESENT_LOCAL_FALLBACK defaults to false.
+// Enable temporarily during rollout only if a specific deck has no contract
+// file yet. Set back to false once contract coverage is complete, then delete
+// this flag and the fallback branch entirely.
+const ALLOW_PRESENT_LOCAL_FALLBACK = false;
+
 function parsePresentId(hash) {
-  const match = /^#\/present\/([^/?#]+)$/.exec(hash || "");
+  // Accept an optional query string after the id segment (e.g. ?cfg=...)
+  const match = /^#\/present\/([^/?#]+)/.exec(hash || "");
   if (!match) return null;
 
   try {
     const id = decodeURIComponent(match[1]);
     if (!id || id.includes("/")) return null;
-    return id;
+    return { id, rawHash: hash };
   } catch {
     return null;
   }
@@ -20,7 +29,7 @@ function parsePresentId(hash) {
 
 let _presentSession = null;
 
-async function bootPresentMode(id, store) {
+async function bootPresentMode({ id, rawHash }, store) {
   const appEl = document.getElementById("app");
   if (!appEl) return;
 
@@ -29,8 +38,26 @@ async function bootPresentMode(id, store) {
     _presentSession = null;
   }
 
+  const contractUrl = `./src/contracts/${encodeURIComponent(id)}.json`;
+  let contractDeck;
+  try {
+    contractDeck = await loadContract(contractUrl);
+  } catch {
+    if (ALLOW_PRESENT_LOCAL_FALLBACK) {
+      contractDeck = store.getById(id);
+    }
+  }
+
+  if (!contractDeck) {
+    appEl.innerHTML = `<div class="ps-not-found">Presentation not found.</div>`;
+    return;
+  }
+
+  const urlOverrides = readMagicLinkConfig(rawHash);
+  const { deck, demoOverrides } = mergeDeck(contractDeck, urlOverrides);
+
   const { mountPresent } = await import("./screens/present.js");
-  _presentSession = mountPresent({ id, store, rootEl: appEl });
+  _presentSession = mountPresent({ id, deck, demoOverrides, store, rootEl: appEl });
 }
 
 /**
@@ -81,9 +108,9 @@ async function boot() {
   const store  = createLibraryStore();
   await seedIfEmpty(store);
 
-  const presentId = parsePresentId(location.hash);
-  if (presentId) {
-    await bootPresentMode(presentId, store);
+  const presentTarget = parsePresentId(location.hash);
+  if (presentTarget) {
+    await bootPresentMode(presentTarget, store);
     return;
   }
 

@@ -14,6 +14,7 @@ import { getRuntime, setRuntime } from "../core/runtime-singleton.js";
 import { createSceneList }      from "../ui/scene-list.js";
 import { createInspectorPanel } from "../ui/inspector-panel.js";
 import { createLayoutManager }  from "../ui/layout-manager.js";
+import { buildMagicLink }       from "../core/magic-link.js";
 
 // Session-level memory: restore scene position when re-opening a presentation
 const _lastSceneIndex = {};
@@ -26,8 +27,13 @@ function esc(str) {
     .replace(/"/g, "&quot;");
 }
 
-function copyPresentLink(id) {
-  const url = `${location.origin}${location.pathname}#/present/${encodeURIComponent(id)}`;
+function copyPresentLink(id, store) {
+  const deck = store.getById(id);
+  const base = `${location.origin}${location.pathname}`;
+  const url = buildMagicLink(base, id, {
+    settings: deck?.settings,
+    theme:    deck?.theme,
+  });
   navigator.clipboard.writeText(url).catch(() => {
     prompt("Copy this link:", url);
   });
@@ -149,7 +155,7 @@ export function mountWorkspace({ id, store, router, shell }) {
       }
     },
     onCopyLink(e) {
-      copyPresentLink(id);
+      copyPresentLink(id, store);
       const btn = e.currentTarget;
       const original = btn.textContent;
       btn.textContent = "Copied!";
