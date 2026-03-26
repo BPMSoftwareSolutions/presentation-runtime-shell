@@ -254,10 +254,25 @@ function tw(container, text, delay, done){
 
 // Typewriter for signal lines — sig1 is a timer, sig2/sig3 are typewriter text
 setTimeout(()=>{
+  // ─── Sig1: Timer counting up ───
+  const sig1TextEl=document.getElementById('sig1-text');
+  const sig1CurEl=document.getElementById('sig1-cursor');
+  sig1TextEl.textContent='Inactive for ';
+  const timerSpan=document.createElement('span');
+  timerSpan.className='timer-val';
+  timerSpan.textContent=fmt(totalSec);
+  sig1TextEl.parentNode.insertBefore(timerSpan, sig1CurEl);
+  // Tick every second
+  setInterval(()=>{ totalSec++; timerSpan.textContent=fmt(totalSec); }, 1000);
+  
+  // ─── Sig2: Typewriter ───
   const sig2TextEl=document.getElementById('sig2-text');
   const sig3TextEl=document.getElementById('sig3-text');
   const sig2CurEl=document.getElementById('sig2-cursor');
   const sig3CurEl=document.getElementById('sig3-cursor');
+  // Clear sig2/sig3 text to prepare for typewriter
+  sig2TextEl.textContent='';
+  sig3TextEl.textContent='';
   let i2=0, i3=0;
   const sig2='Last known location: restaurant parking lot';
   const sig3='External escalation: police contact received';
