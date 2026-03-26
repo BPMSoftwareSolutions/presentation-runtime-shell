@@ -75,7 +75,7 @@
         ]
       },
       "content": { "route": "./src/generated/mortgage-audit/scene-03-review/index.html" },
-      "advance": { "type": "manual" }
+      "advance": { "type": "waitForEvent", "event": "review:complete" }
     },
     {
       "id": "mortgage-04",

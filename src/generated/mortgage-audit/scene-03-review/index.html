@@ -7,47 +7,68 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--violet:#a78bfa}
+:root{--bg:#08101d;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.09);--muted:#94a3b8;--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444}
 .scene{height:100%;padding:32px 44px;position:relative;display:flex;flex-direction:column;gap:18px}
-.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
 .orb1{position:absolute;width:400px;height:400px;right:-80px;top:-100px;border-radius:50%;filter:blur(110px);background:radial-gradient(circle,rgba(14,165,233,.12),transparent 70%)}
 
+/* Head */
 .head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex:none}
+.head-left{display:flex;flex-direction:column;gap:5px}
 .head-title{font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.reviewer-mode{display:flex;align-items:center;gap:7px;font-size:12px;color:#6ee7b7;font-weight:600;letter-spacing:.06em}
+.reviewer-dot{width:7px;height:7px;border-radius:50%;background:#10b981;flex:none;animation:pulse-green 2s ease-in-out infinite}
+@keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.45)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}}
 .head-badge{padding:8px 18px;border-radius:999px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#7dd3fc;font-size:13px;letter-spacing:.08em;font-weight:600}
 
+/* Layout */
 .main{position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:20px;min-height:0}
 
-/* Review Queue */
+/* Review Queue panel */
 .queue-panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
-.queue-panel h3{font-size:14px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.queue-label{font-size:13px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 
 /* Review Card */
-.review-card{border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column;gap:14px;transition:border-color .4s ease,box-shadow .4s ease,background .4s ease}
-.review-card.confirmed{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.06);box-shadow:0 0 22px rgba(16,185,129,.1)}
+.review-card{border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(255,255,255,.03);padding:18px;display:flex;flex-direction:column;gap:12px;transition:border-color .4s ease,box-shadow .4s ease,background .4s ease}
+.review-card.confirmed{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.06);box-shadow:0 0 24px rgba(16,185,129,.1)}
+.review-card.wrong{animation:shake 380ms ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
 .card-head{display:flex;justify-content:space-between;align-items:flex-start}
-.card-title{font-size:15px;font-weight:600;color:#e2e8f0}
-.card-meta{font-size:12px;color:var(--muted);padding:3px 10px;border-radius:999px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#fcd34d;white-space:nowrap}
+.card-title{font-size:15px;font-weight:700;color:#e2e8f0}
+.card-versions{font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#fcd34d;white-space:nowrap;letter-spacing:.06em}
+
+/* Radio options */
 .radio-group{display:flex;flex-direction:column;gap:8px}
-.radio-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);cursor:pointer;transition:all .25s ease}
-.radio-opt.selected{border-color:rgba(14,165,233,.45);background:rgba(14,165,233,.08)}
-.radio-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex:none;display:grid;place-items:center;transition:all .25s ease}
+.radio-opt{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);cursor:pointer;transition:border-color .2s ease,background .2s ease;user-select:none}
+.radio-opt:hover{border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.05)}
+.radio-opt.selected{border-color:rgba(14,165,233,.48);background:rgba(14,165,233,.09)}
+.radio-opt.wrong-pick{border-color:rgba(245,158,11,.48);background:rgba(245,158,11,.07);cursor:not-allowed}
+.radio-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex:none;display:grid;place-items:center;transition:border-color .2s ease}
 .radio-opt.selected .radio-dot{border-color:var(--sky)}
 .radio-dot-inner{width:8px;height:8px;border-radius:50%;background:var(--sky);display:none}
 .radio-opt.selected .radio-dot-inner{display:block}
-.radio-label{font-size:13px;color:#cbd5e1}
+.radio-label{font-size:13px;color:#cbd5e1;flex:1;line-height:1.35}
+.radio-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* Buttons */
 .card-actions{display:flex;gap:10px}
-.btn-primary{flex:1;padding:10px 14px;border-radius:12px;background:var(--sky);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s ease;letter-spacing:.04em}
-.btn-primary:hover{background:#38bdf8;box-shadow:0 0 18px rgba(14,165,233,.35)}
-.btn-primary.confirmed{background:var(--green);box-shadow:0 0 18px rgba(16,185,129,.3)}
-.btn-secondary{padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s ease}
-.btn-secondary:hover{background:rgba(255,255,255,.09)}
-.confirm-msg{font-size:12px;color:#6ee7b7;display:none;align-items:center;gap:6px}
+.btn-confirm{flex:1;padding:10px 14px;border-radius:12px;background:var(--sky);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:background .25s ease,box-shadow .25s ease,opacity .2s ease;letter-spacing:.04em}
+.btn-confirm:hover:not(:disabled){background:#38bdf8;box-shadow:0 0 20px rgba(14,165,233,.38)}
+.btn-confirm:disabled{opacity:.32;cursor:default;pointer-events:none}
+.btn-confirm.confirmed{background:var(--green);box-shadow:0 0 20px rgba(16,185,129,.32)}
+.btn-archive{padding:10px 13px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:13px;cursor:pointer;transition:background .18s ease}
+.btn-archive:hover{background:rgba(255,255,255,.09)}
+
+/* Feedback messages */
+.confirm-msg{font-size:12px;color:#6ee7b7;display:none;align-items:center;gap:6px;font-weight:600}
 .confirm-msg.shown{display:flex}
+.warn-msg{font-size:12px;color:#fcd34d;display:none;align-items:center;gap:7px;padding:7px 11px;border-radius:10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.22);line-height:1.4}
+.warn-msg.shown{display:flex}
 
 /* Status Board */
 .board-panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:20px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
-.board-panel h3{font-size:14px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.board-label{font-size:13px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 .board-cols{flex:1;display:grid;grid-template-rows:1fr 1fr 1fr;gap:10px}
 .board-col{border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .board-col-green{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2)}
@@ -58,9 +79,9 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
 .col-hd-neutral{color:var(--muted)}
 .col-hd-amber{color:#fcd34d}
 .board-items{display:flex;flex-direction:column;gap:5px}
-.board-doc{font-size:12px;color:#94a3b8;padding:4px 8px;border-radius:8px;transition:all .35s ease;opacity:0;transform:translateY(5px)}
+.board-doc{font-size:12px;color:#94a3b8;padding:4px 8px;border-radius:8px;opacity:0;transform:translateY(5px);transition:opacity .35s ease,transform .35s ease,background .35s ease,color .35s ease,box-shadow .35s ease}
 .board-doc.shown{opacity:1;transform:none}
-.board-doc.highlight{background:rgba(16,185,129,.1);color:#a7f3d0;box-shadow:0 0 10px rgba(16,185,129,.12)}
+.board-doc.highlight{background:rgba(16,185,129,.12);color:#a7f3d0;box-shadow:0 0 12px rgba(16,185,129,.14)}
 
 [data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
 @keyframes reveal{to{opacity:1;transform:none}}
@@ -72,86 +93,107 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
   <div class="orb1"></div>
 
   <div class="head" data-reveal>
-    <div class="head-title">Used in Closing?</div>
-    <div class="head-badge">Reviewer Confirmation</div>
+    <div class="head-left">
+      <div class="head-title">Used in Closing?</div>
+      <div class="reviewer-mode"><span class="reviewer-dot"></span>Reviewer Mode: Active</div>
+    </div>
+    <div class="head-badge">Loan #48291</div>
   </div>
 
   <div class="main">
+    <!-- Left: Review Queue -->
     <div class="queue-panel" data-reveal>
-      <h3>Review Queue</h3>
+      <div class="queue-label">Review Queue — Confirm Closing Versions</div>
 
       <!-- Card 1: Closing Disclosure -->
-      <div class="review-card" id="card-1">
+      <div class="review-card" id="card-cd">
         <div class="card-head">
           <div class="card-title">Closing Disclosure</div>
-          <div class="card-meta">2 versions found</div>
+          <div class="card-versions">2 versions found</div>
         </div>
         <div class="radio-group">
-          <div class="radio-opt" id="cd-v2" onclick="selectRadio('cd','v2')">
+          <div class="radio-opt" id="cd-v2" onclick="selectOpt('cd','v2')">
             <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-            <div class="radio-label">DISC-CD-V2 &mdash; revised (not final)</div>
+            <div>
+              <div class="radio-label">DISC-CD-V2 — revised, not final</div>
+              <div class="radio-sub">Created Mar 10 · unsigned</div>
+            </div>
           </div>
-          <div class="radio-opt selected" id="cd-v3" onclick="selectRadio('cd','v3')">
+          <div class="radio-opt" id="cd-v3" onclick="selectOpt('cd','v3')">
             <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-            <div class="radio-label">DISC-CD-V3 &mdash; final signed</div>
+            <div>
+              <div class="radio-label">DISC-CD-V3 — final signed</div>
+              <div class="radio-sub">Created Mar 12 · signed by all parties</div>
+            </div>
           </div>
         </div>
         <div class="card-actions">
-          <button class="btn-primary" id="btn-cd" onclick="confirmCard('cd')">Mark as Used in Closing</button>
-          <button class="btn-secondary">Archive V2</button>
+          <button class="btn-confirm" id="btn-cd" onclick="confirmCard('cd')" disabled>Confirm as Used in Closing</button>
+          <button class="btn-archive" onclick="archiveOther('cd')">Archive other</button>
         </div>
-        <div class="confirm-msg" id="msg-cd">&#10003; Closing Disclosure V3 confirmed as closing record</div>
+        <div class="confirm-msg" id="msg-cd">✓ Closing Disclosure V3 confirmed as the closing record</div>
+        <div class="warn-msg" id="warn-cd">⚠ DISC-CD-V2 is not the final version. Look for the signed copy before confirming.</div>
       </div>
 
       <!-- Card 2: Note -->
-      <div class="review-card" id="card-2">
+      <div class="review-card" id="card-note">
         <div class="card-head">
           <div class="card-title">Note</div>
-          <div class="card-meta">2 versions found</div>
+          <div class="card-versions">2 versions found</div>
         </div>
         <div class="radio-group">
-          <div class="radio-opt" id="note-v1" onclick="selectRadio('note','v1')">
+          <div class="radio-opt" id="note-v1" onclick="selectOpt('note','v1')">
             <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-            <div class="radio-label">NOTE-V1 &mdash; unsigned</div>
+            <div>
+              <div class="radio-label">NOTE-V1 — unsigned</div>
+              <div class="radio-sub">Created Mar 8 · not executed</div>
+            </div>
           </div>
-          <div class="radio-opt selected" id="note-v2" onclick="selectRadio('note','v2')">
+          <div class="radio-opt" id="note-v2" onclick="selectOpt('note','v2')">
             <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-            <div class="radio-label">NOTE-V2 &mdash; signed final</div>
+            <div>
+              <div class="radio-label">NOTE-V2 — signed final</div>
+              <div class="radio-sub">Created Mar 12 · executed at closing</div>
+            </div>
           </div>
         </div>
         <div class="card-actions">
-          <button class="btn-primary" id="btn-note" onclick="confirmCard('note')">Mark as Used in Closing</button>
-          <button class="btn-secondary">Supersede Unsigned</button>
+          <button class="btn-confirm" id="btn-note" onclick="confirmCard('note')" disabled>Confirm as Used in Closing</button>
+          <button class="btn-archive" onclick="archiveOther('note')">Supersede unsigned</button>
         </div>
-        <div class="confirm-msg" id="msg-note">&#10003; Signed Note V2 confirmed as closing record</div>
+        <div class="confirm-msg" id="msg-note">✓ Signed Note V2 confirmed as the closing record</div>
+        <div class="warn-msg" id="warn-note">⚠ NOTE-V1 is unsigned. An unsigned note cannot be the closing record.</div>
       </div>
     </div>
 
-    <div class="board-panel" data-reveal id="board-panel">
-      <h3>Status Board</h3>
+    <!-- Right: Status Board -->
+    <div class="board-panel" data-reveal>
+      <div class="board-label">Status Board</div>
       <div class="board-cols">
         <div class="board-col board-col-green">
           <div class="col-hd col-hd-green">Used in Closing</div>
           <div class="board-items">
-            <div class="board-doc" id="bd-cd" data-group="used">Closing Disclosure</div>
-            <div class="board-doc" id="bd-note" data-group="used">Note</div>
-            <div class="board-doc" id="bd-payoff" data-group="used">Payoff Letter</div>
-            <div class="board-doc" id="bd-title" data-group="used">Title Commitment</div>
+            <!-- These two are empty until user confirms them -->
+            <div class="board-doc" id="bd-cd">Closing Disclosure</div>
+            <div class="board-doc" id="bd-note">Note</div>
+            <!-- These are already confirmed by context -->
+            <div class="board-doc" id="bd-payoff">Payoff Letter</div>
+            <div class="board-doc" id="bd-title">Title Commitment</div>
           </div>
         </div>
         <div class="board-col board-col-neutral">
           <div class="col-hd col-hd-neutral">Not Used / Ancillary</div>
           <div class="board-items">
-            <div class="board-doc" id="bd-escrow" data-group="anc">Escrow Worksheet</div>
-            <div class="board-doc" id="bd-addendum" data-group="anc">Misc Addendum</div>
-            <div class="board-doc" id="bd-compliance" data-group="anc">Compliance Notice</div>
+            <div class="board-doc" id="bd-escrow">Escrow Worksheet</div>
+            <div class="board-doc" id="bd-addendum">Misc Addendum</div>
+            <div class="board-doc" id="bd-compliance">Compliance Notice</div>
           </div>
         </div>
         <div class="board-col board-col-amber">
           <div class="col-hd col-hd-amber">Needs Review</div>
           <div class="board-items">
-            <div class="board-doc" id="bd-wiring" data-group="review">Wiring Instructions OLD</div>
-            <div class="board-doc" id="bd-scan" data-group="review">Random Scan 003</div>
+            <div class="board-doc" id="bd-wiring">Wiring Instructions OLD</div>
+            <div class="board-doc" id="bd-scan">Random Scan 003</div>
           </div>
         </div>
       </div>
@@ -167,52 +209,86 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
   function revealDelay(idx){ return (0.1 + idx * 0.13) * 1000; }
   var REVEAL_DUR = 550;
 
-  // Stagger board docs after board panel reveals (index 2)
+  // Board: Payoff, Title, Ancillary, Needs Review all reveal on load.
+  // Closing Disclosure and Note start hidden — they appear only after user confirms.
   var boardStart = revealDelay(2) + REVEAL_DUR + 100;
-  var boardDocs = document.querySelectorAll('.board-doc');
-  boardDocs.forEach(function(doc, i){
-    setTimeout(function(){ doc.classList.add('shown'); }, boardStart + i * 80);
+  var prePopulated = ['bd-payoff','bd-title','bd-escrow','bd-addendum','bd-compliance','bd-wiring','bd-scan'];
+  prePopulated.forEach(function(id, i){
+    setTimeout(function(){ document.getElementById(id).classList.add('shown'); }, boardStart + i * 80);
   });
 
-  // Radio selection
-  window.selectRadio = function(group, version){
-    var opts = document.querySelectorAll('[id^="' + group + '-"]');
-    opts.forEach(function(opt){ opt.classList.remove('selected'); });
-    document.getElementById(group + '-' + version).classList.add('selected');
-  };
+  var selections = { cd: null, note: null };
+  var confirmed  = { cd: false, note: false };
+  var correct    = { cd: 'v3', note: 'v2' };
 
-  var confirmed = {cd: false, note: false};
+  window.selectOpt = function(group, version){
+    if(confirmed[group]) return;
+    // Clear previous state
+    ['v1','v2','v3'].forEach(function(v){
+      var el = document.getElementById(group + '-' + v);
+      if(el) el.classList.remove('selected','wrong-pick');
+    });
+    document.getElementById(group + '-' + version).classList.add('selected');
+    selections[group] = version;
+    // Enable confirm button now that a selection exists
+    document.getElementById('btn-' + group).disabled = false;
+    // Clear previous warning
+    document.getElementById('warn-' + group).classList.remove('shown');
+  };
 
   window.confirmCard = function(group){
-    if(confirmed[group]) return;
+    if(confirmed[group] || !selections[group]) return;
+
+    var card  = document.getElementById('card-' + group);
+    var btn   = document.getElementById('btn-'  + group);
+    var msg   = document.getElementById('msg-'  + group);
+    var warn  = document.getElementById('warn-' + group);
+
+    if(selections[group] !== correct[group]){
+      // Wrong answer: shake, warn, reset for retry
+      card.classList.add('wrong');
+      warn.classList.add('shown');
+      document.getElementById(group + '-' + selections[group]).classList.replace('selected','wrong-pick');
+      selections[group] = null;
+      btn.disabled = true;
+      setTimeout(function(){ card.classList.remove('wrong'); }, 420);
+      return;
+    }
+
+    // Correct answer
     confirmed[group] = true;
-
-    var card = document.getElementById('card-' + (group === 'cd' ? '1' : '2'));
-    var btn = document.getElementById('btn-' + group);
-    var msg = document.getElementById('msg-' + group);
-    var boardDoc = document.getElementById('bd-' + (group === 'cd' ? 'cd' : 'note'));
-
     card.classList.add('confirmed');
-    btn.textContent = '\u2713 Confirmed';
+    btn.textContent  = '✓ Confirmed';
     btn.classList.add('confirmed');
     btn.disabled = true;
+    warn.classList.remove('shown');
     msg.classList.add('shown');
 
-    // Highlight matching board entry
+    // Animate matching board entry in with highlight — the cause→effect moment
+    var boardId = group === 'cd' ? 'bd-cd' : 'bd-note';
     setTimeout(function(){
-      boardDoc.classList.add('highlight');
-    }, 300);
+      var el = document.getElementById(boardId);
+      el.classList.add('shown');
+      // Brief delay so the "shown" transition runs before highlight kicks in
+      setTimeout(function(){ el.classList.add('highlight'); }, 80);
+    }, 320);
+
+    // Once both confirmed, unlock the presenter to advance
+    if(confirmed.cd && confirmed.note){
+      setTimeout(function(){
+        window.parent.postMessage({ type: 'review:complete' }, '*');
+      }, 700);
+    }
   };
 
-  // Auto-demo: confirm both cards sequentially if not clicked
-  var autoDemoFired = false;
-  setTimeout(function(){
-    if(!confirmed.cd && !autoDemoFired){
-      autoDemoFired = true;
-      confirmCard('cd');
-      setTimeout(function(){ confirmCard('note'); }, 900);
-    }
-  }, 2800);
+  // Archive/supersede buttons: no-op in demo but feel interactive
+  window.archiveOther = function(group){
+    if(!confirmed[group]) return;
+    var wrongV = correct[group] === 'v3' ? 'v2' : 'v1';
+    var el = document.getElementById(group + '-' + wrongV);
+    if(el) el.style.opacity = '.3';
+  };
+
 })();
 </script>
 </body>
