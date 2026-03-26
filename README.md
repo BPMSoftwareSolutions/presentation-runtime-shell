@@ -136,9 +136,17 @@ presentation-runtime-shell/
 │   │   ├── manifest.json         # Ordered list of contract paths to seed
 │   │   ├── demo-deck.json        # 3-scene starter demo
 │   │   ├── msp-demo-deck.json    # MSP Command Center demo
+│   │   ├── mortgage-audit-demo.json  # Mortgage closing document audit demo
 │   │   └── ...                   # filename must match deck id field
 │   └── generated/
-│       └── msp/                  # Self-contained scene HTML files
+│       ├── msp/                  # MSP Command Center scene HTML files
+│       └── mortgage-audit/       # Mortgage audit scene HTML files
+│           ├── scene-00-import/  # File system import (waitForEvent)
+│           ├── scene-01-intake/  # Loan file after import (delay)
+│           ├── scene-02-classify/ # Classification animation (waitForEvent)
+│           ├── scene-03-review/  # Reviewer confirmation (waitForEvent)
+│           ├── scene-04-separate/ # Separation of record (waitForEvent)
+│           └── scene-05-audit/   # Audit-ready proof (manual)
 ├── tests/
 │   └── magic-link.test.js        # Parser, merge, builder, round-trip tests
 ├── skills/                       # Task-oriented how-to guides
@@ -155,7 +163,7 @@ presentation-runtime-shell/
 - Open any deck into the workspace
 
 ### Present (`#/present/:id`)
-Fullscreen client-facing player. Loaded directly from the contract file — localStorage is never consulted. Accepts an optional `?cfg=` magic link parameter to override playback settings and theme. Use **Copy Link** in the workspace to generate a shareable URL.
+Fullscreen client-facing player. Loaded directly from the contract file — localStorage is never consulted. Accepts an optional `?cfg=` magic link parameter to override playback settings, theme, and per-scene advance rules. Use **Copy Link** in the workspace to generate a shareable URL.
 
 ### Workspace (`#/presentation/:id`)
 The main authoring and presenting environment. Three columns:
@@ -220,7 +228,7 @@ Active in **Split** and **Fullscreen** modes:
 | `manual` | Presenter clicks next (default) |
 | `auto` | Immediately advance after typing finishes |
 | `delay` | Wait `delayMs` milliseconds, then advance |
-| `waitForEvent` | Wait for the iframe to post a named event (e.g., `"chart:animated"`) |
+| `waitForEvent` | Wait for the iframe to post a named event (e.g., `"chart:animated"`) — the inspector shows a datalist of events already used in the deck |
 
 ---
 
