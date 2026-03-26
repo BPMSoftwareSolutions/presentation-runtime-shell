@@ -8,13 +8,13 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
 :root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--red:#ef4444;--amber:#f59e0b}
-.scene{height:100%;padding:42px;position:relative}
+.scene{height:100%;padding:24px;position:relative}
 .orb{position:absolute;inset:auto 0 0 auto;width:440px;height:440px;border-radius:50%;filter:blur(120px);background:radial-gradient(circle,rgba(239,68,68,.18),transparent 70%)}
-.wrap{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:20px}
+.wrap{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) minmax(0,.72fr) auto;gap:16px}
 
 /* Pulsing alert banner */
 .alert{
-  padding:16px 20px;
+  padding:14px 18px;
   border:1px solid rgba(239,68,68,.35);
   background:rgba(239,68,68,.10);
   border-radius:22px;
@@ -27,7 +27,7 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
   0%,100%{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.10)}
   50%{border-color:rgba(239,68,68,.55);background:rgba(239,68,68,.17)}
 }
-.alert .left{font-size:26px;font-weight:800;color:#fecaca}
+.alert .left{font-size:22px;font-weight:800;color:#fecaca}
 .alert .right{display:flex;align-items:center;gap:12px;font-size:15px;color:#fca5a5}
 .severity-label{white-space:nowrap}
 
@@ -35,19 +35,19 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
 .gauge-group{display:flex;flex-direction:column;align-items:center;gap:1px}
 .gauge-sublabel{font-size:11px;color:#fca5a5;white-space:nowrap;letter-spacing:.02em}
 
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
-.card{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:22px}
-.card h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;min-height:0}
+.card{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:18px;display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;overflow:hidden}
+.card h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
 
 /* Signal list */
 .signal{display:grid;gap:14px}
 .sig{
-  padding:16px 18px;
+  padding:14px 16px;
   border-radius:18px;
   background:rgba(255,255,255,.03);
-  font-size:21px;
+  font-size:18px;
   line-height:1.4;
-  min-height:60px;
+  min-height:54px;
   display:flex;
   align-items:center;
   flex-wrap:wrap;
@@ -73,6 +73,7 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
 /* SVG Map */
 .map-wrap{
   height:100%;
+  min-height:0;
   border-radius:18px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.1);
@@ -94,9 +95,9 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
 .map-sub{font-family:Inter,ui-sans-serif,system-ui,sans-serif;fill:#94a3b8;text-anchor:middle}
 .map-badge-bg{fill:rgba(8,16,29,.82);stroke:rgba(239,68,68,.3);stroke-width:1}
 
-.impact{display:grid;gap:12px}
-.impact .row{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);font-size:18px}
-.footer{padding:18px 20px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.08);border-radius:22px;font-size:20px;line-height:1.5;color:#fde68a}
+.impact{display:grid;gap:10px;align-content:start}
+.impact .row{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.03);font-size:16px;line-height:1.35}
+.footer{padding:14px 18px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.08);border-radius:22px;font-size:18px;line-height:1.4;color:#fde68a}
 
 [data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .5s ease forwards}
 @keyframes reveal{to{opacity:1;transform:none}}
@@ -176,9 +177,9 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
             <circle class="pin-dot"    cx="150" cy="100" r="7"/>
             <circle class="pin-center" cx="150" cy="100" r="3"/>
             <!-- Label badge -->
-            <rect class="map-badge-bg" x="88" y="148" width="124" height="40" rx="8"/>
-            <text class="map-lbl" x="150" y="165" font-size="12">Trenton, MI</text>
-            <text class="map-sub" x="150" y="181" font-size="9.5">Vehicle stationary</text>
+            <rect class="map-badge-bg" x="104" y="132" width="92" height="30" rx="8"/>
+            <text class="map-lbl" x="150" y="145" font-size="9.5">Trenton, MI</text>
+            <text class="map-sub" x="150" y="156" font-size="7.5">Vehicle stationary</text>
           </svg>
         </div>
       </div>
