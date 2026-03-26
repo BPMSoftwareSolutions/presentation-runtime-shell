@@ -1,1 +1,253 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Playbook</title><style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}:root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--green:#10b981;--amber:#f59e0b;--violet:#a78bfa}.scene{height:100%;padding:40px}.wrap{height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:20px}.head{display:flex;justify-content:space-between;align-items:center}.title{font-size:22px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.badge{padding:10px 14px;border-radius:999px;border:1px solid rgba(167,139,250,.28);background:rgba(167,139,250,.08);color:#ddd6fe}.steps{display:grid;grid-template-columns:1fr 1fr;gap:18px}.step{border:1px solid var(--border);border-radius:22px;background:rgba(255,255,255,.04);padding:20px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}.num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(16,185,129,.14);color:#a7f3d0;font-weight:800}.label{font-size:22px}.sub{font-size:14px;color:var(--muted);margin-top:6px}.result{padding:10px 14px;border-radius:999px;font-size:13px;text-transform:uppercase;letter-spacing:.09em}.ok{background:rgba(16,185,129,.12);color:#86efac}.warn{background:rgba(245,158,11,.12);color:#fcd34d}.footer{padding:18px 22px;border-radius:22px;border:1px solid rgba(16,185,129,.25);background:rgba(16,185,129,.07);font-size:22px;color:#d1fae5}[data-reveal]{opacity:0;transform:translateY(12px);animation:reveal .55s ease forwards}@keyframes reveal{to{opacity:1;transform:none}}</style></head><body><div class="scene"><div class="wrap"><div class="head"><div class="title" data-reveal>Playbook: Driver Incident Response</div><div class="badge" data-reveal>Governed execution</div></div><div class="steps"><div class="step" data-reveal><div class="num">1</div><div><div class="label">Attempt contact</div><div class="sub">Owner or dispatcher tries driver call and emergency escalation path</div></div><div class="result warn">Failed</div></div><div class="step" data-reveal><div class="num">2</div><div><div class="label">Suspend driver</div><div class="sub">Driver removed from active pool and unavailable for dispatch</div></div><div class="result ok">Success</div></div><div class="step" data-reveal><div class="num">3</div><div><div class="label">Reassign vehicle</div><div class="sub">Sprinter 05 handed to Driver-155 to preserve fleet throughput</div></div><div class="result ok">Success</div></div><div class="step" data-reveal><div class="num">4</div><div><div class="label">Log compliance incident</div><div class="sub">Incident recorded for legal, insurance, and internal review</div></div><div class="result ok">Logged</div></div><div class="step" data-reveal><div class="num">5</div><div><div class="label">Notify owner</div><div class="sub">Adrian gets one clear status update instead of fragmented calls</div></div><div class="result ok">Sent</div></div><div class="step" data-reveal><div class="num">6</div><div><div class="label">Resume monitoring</div><div class="sub">Fleet returns to managed state with active follow-up tasks</div></div><div class="result ok">Active</div></div></div><div class="footer" data-reveal>Outcome: the incident is contained consistently, quickly, and with an audit trail.</div></div></div><script>document.querySelectorAll('[data-reveal]').forEach((e,i)=>e.style.animationDelay=`${0.08+i*0.09}s`);</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playbook</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    :root {
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,.08);
+      --green: #10b981;
+      --amber: #f59e0b;
+      --violet: #a78bfa;
+    }
+    .scene { height: 100%; padding: 40px; }
+    .wrap { height: 100%; display: grid; grid-template-rows: auto auto 1fr auto; gap: 20px; }
+    .head { display: flex; justify-content: space-between; align-items: center; }
+    .title { font-size: 22px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .badge { padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(167,139,250,.28); background: rgba(167,139,250,.08); color: #ddd6fe; }
+
+    /* Progress section */
+    .progress-section { display: flex; flex-direction: column; gap: 8px; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; }
+    .progress-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .09em; }
+    .progress-counter { font-size: 13px; color: #a7f3d0; font-weight: 700; letter-spacing: .05em; }
+    .progress-track { height: 6px; border-radius: 999px; background: rgba(255,255,255,.07); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10b981, #34d399); width: 0%; transition: width 0.4s ease; }
+
+    .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .step {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: rgba(255,255,255,.04);
+      padding: 20px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(10px) scale(1);
+    }
+    .step.revealed {
+      animation: step-in .55s cubic-bezier(.22,.68,0,1.2) forwards;
+    }
+    @keyframes step-in {
+      0%   { opacity: 0; transform: translateY(10px) scale(1); }
+      60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .num {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(16,185,129,.14);
+      color: #a7f3d0;
+      font-weight: 800;
+    }
+    .num.glow-green { animation: glow-green .65s ease forwards; }
+    .num.glow-amber { animation: glow-amber .65s ease forwards; }
+    @keyframes glow-green {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+      40%  { box-shadow: 0 0 12px 4px rgba(16,185,129,0.4); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+    @keyframes glow-amber {
+      0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0); background: rgba(245,158,11,.14); }
+      40%  { box-shadow: 0 0 12px 4px rgba(245,158,11,0.4); background: rgba(245,158,11,.22); }
+      100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); background: rgba(245,158,11,.14); }
+    }
+    .label { font-size: 22px; }
+    .sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+    .result {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      opacity: 0;
+      transform: scale(0);
+    }
+    .result.pop {
+      animation: badge-pop .45s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes badge-pop {
+      0%   { opacity: 0; transform: scale(0); }
+      70%  { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .ok  { background: rgba(16,185,129,.12);  color: #86efac; }
+    .warn { background: rgba(245,158,11,.12); color: #fcd34d; }
+    .footer {
+      padding: 18px 22px;
+      border-radius: 22px;
+      border: 1px solid rgba(16,185,129,.25);
+      background: rgba(16,185,129,.07);
+      font-size: 22px;
+      color: #d1fae5;
+    }
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal .55s ease forwards;
+    }
+    @keyframes reveal { to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="wrap">
+
+      <div class="head">
+        <div class="title" data-reveal>Playbook: Driver Incident Response</div>
+        <div class="badge" data-reveal>Governed execution</div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-header">
+          <span class="progress-label">Incident response progress</span>
+          <span class="progress-counter" id="prog-counter">0 / 6 steps</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="prog-fill"></div>
+        </div>
+      </div>
+
+      <div class="steps" id="steps-grid">
+        <!-- Step 1 — Failed (amber) -->
+        <div class="step" data-step="1">
+          <div class="num" data-glow="amber">1</div>
+          <div>
+            <div class="label">Attempt contact</div>
+            <div class="sub">Owner or dispatcher tries driver call and emergency escalation path</div>
+          </div>
+          <div class="result warn">Failed</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step" data-step="2">
+          <div class="num" data-glow="green">2</div>
+          <div>
+            <div class="label">Suspend driver</div>
+            <div class="sub">Driver removed from active pool and unavailable for dispatch</div>
+          </div>
+          <div class="result ok">Success</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step" data-step="3">
+          <div class="num" data-glow="green">3</div>
+          <div>
+            <div class="label">Reassign vehicle</div>
+            <div class="sub">Sprinter 05 handed to Driver-155 to preserve fleet throughput</div>
+          </div>
+          <div class="result ok">Success</div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step" data-step="4">
+          <div class="num" data-glow="green">4</div>
+          <div>
+            <div class="label">Log compliance incident</div>
+            <div class="sub">Incident recorded for legal, insurance, and internal review</div>
+          </div>
+          <div class="result ok">Logged</div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step" data-step="5">
+          <div class="num" data-glow="green">5</div>
+          <div>
+            <div class="label">Notify owner</div>
+            <div class="sub">Adrian gets one clear status update instead of fragmented calls</div>
+          </div>
+          <div class="result ok">Sent</div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step" data-step="6">
+          <div class="num" data-glow="green">6</div>
+          <div>
+            <div class="label">Resume monitoring</div>
+            <div class="sub">Fleet returns to managed state with active follow-up tasks</div>
+          </div>
+          <div class="result ok">Active</div>
+        </div>
+      </div>
+
+      <div class="footer" data-reveal style="animation-delay:.17s">Outcome: the incident is contained consistently, quickly, and with an audit trail.</div>
+    </div>
+  </div>
+
+  <script>
+    // Stagger head elements
+    document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+      el.style.animationDelay = `${0.08 + i * 0.09}s`;
+    });
+
+    const steps = document.querySelectorAll('.step');
+    const fill  = document.getElementById('prog-fill');
+    const counter = document.getElementById('prog-counter');
+
+    // Progress targets: 5 of 6 steps "complete" (step 6 is Active — still green but partial)
+    // We count each revealed step up to 5 for the 83% bar, step 6 is revealed but stays at 5/6
+    const TOTAL = 6;
+    const COMPLETE = 5; // steps that count toward bar completion
+    // Bar goes to 83% (5/6)
+    const BAR_TARGET = ((COMPLETE / TOTAL) * 100).toFixed(1);
+
+    const STEP_DELAY_MS = 600;  // gap between steps
+    const START_DELAY_MS = 500; // initial delay before first step
+
+    let revealed = 0;
+
+    function revealStep(index) {
+      const step   = steps[index];
+      const num    = step.querySelector('.num');
+      const badge  = step.querySelector('.result');
+      const glowType = num.dataset.glow;
+
+      // Animate card in
+      step.classList.add('revealed');
+
+      // Glow on .num
+      setTimeout(() => {
+        num.classList.add(glowType === 'amber' ? 'glow-amber' : 'glow-green');
+      }, 80);
+
+      // Badge pop 200ms after card appears
+      setTimeout(() => {
+        badge.classList.add('pop');
+      }, 200);
+
+      // Update counter + progress bar
+      revealed++;
+      counter.textContent = `${Math.min(revealed, COMPLETE)} / ${TOTAL} steps`;
+
+      if (revealed <= COMPLETE) {
+        const pct = ((revealed / TOTAL) * 100).toFixed(1);
+        fill.style.width = pct + '%';
+      }
+    }
+
+    // Kick off sequential reveal
+    steps.forEach((_, i) => {
+      setTimeout(() => revealStep(i), START_DELAY_MS + i * STEP_DELAY_MS);
+    });
+  </script>
+</body>
+</html>

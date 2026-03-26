@@ -1,1 +1,310 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Impact</title><style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}:root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--green:#10b981;--violet:#a78bfa;--amber:#f59e0b}.scene{height:100%;position:relative;padding:46px}.gridbg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);background-size:46px 46px}.wrap{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:24px}.head{display:flex;justify-content:space-between;align-items:center}.eyebrow{color:var(--violet);font-size:14px;text-transform:uppercase;letter-spacing:.15em}.tag{padding:10px 14px;border-radius:999px;border:1px solid rgba(16,185,129,.22);background:rgba(16,185,129,.07);color:#d1fae5}.main{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}.panel{border:1px solid var(--border);border-radius:26px;background:rgba(255,255,255,.04);padding:24px}.title{font-size:56px;line-height:1.02;font-weight:800;max-width:700px}.subtitle{margin-top:16px;font-size:23px;line-height:1.5;color:var(--muted);max-width:760px}.metrics{display:grid;gap:14px}.metric{padding:18px;border-radius:18px;background:rgba(255,255,255,.03);display:flex;justify-content:space-between;align-items:end}.lab{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.val{font-size:36px;font-weight:800}.quote{padding:20px 24px;border-radius:24px;border:1px solid rgba(245,158,11,.28);background:rgba(245,158,11,.08);font-size:24px;line-height:1.5;color:#fde68a}.footer{display:flex;justify-content:space-between;align-items:end}.pill{padding:10px 14px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .6s ease forwards}@keyframes reveal{to{opacity:1;transform:none}}</style></head><body><div class="scene"><div class="gridbg"></div><div class="wrap"><div class="head"><div class="eyebrow" data-reveal>Operational impact</div><div class="tag" data-reveal>From reactive management to governed operations</div></div><div class="main"><div class="panel"><div class="title" data-reveal>Faster detection. Faster response. Better sleep.</div><div class="subtitle" data-reveal>FleetOps gives the owner one place to see the business, catch high-risk events, execute standard playbooks, and keep the fleet moving without living in nonstop escalation mode.</div><div class="quote" data-reveal>“You are no longer the coordination layer. The platform becomes the coordination layer.”</div></div><div class="panel"><div class="metrics"><div class="metric" data-reveal><div><div class="lab">Detection time</div></div><div class="val">2m</div></div><div class="metric" data-reveal><div><div class="lab">Response time</div></div><div class="val">3m</div></div><div class="metric" data-reveal><div><div class="lab">Manual equivalent</div></div><div class="val">2–4h</div></div><div class="metric" data-reveal><div><div class="lab">Sleep recovered</div></div><div class="val">3+ h</div></div></div></div></div><div class="footer"><div class="pill" data-reveal>Visibility</div><div class="pill" data-reveal>Governance</div><div class="pill" data-reveal>Incident response</div><div class="pill" data-reveal>Compliance trail</div><div class="pill" data-reveal>Scalable operations</div></div></div></div><script>document.querySelectorAll('[data-reveal]').forEach((e,i)=>e.style.animationDelay=`${0.12+i*0.1}s`);</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Impact</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    :root {
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,.08);
+      --green: #10b981;
+      --violet: #a78bfa;
+      --amber: #f59e0b;
+    }
+    .scene { height: 100%; position: relative; padding: 46px; }
+    .gridbg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 46px 46px;
+    }
+    .wrap { position: relative; z-index: 1; height: 100%; display: grid; grid-template-rows: auto 1fr auto; gap: 24px; }
+    .head { display: flex; justify-content: space-between; align-items: center; }
+    .eyebrow { color: var(--violet); font-size: 14px; text-transform: uppercase; letter-spacing: .15em; }
+    .tag { padding: 10px 14px; border-radius: 999px; border: 1px solid rgba(16,185,129,.22); background: rgba(16,185,129,.07); color: #d1fae5; }
+    .main { display: grid; grid-template-columns: 1.1fr .9fr; gap: 22px; }
+    .panel { border: 1px solid var(--border); border-radius: 26px; background: rgba(255,255,255,.04); padding: 24px; }
+    .panel-title { font-size: 56px; line-height: 1.02; font-weight: 800; max-width: 700px; }
+    .subtitle { margin-top: 16px; font-size: 23px; line-height: 1.5; color: var(--muted); max-width: 760px; }
+
+    /* Quote with typewriter */
+    .quote {
+      padding: 20px 24px;
+      border-radius: 24px;
+      border: 1px solid rgba(245,158,11,.28);
+      background: rgba(245,158,11,.08);
+      font-size: 24px;
+      line-height: 1.5;
+      color: #fde68a;
+      min-height: 108px;
+    }
+    .quote .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: #fde68a;
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: blink .75s step-end infinite;
+    }
+    .cursor.hidden { display: none; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* Right panel metrics */
+    .metrics { display: grid; gap: 14px; height: 100%; grid-template-rows: 1fr 1fr 1fr 1fr; }
+    .metric {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lab { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+    .val { font-size: 36px; font-weight: 800; color: #eef2ff; }
+    .val-unit { font-size: 16px; font-weight: 600; color: var(--muted); margin-left: 3px; }
+
+    /* Comparison bars section */
+    .compare-section { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .compare-row { display: flex; flex-direction: column; gap: 4px; }
+    .compare-label-row { display: flex; justify-content: space-between; align-items: center; }
+    .compare-name { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .compare-time { font-size: 12px; font-weight: 700; }
+    .compare-time.green { color: #86efac; }
+    .compare-time.red   { color: #fca5a5; }
+    .bar-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,.06); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; width: 0%; transition: width 1.1s cubic-bezier(.22,.68,0,1.1); }
+    .bar-fill.green { background: linear-gradient(90deg, #10b981, #34d399); }
+    .bar-fill.red   { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* Gauge */
+    .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .gauge-svg { display: block; }
+    .gauge-label { font-size: 15px; font-weight: 800; color: #86efac; }
+    .gauge-sub   { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+    /* Footer pills */
+    .footer { display: flex; justify-content: space-between; align-items: end; }
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    .pill.revealed {
+      animation: pill-in .5s cubic-bezier(.22,.68,0,1.1) forwards;
+    }
+    @keyframes pill-in {
+      0%   { opacity: 0; transform: translateY(16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .pill.glow-pill {
+      animation: pill-in .5s cubic-bezier(.22,.68,0,1.1) forwards, pill-glow .8s ease forwards;
+    }
+    @keyframes pill-glow {
+      0%   { border-color: var(--border); }
+      30%  { border-color: rgba(167,139,250,.7); box-shadow: 0 0 8px 2px rgba(167,139,250,.25); }
+      100% { border-color: var(--border); box-shadow: none; }
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(14px);
+      animation: reveal .6s ease forwards;
+    }
+    @keyframes reveal { to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="gridbg"></div>
+    <div class="wrap">
+
+      <div class="head">
+        <div class="eyebrow" data-reveal style="animation-delay:.12s">Operational impact</div>
+        <div class="tag"     data-reveal style="animation-delay:.22s">From reactive management to governed operations</div>
+      </div>
+
+      <div class="main">
+        <!-- Left panel — unchanged content -->
+        <div class="panel">
+          <div class="panel-title" data-reveal style="animation-delay:.32s">Faster detection. Faster response. Better sleep.</div>
+          <div class="subtitle"   data-reveal style="animation-delay:.42s">FleetOps gives the owner one place to see the business, catch high-risk events, execute standard playbooks, and keep the fleet moving without living in nonstop escalation mode.</div>
+          <!-- Quote: starts empty, typed after reveal -->
+          <div class="quote" id="quote-box" data-reveal style="animation-delay:.52s; margin-top:20px;">
+            <span id="quote-text"></span><span class="cursor" id="quote-cursor"></span>
+          </div>
+        </div>
+
+        <!-- Right panel — metrics -->
+        <div class="panel">
+          <div class="metrics">
+
+            <!-- Detection time count-up -->
+            <div class="metric" data-reveal style="animation-delay:.62s">
+              <div><div class="lab">Detection time</div></div>
+              <div style="display:flex;align-items:baseline;gap:3px;">
+                <span class="val" id="detect-val">0</span><span class="val-unit">m</span>
+              </div>
+            </div>
+
+            <!-- Response time count-up -->
+            <div class="metric" data-reveal style="animation-delay:.72s">
+              <div><div class="lab">Response time</div></div>
+              <div style="display:flex;align-items:baseline;gap:3px;">
+                <span class="val" id="response-val">0</span><span class="val-unit">m</span>
+              </div>
+            </div>
+
+            <!-- Comparison bar chart — manual vs FleetOps -->
+            <div class="metric" data-reveal style="animation-delay:.82s; flex-direction:column; align-items:stretch;">
+              <div class="lab" style="margin-bottom:10px;">vs. Manual</div>
+              <div class="compare-section">
+                <div class="compare-row">
+                  <div class="compare-label-row">
+                    <span class="compare-name">FleetOps</span>
+                    <span class="compare-time green">5 min total</span>
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill green" id="bar-fleetops"></div>
+                  </div>
+                </div>
+                <div class="compare-row">
+                  <div class="compare-label-row">
+                    <span class="compare-name">Manual</span>
+                    <span class="compare-time red">2–4 hours</span>
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill red" id="bar-manual"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sleep recovered — arc gauge -->
+            <div class="metric" data-reveal style="animation-delay:.92s;">
+              <div><div class="lab">Sleep recovered</div></div>
+              <div class="gauge-wrap">
+                <svg class="gauge-svg" width="80" height="48" viewBox="0 0 80 48">
+                  <!-- Background arc: semicircle, stroke only top half -->
+                  <path
+                    d="M 8 44 A 32 32 0 0 1 72 44"
+                    fill="none"
+                    stroke="rgba(255,255,255,.08)"
+                    stroke-width="7"
+                    stroke-linecap="round"
+                  />
+                  <!-- Foreground arc: animated -->
+                  <path
+                    id="gauge-arc"
+                    d="M 8 44 A 32 32 0 0 1 72 44"
+                    fill="none"
+                    stroke="#10b981"
+                    stroke-width="7"
+                    stroke-linecap="round"
+                    stroke-dasharray="0 200"
+                  />
+                </svg>
+                <div class="gauge-label">3+ h</div>
+                <div class="gauge-sub">/ night</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer pills -->
+      <div class="footer">
+        <div class="pill" data-pill="0">Visibility</div>
+        <div class="pill" data-pill="1">Governance</div>
+        <div class="pill" data-pill="2">Incident response</div>
+        <div class="pill" data-pill="3">Compliance trail</div>
+        <div class="pill" data-pill="4">Scalable operations</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ── Utilities ─────────────────────────────────────── */
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function animateCount(el, from, to, durationMs, suffix) {
+      suffix = suffix || '';
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min((now - start) / durationMs, 1);
+        const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        el.textContent = Math.round(lerp(from, to, ease)) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* ── Reveal-delay stagger for [data-reveal] elements ─ */
+    // Already set inline via style attributes — nothing extra needed.
+
+    /* ── Metric animations: triggered after their reveal delay ── */
+
+    // Detection time: 0→2, delay matches animation-delay .62s + ~.6s duration
+    setTimeout(() => animateCount(document.getElementById('detect-val'), 0, 2, 900), 1000);
+
+    // Response time: 0→3, delay .72s + .6s
+    setTimeout(() => animateCount(document.getElementById('response-val'), 0, 3, 900), 1100);
+
+    // Comparison bars: revealed at .82s, animate after
+    setTimeout(() => {
+      document.getElementById('bar-fleetops').style.width = '4%';
+      document.getElementById('bar-manual').style.width   = '100%';
+    }, 1200);
+
+    // Gauge arc: 3h out of 8h = 37.5% of arc
+    // Semicircle arc path length for r=32: π * r ≈ 100.5
+    // We target 37.5% of that
+    setTimeout(() => {
+      const arcEl = document.getElementById('gauge-arc');
+      const totalLen = Math.PI * 32; // ≈ 100.53
+      const target = totalLen * (3 / 8);  // 37.5%
+      const gap = totalLen - target;
+      arcEl.style.transition = 'stroke-dasharray 1.2s cubic-bezier(.22,.68,0,1.1)';
+      arcEl.setAttribute('stroke-dasharray', `${target.toFixed(2)} ${gap.toFixed(2)}`);
+    }, 1350);
+
+    /* ── Quote typewriter ─────────────────────────────── */
+    const QUOTE_TEXT = '\u201cYou are no longer the coordination layer. The platform becomes the coordination layer.\u201d';
+    const quoteTextEl  = document.getElementById('quote-text');
+    const quoteCursor  = document.getElementById('quote-cursor');
+    const CHAR_DELAY   = 22; // ms per character
+    const QUOTE_START  = 1400; // ms — after reveal animation at .52s + .6s duration
+
+    setTimeout(() => {
+      let idx = 0;
+      function typeChar() {
+        if (idx < QUOTE_TEXT.length) {
+          quoteTextEl.textContent += QUOTE_TEXT[idx++];
+          setTimeout(typeChar, CHAR_DELAY);
+        } else {
+          // Done — hide cursor after a brief pause
+          setTimeout(() => { quoteCursor.classList.add('hidden'); }, 1200);
+        }
+      }
+      typeChar();
+    }, QUOTE_START);
+
+    /* ── Footer pills stagger ─────────────────────────── */
+    const PILL_START = 1500;
+    document.querySelectorAll('.pill').forEach((pill, i) => {
+      setTimeout(() => {
+        pill.classList.add('revealed', 'glow-pill');
+      }, PILL_START + i * 100);
+    });
+  </script>
+</body>
+</html>

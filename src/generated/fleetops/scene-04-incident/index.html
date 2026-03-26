@@ -1,1 +1,310 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Incident</title><style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}:root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--red:#ef4444;--amber:#f59e0b}.scene{height:100%;padding:42px;position:relative}.orb{position:absolute;inset:auto 0 0 auto;width:440px;height:440px;border-radius:50%;filter:blur(120px);background:radial-gradient(circle, rgba(239,68,68,.18), transparent 70%)}.wrap{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:20px}.alert{padding:16px 20px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.1);border-radius:22px;display:flex;justify-content:space-between;align-items:center}.alert .left{font-size:26px;font-weight:800;color:#fecaca}.alert .right{font-size:15px;color:#fca5a5}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}.card{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:22px}.card h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px}.signal{display:grid;gap:14px}.sig{padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.03);font-size:22px;line-height:1.4}.impact{display:grid;gap:12px}.impact .row{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);font-size:18px}.map{height:100%;border-radius:18px;border:1px dashed rgba(255,255,255,.14);display:grid;place-items:center;color:#fca5a5;font-size:22px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01))}.footer{padding:18px 20px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.08);border-radius:22px;font-size:20px;line-height:1.5;color:#fde68a}[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .5s ease forwards}@keyframes reveal{to{opacity:1;transform:none}}</style></head><body><div class="scene"><div class="orb"></div><div class="wrap"><div class="alert" data-reveal><div class="left">🚨 Incident detected — Driver-142</div><div class="right">Severity: High risk</div></div><div class="grid"><div class="card" data-reveal><h3>Signal</h3><div class="signal"><div class="sig">Inactive for <strong>4h 52m</strong></div><div class="sig">Last known location: <strong>restaurant parking lot</strong></div><div class="sig">External escalation: <strong>police contact received</strong></div></div></div><div class="card" data-reveal><h3>Location snapshot</h3><div class="map">Trenton, MI<br>Vehicle stationary<br>Restaurant parking lot</div></div></div><div class="grid"><div class="card" data-reveal><h3>Immediate impact</h3><div class="impact"><div class="row">Potential DUI or fatigue incident</div><div class="row">Vehicle becomes unavailable to the active fleet</div><div class="row">Legal and insurance exposure rises immediately</div></div></div><div class="card" data-reveal><h3>What changes</h3><div class="impact"><div class="row">This is now a governed incident, not an informal phone call</div><div class="row">The operation can respond with a standard playbook</div><div class="row">Owner is notified with context, not confusion</div></div></div></div><div class="footer" data-reveal>The command center surfaces the event before the whole business starts reacting blindly.</div></div></div><script>document.querySelectorAll('[data-reveal]').forEach((e,i)=>e.style.animationDelay=`${0.08+i*0.1}s`);</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--red:#ef4444;--amber:#f59e0b}
+.scene{height:100%;padding:42px;position:relative}
+.orb{position:absolute;inset:auto 0 0 auto;width:440px;height:440px;border-radius:50%;filter:blur(120px);background:radial-gradient(circle,rgba(239,68,68,.18),transparent 70%)}
+.wrap{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto auto 1fr;gap:20px}
+
+/* Pulsing alert banner */
+.alert{
+  padding:16px 20px;
+  border:1px solid rgba(239,68,68,.35);
+  background:rgba(239,68,68,.10);
+  border-radius:22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  animation:alertPulse 1.2s ease-in-out infinite;
+}
+@keyframes alertPulse{
+  0%,100%{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.10)}
+  50%{border-color:rgba(239,68,68,.55);background:rgba(239,68,68,.17)}
+}
+.alert .left{font-size:26px;font-weight:800;color:#fecaca}
+.alert .right{display:flex;align-items:center;gap:12px;font-size:15px;color:#fca5a5}
+.severity-label{white-space:nowrap}
+
+/* Confidence gauge (mini arc SVG) */
+.gauge-group{display:flex;flex-direction:column;align-items:center;gap:1px}
+.gauge-sublabel{font-size:11px;color:#fca5a5;white-space:nowrap;letter-spacing:.02em}
+
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+.card{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.04);padding:22px}
+.card h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px}
+
+/* Signal list */
+.signal{display:grid;gap:14px}
+.sig{
+  padding:16px 18px;
+  border-radius:18px;
+  background:rgba(255,255,255,.03);
+  font-size:21px;
+  line-height:1.4;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.sig-icon{margin-right:6px;flex:none}
+
+/* Timer */
+.timer-val{font-weight:700;color:#ef4444;margin-left:4px;animation:timerGlow 1.5s ease-in-out infinite}
+@keyframes timerGlow{0%,100%{opacity:1}50%{opacity:.55}}
+
+/* Typewriter cursor */
+.tw-cursor{
+  display:inline-block;
+  width:2px;
+  height:.85em;
+  background:#fca5a5;
+  margin-left:2px;
+  vertical-align:middle;
+  animation:blink .7s step-end infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* SVG Map */
+.map-wrap{
+  height:100%;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);
+  background:#070e1a;
+  position:relative;
+}
+.map-wrap svg{width:100%;height:100%}
+.map-street-h,.map-street-v{stroke:rgba(148,163,184,.09);stroke-width:1;fill:none}
+.map-block{fill:rgba(255,255,255,.025)}
+.pin-ring{fill:none;stroke:#ef4444;stroke-width:1.5;animation:pinRing 2s ease-out infinite}
+.pin-ring2{fill:none;stroke:#ef4444;stroke-width:1;animation:pinRing 2s ease-out infinite;animation-delay:.8s}
+@keyframes pinRing{
+  0%{r:7;opacity:.85}
+  100%{r:30;opacity:0}
+}
+.pin-dot{fill:#ef4444;filter:drop-shadow(0 0 5px rgba(239,68,68,.9))}
+.pin-center{fill:#fff;opacity:.9}
+.map-lbl{font-family:Inter,ui-sans-serif,system-ui,sans-serif;fill:#fca5a5;font-weight:700;text-anchor:middle}
+.map-sub{font-family:Inter,ui-sans-serif,system-ui,sans-serif;fill:#94a3b8;text-anchor:middle}
+.map-badge-bg{fill:rgba(8,16,29,.82);stroke:rgba(239,68,68,.3);stroke-width:1}
+
+.impact{display:grid;gap:12px}
+.impact .row{padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);font-size:18px}
+.footer{padding:18px 20px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.08);border-radius:22px;font-size:20px;line-height:1.5;color:#fde68a}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .5s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="orb"></div>
+  <div class="wrap">
+
+    <!-- Alert banner -->
+    <div class="alert" data-reveal>
+      <div class="left">&#x1F6A8; Incident detected &#x2014; Driver-142</div>
+      <div class="right">
+        <!-- Mini arc confidence gauge -->
+        <div class="gauge-group">
+          <svg id="gaugeSvg" width="54" height="32" viewBox="0 0 54 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#f59e0b"/>
+                <stop offset="100%" stop-color="#ef4444"/>
+              </linearGradient>
+            </defs>
+            <!-- Background arc: center (27,30), r=22, from 180deg to 0deg (left to right, bottom) -->
+            <path d="M5,30 A22,22 0 0,1 49,30"
+              stroke="rgba(239,68,68,.2)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <!-- Fill arc — animated via JS -->
+            <path id="gaugeArc" d="M5,30 A22,22 0 0,1 49,30"
+              stroke="url(#gGrad)" stroke-width="4" fill="none" stroke-linecap="round"
+              stroke-dasharray="69.1" stroke-dashoffset="69.1"
+              style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)"/>
+          </svg>
+          <div class="gauge-sublabel">94% confidence</div>
+        </div>
+        <div class="severity-label">Severity: High risk</div>
+      </div>
+    </div>
+
+    <!-- Row 2: Signal + Map -->
+    <div class="grid">
+      <div class="card" data-reveal>
+        <h3>Signal</h3>
+        <div class="signal">
+          <div class="sig" id="sig1"></div>
+          <div class="sig" id="sig2"></div>
+          <div class="sig" id="sig3"></div>
+        </div>
+      </div>
+      <div class="card" data-reveal>
+        <h3>Location snapshot</h3>
+        <div class="map-wrap">
+          <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <!-- Street grid horizontal -->
+            <line class="map-street-h" x1="0" y1="60"  x2="300" y2="60"/>
+            <line class="map-street-h" x1="0" y1="100" x2="300" y2="100"/>
+            <line class="map-street-h" x1="0" y1="140" x2="300" y2="140"/>
+            <!-- Street grid vertical -->
+            <line class="map-street-v" x1="75"  y1="0" x2="75"  y2="200"/>
+            <line class="map-street-v" x1="150" y1="0" x2="150" y2="200"/>
+            <line class="map-street-v" x1="225" y1="0" x2="225" y2="200"/>
+            <!-- City block fills -->
+            <rect class="map-block" x="77"  y="62"  width="70" height="36" rx="2"/>
+            <rect class="map-block" x="152" y="62"  width="70" height="36" rx="2"/>
+            <rect class="map-block" x="77"  y="102" width="70" height="36" rx="2"/>
+            <rect class="map-block" x="152" y="102" width="70" height="36" rx="2"/>
+            <rect class="map-block" x="3"   y="62"  width="69" height="36" rx="2"/>
+            <rect class="map-block" x="227" y="62"  width="70" height="36" rx="2"/>
+            <rect class="map-block" x="3"   y="102" width="69" height="36" rx="2"/>
+            <rect class="map-block" x="227" y="102" width="70" height="36" rx="2"/>
+            <!-- Subtle road highlight at pin crossroads -->
+            <rect x="145" y="0"  width="10" height="200" fill="rgba(255,255,255,.012)"/>
+            <rect x="0"   y="95" width="300" height="10" fill="rgba(255,255,255,.012)"/>
+            <!-- Pulsing rings -->
+            <circle class="pin-ring"  cx="150" cy="100"/>
+            <circle class="pin-ring2" cx="150" cy="100"/>
+            <!-- Pin -->
+            <circle class="pin-dot"    cx="150" cy="100" r="7"/>
+            <circle class="pin-center" cx="150" cy="100" r="3"/>
+            <!-- Label badge -->
+            <rect class="map-badge-bg" x="88" y="148" width="124" height="40" rx="8"/>
+            <text class="map-lbl" x="150" y="165" font-size="12">Trenton, MI</text>
+            <text class="map-sub" x="150" y="181" font-size="9.5">Vehicle stationary</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Impact + What changes -->
+    <div class="grid">
+      <div class="card" data-reveal>
+        <h3>Immediate impact</h3>
+        <div class="impact">
+          <div class="row">Potential DUI or fatigue incident</div>
+          <div class="row">Vehicle becomes unavailable to the active fleet</div>
+          <div class="row">Legal and insurance exposure rises immediately</div>
+        </div>
+      </div>
+      <div class="card" data-reveal>
+        <h3>What changes</h3>
+        <div class="impact">
+          <div class="row">This is now a governed incident, not an informal phone call</div>
+          <div class="row">The operation can respond with a standard playbook</div>
+          <div class="row">Owner is notified with context, not confusion</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" data-reveal>The command center surfaces the event before the whole business starts reacting blindly.</div>
+
+  </div>
+</div>
+
+<script>
+// Stagger reveal
+document.querySelectorAll('[data-reveal]').forEach((e,i)=>{
+  e.style.animationDelay=`${0.08+i*0.1}s`;
+});
+
+// --- Gauge ---
+// Semicircle arc length for r=22: PI * 22 ≈ 69.1
+// 94% fill => dashoffset = 69.1 * (1 - 0.94) = 4.146
+setTimeout(()=>{
+  const arc = document.getElementById('gaugeArc');
+  if(arc) arc.style.strokeDashoffset = (69.1 * (1 - 0.94)).toFixed(2);
+}, 250);
+
+// --- Live running timer ---
+let totalSec = 4*3600 + 52*60; // 4h 52m 00s
+function fmt(s){
+  const h=Math.floor(s/3600);
+  const m=Math.floor((s%3600)/60);
+  const sc=s%60;
+  return h+'h '+String(m).padStart(2,'0')+'m '+String(sc).padStart(2,'0')+'s';
+}
+
+// --- Typewriter helper ---
+function tw(container, text, delay, done){
+  let i=0;
+  const cur=document.createElement('span');
+  cur.className='tw-cursor';
+  container.appendChild(cur);
+  const tick=()=>{
+    if(i<text.length){
+      cur.insertAdjacentText('beforebegin', text[i++]);
+      setTimeout(tick, delay);
+    } else {
+      cur.remove();
+      if(done) done();
+    }
+  };
+  tick();
+}
+
+// --- Build sig items ---
+function buildSig1(done){
+  const el=document.getElementById('sig1');
+  // Icon
+  const ic=document.createElement('span');
+  ic.className='sig-icon'; ic.textContent='&#x1F550;';
+  el.appendChild(ic);
+  el.appendChild(document.createTextNode('\u00A0Inactive for\u00A0'));
+  // Timer span
+  const ts=document.createElement('span');
+  ts.className='timer-val';
+  ts.textContent=fmt(totalSec);
+  el.appendChild(ts);
+  // Tick every second
+  setInterval(()=>{ totalSec++; ts.textContent=fmt(totalSec); },1000);
+  // sig1 "types in" instantly (it's a live value), call done after short pause
+  if(done) setTimeout(done, 200);
+}
+
+function buildSig2(done){
+  const el=document.getElementById('sig2');
+  const ic=document.createElement('span');
+  ic.className='sig-icon'; ic.textContent='&#x1F4CD;';
+  el.appendChild(ic);
+  el.appendChild(document.createTextNode('\u00A0'));
+  tw(el,'Last known location:\u00A0',18,()=>{
+    const b=document.createElement('strong');
+    el.appendChild(b);
+    tw(b,'restaurant parking lot',18,()=>{
+      if(done) setTimeout(done,300);
+    });
+  });
+}
+
+function buildSig3(done){
+  const el=document.getElementById('sig3');
+  const ic=document.createElement('span');
+  ic.className='sig-icon'; ic.textContent='&#x1F4DE;';
+  el.appendChild(ic);
+  el.appendChild(document.createTextNode('\u00A0'));
+  tw(el,'External escalation:\u00A0',18,()=>{
+    const b=document.createElement('strong');
+    el.appendChild(b);
+    tw(b,'police contact received',18,done);
+  });
+}
+
+// Signal card reveals at ~0.08 + 1*0.1 = 0.18s; start typewriter at 0.32s
+setTimeout(()=>{
+  buildSig1(()=>{
+    buildSig2(()=>{
+      buildSig3(null);
+    });
+  });
+}, 320);
+</script>
+</body>
+</html>

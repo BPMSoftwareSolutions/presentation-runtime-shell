@@ -1,1 +1,270 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AI Analysis</title><style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}:root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--violet:#a78bfa;--red:#ef4444;--green:#10b981;--amber:#f59e0b}.scene{height:100%;padding:38px}.wrap{height:100%;display:grid;grid-template-columns:1fr .95fr;gap:20px}.panel{border:1px solid var(--border);border-radius:26px;background:rgba(255,255,255,.04);padding:24px;display:grid;gap:18px}.eyebrow{font-size:13px;color:var(--violet);text-transform:uppercase;letter-spacing:.16em}.title{font-size:42px;font-weight:800;line-height:1.08}.term{padding:18px;border:1px solid rgba(167,139,250,.28);border-radius:20px;background:rgba(167,139,250,.07);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:18px;line-height:1.8;color:#e9ddff}.section h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px}.section .box{padding:18px;border-radius:18px;background:rgba(255,255,255,.03);font-size:20px;line-height:1.55}.actions{display:grid;gap:12px}.act{padding:16px 18px;border-radius:16px;background:rgba(255,255,255,.03);display:flex;gap:12px;align-items:flex-start;font-size:19px}.num{width:30px;height:30px;border-radius:50%;background:rgba(16,185,129,.14);color:#a7f3d0;display:grid;place-items:center;font-weight:700;flex:none}.chips{display:flex;gap:10px;flex-wrap:wrap}.chip{padding:8px 12px;border-radius:999px;font-size:13px;border:1px solid var(--border);color:var(--muted)}[data-reveal]{opacity:0;transform:translateY(12px);animation:reveal .55s ease forwards}@keyframes reveal{to{opacity:1;transform:none}}</style></head><body><div class="scene"><div class="wrap"><div class="panel"><div class="eyebrow" data-reveal>AI Operator Analysis</div><div class="title" data-reveal>From alert to diagnosis, impact, and action.</div><div class="term" data-reveal>&gt; root cause estimate: driver incapacitated<br>&gt; confidence: medium-high<br>&gt; likely causes: fatigue, intoxication, medical issue<br>&gt; business effect: active fleet capacity reduced<br>&gt; owner action: suspend, reassign, log, notify</div><div class="section" data-reveal><h3>Root cause</h3><div class="box">Driver-142 is likely unable to continue operating safely. The system treats this as an operational and compliance event, not only a dispatch delay.</div></div><div class="chips" data-reveal><div class="chip">Risk: Legal exposure</div><div class="chip">Risk: Insurance claim</div><div class="chip">Risk: Lost revenue</div></div></div><div class="panel"><div class="section" data-reveal><h3>System impact</h3><div class="box">Revenue from one productive driver pauses immediately. Dispatch coverage narrows. Owner attention is pulled into reactive coordination unless the platform absorbs the response workflow.</div></div><div class="section" data-reveal><h3>Recommended action</h3><div class="actions"><div class="act"><div class="num">1</div><div>Attempt immediate contact and verify driver condition</div></div><div class="act"><div class="num">2</div><div>Remove driver from active pool and lock dispatch access</div></div><div class="act"><div class="num">3</div><div>Reassign vehicle or demand to another available driver</div></div><div class="act"><div class="num">4</div><div>Create compliance record and notify the owner with context</div></div></div></div></div></div><script>document.querySelectorAll('[data-reveal]').forEach((e,i)=>e.style.animationDelay=`${0.1+i*0.1}s`);</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Analysis</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--muted:#94a3b8;--border:rgba(255,255,255,.08);--violet:#a78bfa;--red:#ef4444;--green:#10b981;--amber:#f59e0b}
+.scene{height:100%;padding:38px}
+.wrap{height:100%;display:grid;grid-template-columns:1fr .95fr;gap:20px}
+.panel{border:1px solid var(--border);border-radius:26px;background:rgba(255,255,255,.04);padding:24px;display:grid;gap:18px}
+.eyebrow{font-size:13px;color:var(--violet);text-transform:uppercase;letter-spacing:.16em}
+.title{font-size:42px;font-weight:800;line-height:1.08}
+
+/* Terminal */
+.term{
+  padding:18px;
+  border:1px solid rgba(167,139,250,.28);
+  border-radius:20px;
+  background:rgba(167,139,250,.07);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:18px;
+  line-height:1.8;
+  color:#e9ddff;
+  min-height:186px; /* preserve card height while typing */
+}
+.term-line{display:block}
+/* Blinking block cursor */
+.term-cursor{
+  display:inline-block;
+  width:.6em;
+  height:1.1em;
+  background:#a78bfa;
+  margin-left:1px;
+  vertical-align:text-bottom;
+  animation:termBlink .65s step-end infinite;
+}
+@keyframes termBlink{0%,100%{opacity:1}50%{opacity:0}}
+
+.section h3{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px}
+.section .box{padding:18px;border-radius:18px;background:rgba(255,255,255,.03);font-size:20px;line-height:1.55}
+
+/* Actions — initially hidden, revealed via JS */
+.actions{display:grid;gap:12px}
+.act{
+  padding:16px 18px;
+  border-radius:16px;
+  background:rgba(255,255,255,.03);
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  font-size:19px;
+  opacity:0;
+  transform:scale(.97) translateY(6px);
+  transition:opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.act.visible{opacity:1;transform:scale(1) translateY(0)}
+.num{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(16,185,129,.14);color:#a7f3d0;
+  display:grid;place-items:center;font-weight:700;flex:none;
+  transition:box-shadow .4s ease, background .4s ease;
+}
+.num.glow{
+  box-shadow:0 0 0 4px rgba(16,185,129,.28),0 0 14px rgba(16,185,129,.35);
+  background:rgba(16,185,129,.28);
+}
+
+/* Confidence gauge bar */
+.gauge-bar-wrap{margin-top:2px}
+.gauge-bar-track{
+  height:8px;border-radius:999px;
+  background:rgba(255,255,255,.07);
+  overflow:hidden;
+  position:relative;
+}
+.gauge-bar-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#a78bfa,#f59e0b);
+  transition:width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.gauge-bar-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:6px;font-size:13px;
+}
+.gauge-bar-pct{color:#f59e0b;font-weight:700}
+.gauge-bar-label-right{color:var(--muted)}
+
+/* Risk chips — hidden initially, slide in from left */
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{
+  padding:8px 12px;border-radius:999px;font-size:13px;
+  border:1px solid var(--border);color:var(--muted);
+  opacity:0;
+  transform:translateX(-18px);
+  transition:opacity .3s ease, transform .3s ease, box-shadow .4s ease, border-color .4s ease;
+}
+.chip.visible{opacity:1;transform:translateX(0)}
+.chip.glow{
+  border-color:rgba(245,158,11,.5);
+  box-shadow:0 0 10px rgba(245,158,11,.25);
+}
+
+[data-reveal]{opacity:0;transform:translateY(12px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="wrap">
+
+    <!-- Left panel -->
+    <div class="panel">
+      <div class="eyebrow" data-reveal>AI Operator Analysis</div>
+      <div class="title" data-reveal>From alert to diagnosis, impact, and action.</div>
+      <!-- Terminal: starts empty, typed in by JS -->
+      <div class="term" id="term" data-reveal></div>
+      <div class="section" data-reveal>
+        <h3>Root cause</h3>
+        <div class="box">Driver-142 is likely unable to continue operating safely. The system treats this as an operational and compliance event, not only a dispatch delay.</div>
+      </div>
+      <!-- Risk chips -->
+      <div class="chips" data-reveal>
+        <div class="chip" id="chip0">Risk: Legal exposure</div>
+        <div class="chip" id="chip1">Risk: Insurance claim</div>
+        <div class="chip" id="chip2">Risk: Lost revenue</div>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="panel">
+      <div class="section" data-reveal>
+        <h3>System impact</h3>
+        <div class="box">Revenue from one productive driver pauses immediately. Dispatch coverage narrows. Owner attention is pulled into reactive coordination unless the platform absorbs the response workflow.</div>
+      </div>
+
+      <!-- AI Confidence gauge -->
+      <div class="section" data-reveal id="gaugeSection">
+        <h3>AI Confidence</h3>
+        <div class="gauge-bar-wrap">
+          <div class="gauge-bar-track">
+            <div class="gauge-bar-fill" id="gaugeBarFill"></div>
+          </div>
+          <div class="gauge-bar-meta">
+            <div class="gauge-bar-pct">74%</div>
+            <div class="gauge-bar-label-right">Medium-High</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" data-reveal>
+        <h3>Recommended action</h3>
+        <div class="actions" id="actionsContainer">
+          <div class="act" id="act0"><div class="num" id="num0">1</div><div>Attempt immediate contact and verify driver condition</div></div>
+          <div class="act" id="act1"><div class="num" id="num1">2</div><div>Remove driver from active pool and lock dispatch access</div></div>
+          <div class="act" id="act2"><div class="num" id="num2">3</div><div>Reassign vehicle or demand to another available driver</div></div>
+          <div class="act" id="act3"><div class="num" id="num3">4</div><div>Create compliance record and notify the owner with context</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Stagger base reveal
+document.querySelectorAll('[data-reveal]').forEach((e,i)=>{
+  e.style.animationDelay=`${0.1+i*0.1}s`;
+});
+
+// ===================== TERMINAL TYPEWRITER =====================
+const termLines=[
+  '> root cause estimate: driver incapacitated',
+  '> confidence: medium-high',
+  '> likely causes: fatigue, intoxication, medical issue',
+  '> business effect: active fleet capacity reduced',
+  '> owner action: suspend, reassign, log, notify',
+];
+const CHAR_DELAY=16;
+const LINE_PAUSE=200;
+
+function typeTerm(){
+  const term=document.getElementById('term');
+  term.innerHTML=''; // clear static content
+  let lineIdx=0;
+  let currentLineEl=null;
+  let cursor=null;
+
+  function nextLine(){
+    if(lineIdx>0 && cursor){ cursor.remove(); cursor=null; }
+    if(lineIdx>=termLines.length) return;
+
+    // Create line element
+    currentLineEl=document.createElement('span');
+    currentLineEl.className='term-line';
+    term.appendChild(currentLineEl);
+
+    // Cursor at end of current line
+    cursor=document.createElement('span');
+    cursor.className='term-cursor';
+    term.appendChild(cursor);
+
+    const text=termLines[lineIdx];
+    lineIdx++;
+    let ci=0;
+
+    function typeChar(){
+      if(ci<text.length){
+        currentLineEl.textContent+=text[ci++];
+        setTimeout(typeChar,CHAR_DELAY);
+      } else {
+        // Line done — pause then move to next
+        setTimeout(nextLine, LINE_PAUSE);
+      }
+    }
+    typeChar();
+  }
+
+  nextLine();
+}
+
+// Term block is the 3rd [data-reveal] element (index 2), delay = 0.1+2*0.1 = 0.3s reveal anim
+// Fire typewriter after reveal finishes: 0.3s delay + 0.55s anim + small buffer = ~0.95s
+setTimeout(typeTerm, 950);
+
+// ===================== ACTION STAGGERED ENTRANCE =====================
+// Actions section is revealed at ~0.1+7*0.1=0.8s (right panel, 2nd data-reveal in right = index ~7)
+// We'll fire actions starting ~1.2s from load, stagger 350ms each
+function showActions(){
+  [0,1,2,3].forEach(i=>{
+    setTimeout(()=>{
+      const act=document.getElementById('act'+i);
+      const num=document.getElementById('num'+i);
+      if(!act) return;
+      act.classList.add('visible');
+      // Glow the number circle briefly
+      num.classList.add('glow');
+      setTimeout(()=>num.classList.remove('glow'),600);
+    }, i*350);
+  });
+}
+setTimeout(showActions, 1200);
+
+// ===================== CONFIDENCE GAUGE BAR =====================
+// Gauge section is revealed around 0.8s; animate bar at 1s
+setTimeout(()=>{
+  const fill=document.getElementById('gaugeBarFill');
+  if(fill) fill.style.width='74%';
+},1000);
+
+// ===================== RISK CHIP SLIDE-IN =====================
+// Chips [data-reveal] is index 4 (left panel), delay = 0.1+4*0.1=0.5s reveal
+// Slide chips in starting ~0.85s, stagger 200ms
+[0,1,2].forEach(i=>{
+  setTimeout(()=>{
+    const chip=document.getElementById('chip'+i);
+    if(!chip) return;
+    chip.classList.add('visible');
+    // Brief amber glow
+    chip.classList.add('glow');
+    setTimeout(()=>chip.classList.remove('glow'),700);
+  }, 850 + i*200);
+});
+</script>
+</body>
+</html>
