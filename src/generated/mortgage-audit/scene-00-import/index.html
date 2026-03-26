@@ -236,10 +236,12 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
             dz.classList.add('done');
             dzCount.classList.add('done-color');
             dzSuccess.classList.add('visible');
-            btn.textContent = '✓ Imported — viewing documents';
+            btn.textContent = '✓ Imported — continue →';
             btn.classList.add('done-btn');
             btn.disabled = false;
             ctaOr.style.opacity = '0';
+            // Signal shell: user has completed the import interaction — advance is now unlocked
+            window.parent.postMessage({ type: 'import:complete' }, '*');
           }, 180);
         }
       }, idx * 55);
