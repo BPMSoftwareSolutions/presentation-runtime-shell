@@ -24,6 +24,14 @@ The app boots, seeds any missing decks from `/src/contracts/`, and routes to `#/
 
 All data persists to **browser localStorage** under the key `prs_library`.
 
+### Running tests
+
+```bash
+npm test
+```
+
+Tests use Node's built-in test runner (`node:test`). Node 18+ required, no dependencies to install.
+
 ---
 
 ## Core Concepts
@@ -35,7 +43,7 @@ A named collection of scenes with settings (playback mode, typing speed, theme).
 A single slide — one iframe-hosted HTML file paired with a presenter script (blocks of text typed character-by-character) and an advance rule. Scenes are fully self-contained HTML files with inline CSS and JS; no external dependencies.
 
 ### Deck Contract
-A JSON file in `/src/contracts/` that defines a full presentation. Seeded into the store on first load. See [`skills/deck-json-reference.md`](skills/deck-json-reference.md) for the full schema.
+A JSON file in `/src/contracts/` that defines a full presentation. The filename must match the deck's `id` field (e.g. `my-deck.json` must contain `"id": "my-deck"`). Seeded into the store on first load. See [`skills/deck-json-reference.md`](skills/deck-json-reference.md) for the full schema.
 
 ### Runtime
 The engine that drives playback: loads the deck, navigates iframes, runs the presenter typewriter, and waits for advance conditions. Lives as a singleton across screen transitions.
@@ -45,11 +53,50 @@ A per-scene text field describing what the scene should accomplish. Used as cont
 
 ---
 
+## Magic Links
+
+The **Copy Link** button in the workspace generates a self-contained URL that encodes the current presentation settings directly in the query string. No server or database required — opening the link anywhere reproduces the exact playback configuration.
+
+### URL format
+
+```
+https://your-host/#/present/{deckId}?cfg={BASE64URL_JSON}
+```
+
+The `cfg` parameter is a base64url-encoded JSON payload. If there are no overrides beyond the contract defaults, the `?cfg=` param is omitted entirely and a plain `#/present/{deckId}` link is generated.
+
+### What travels in the link
+
+| Included | Excluded |
+|----------|----------|
+| Playback mode | Selected scene in workspace |
+| Typing speed | Panel layout |
+| Controls position | Collapsed sections |
+| Between-scenes delay | Search filters |
+| Theme (shell, accent, presenter position) | Any local author prefs |
+| Demo state (tenant, scenario, etc.) | |
+
+### Precedence when opening a magic link
+
+1. Code defaults
+2. Contract baseline (`/src/contracts/{id}.json`)
+3. URL overrides (`?cfg=` param)
+4. Author prefs apply in workspace only — never affect link-only playback
+
+### Adding a new presentable deck
+
+1. Create `/src/contracts/{id}.json` where the filename matches the `"id"` field inside the file.
+2. Add the path to `/src/contracts/manifest.json`.
+3. The deck will be seeded into the library on next load and will be accessible via `#/present/{id}`.
+
+---
+
 ## Folder Structure
 
 ```
 presentation-runtime-shell/
 ├── index.html                    # Entry point
+├── package.json                  # type: module + npm test script
 ├── styles/
 │   ├── shell.css                 # App shell, top bar, global tokens
 │   └── screens/
@@ -67,10 +114,12 @@ presentation-runtime-shell/
 │   │   ├── event-bus.js          # Simple pub/sub
 │   │   ├── router.js             # Hash-based router
 │   │   ├── runtime-singleton.js  # Keeps runtime alive across navigations
-│   │   └── contract-loader.js    # Normalizes raw deck JSON
+│   │   ├── contract-loader.js    # Normalizes raw deck JSON
+│   │   └── magic-link.js         # URL config encode/decode, merge, link builder
 │   ├── screens/
 │   │   ├── library.js            # #/library — presentation grid
 │   │   ├── workspace.js          # #/presentation/:id — editor + canvas
+│   │   ├── present.js            # #/present/:id — fullscreen player
 │   │   └── import-scene.js       # #/presentation/:id/import
 │   ├── ui/
 │   │   ├── app-shell.js          # Persistent frame: top bar + left nav
@@ -79,13 +128,14 @@ presentation-runtime-shell/
 │   │   ├── scene-list.js         # Left rail: scene navigator
 │   │   └── ...
 │   ├── contracts/
+│   │   ├── manifest.json         # Ordered list of contract paths to seed
 │   │   ├── demo-deck.json        # 3-scene starter demo
-│   │   └── msp-demo-deck.json    # 8-scene MSP Command Center demo
+│   │   ├── msp-demo-deck.json    # MSP Command Center demo
+│   │   └── ...                   # filename must match deck id field
 │   └── generated/
 │       └── msp/                  # Self-contained scene HTML files
-│           ├── scene-01-title/
-│           ├── scene-02-tenants/
-│           └── ... (8 total)
+├── tests/
+│   └── magic-link.test.js        # Parser, merge, builder, round-trip tests
 ├── skills/                       # Task-oriented how-to guides
 └── docs/                         # Architecture and design docs
 ```
@@ -98,6 +148,9 @@ presentation-runtime-shell/
 - Browse, search, and filter presentations
 - Create, duplicate, archive, or delete decks
 - Open any deck into the workspace
+
+### Present (`#/present/:id`)
+Fullscreen client-facing player. Loaded directly from the contract file — localStorage is never consulted. Accepts an optional `?cfg=` magic link parameter to override playback settings and theme. Use **Copy Link** in the workspace to generate a shareable URL.
 
 ### Workspace (`#/presentation/:id`)
 The main authoring and presenting environment. Three columns:
