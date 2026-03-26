@@ -37,6 +37,29 @@ function normalizeContract(deck) {
   };
 }
 
+/**
+ * Scan the manifest and return the normalized contract whose id matches.
+ * Returns null if not found or on any fetch error.
+ */
+export async function loadContractById(id) {
+  try {
+    const manifestRes = await fetch("./src/contracts/manifest.json");
+    if (!manifestRes.ok) return null;
+    const paths = await manifestRes.json();
+    for (const path of paths) {
+      try {
+        const contract = await loadContract(path);
+        if (contract.id === id) return contract;
+      } catch {
+        // skip failed contract paths
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function loadContract(url, fallback = null) {
   try {
     const response = await fetch(url);

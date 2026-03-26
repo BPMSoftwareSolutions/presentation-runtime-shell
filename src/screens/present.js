@@ -1,5 +1,7 @@
-import { createDeckRuntime } from "../core/deck-runtime.js";
+import { createDeckRuntime }       from "../core/deck-runtime.js";
 import { createTransportController } from "../ui/transport-controller.js";
+import { loadContractById }          from "../core/contract-loader.js";
+import { mergeDeck }                 from "../core/merge-deck.js";
 
 let _activeSession = null;
 let _runtime = null;
@@ -22,19 +24,11 @@ function createNotFound(rootEl) {
   };
 }
 
-function createPresentSession({ id, store, rootEl }) {
-  const presentation = store.getById(id);
-  if (!presentation) {
-    return createNotFound(rootEl);
-  }
-
-  const controlsPosition = getControlsPosition(presentation);
-  const positionClass = controlsPosition === "top"
-    ? "ps-player--controls-top"
-    : "ps-player--controls-bottom";
-
+function createPresentSession({ id, store, sharedDeckStore, rootEl }) {
+  // Render the player shell immediately with default controls-bottom position.
+  // The position class is updated after async load if the effective deck differs.
   rootEl.innerHTML = `
-    <div class="ps-player ${positionClass}" id="ps-player">
+    <div class="ps-player ps-player--controls-bottom" id="ps-player">
       <div class="ps-header">
         <span class="ps-title" id="ps-title"></span>
         <span class="ps-counter" id="ps-counter">— / —</span>
@@ -61,18 +55,18 @@ function createPresentSession({ id, store, rootEl }) {
     </div>
   `;
 
-  const playerEl = rootEl.querySelector("#ps-player");
-  const iframeEl = rootEl.querySelector("#ps-frame");
+  const playerEl  = rootEl.querySelector("#ps-player");
+  const iframeEl  = rootEl.querySelector("#ps-frame");
   const loadingEl = rootEl.querySelector("#ps-loading");
-  const titleEl = rootEl.querySelector("#ps-title");
+  const titleEl   = rootEl.querySelector("#ps-title");
   const counterEl = rootEl.querySelector("#ps-counter");
-  const labelEl = rootEl.querySelector("#ps-label");
+  const labelEl   = rootEl.querySelector("#ps-label");
   const endCardEl = rootEl.querySelector("#ps-end-card");
   const replayBtn = rootEl.querySelector("#ps-replay");
-  const firstBtn = rootEl.querySelector("#ps-first");
-  const prevBtn = rootEl.querySelector("#ps-prev");
-  const nextBtn = rootEl.querySelector("#ps-next");
-  const lastBtn = rootEl.querySelector("#ps-last");
+  const firstBtn  = rootEl.querySelector("#ps-first");
+  const prevBtn   = rootEl.querySelector("#ps-prev");
+  const nextBtn   = rootEl.querySelector("#ps-next");
+  const lastBtn   = rootEl.querySelector("#ps-last");
 
   const runtime = _runtime || createDeckRuntime();
   _runtime = runtime;
@@ -160,7 +154,34 @@ function createPresentSession({ id, store, rootEl }) {
   });
 
   async function init() {
-    await runtime.load(presentation);
+    // Load contract baseline — link-only mode never uses browser-local deck state
+    const contractDeck = await loadContractById(id);
+
+    let effectiveDeck;
+    if (contractDeck) {
+      // Fetch shared overrides; failure falls back to contractBaseline only
+      const overrides = sharedDeckStore
+        ? sharedDeckStore.getPresentationOverrides(id)
+        : {};
+      effectiveDeck = mergeDeck(contractDeck, overrides);
+    } else {
+      // Contract not found in manifest — fall back to store for non-manifest decks
+      effectiveDeck = store?.getById(id) ?? null;
+    }
+
+    if (!effectiveDeck) {
+      if (!destroyed) {
+        rootEl.innerHTML = `<div class="ps-not-found">Presentation not found.</div>`;
+      }
+      return;
+    }
+
+    // Apply the controls position CSS resolved from the effective deck
+    const pos = getControlsPosition(effectiveDeck);
+    playerEl.classList.toggle("ps-player--controls-top",    pos === "top");
+    playerEl.classList.toggle("ps-player--controls-bottom", pos !== "top");
+
+    await runtime.load(effectiveDeck);
     showControls();
     runtime.goTo(0);
   }
@@ -193,7 +214,7 @@ function createPresentSession({ id, store, rootEl }) {
   };
 }
 
-export function mountPresent({ id, store, rootEl = document.getElementById("app") }) {
+export function mountPresent({ id, store, sharedDeckStore, rootEl = document.getElementById("app") }) {
   if (!rootEl) {
     return { destroy() {} };
   }
@@ -202,6 +223,6 @@ export function mountPresent({ id, store, rootEl = document.getElementById("app"
     _activeSession.destroy();
   }
 
-  _activeSession = createPresentSession({ id, store, rootEl });
+  _activeSession = createPresentSession({ id, store, sharedDeckStore, rootEl });
   return _activeSession;
 }

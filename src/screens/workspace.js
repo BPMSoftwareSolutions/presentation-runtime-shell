@@ -117,7 +117,7 @@ function openPreviewMenu(anchorEl, layoutManager, { runtime, getActiveIndex }) {
 
 // ── Screen ─────────────────────────────────────────────────────────────────
 
-export function mountWorkspace({ id, store, router, shell }) {
+export function mountWorkspace({ id, store, sharedDeckStore, router, shell }) {
   const root = document.getElementById("screen-root");
 
   // Guard: presentation must exist
@@ -261,12 +261,18 @@ export function mountWorkspace({ id, store, router, shell }) {
     onRegenerate(scene)       {
       editIntentEl.value = "";
       store.updateScene(id, scene.id, { editIntent: "" });
+      if (sharedDeckStore) {
+        sharedDeckStore.updatePresentation(id, { scenes: { [scene.id]: { editIntent: "" } } });
+      }
     },
     onSettingsChange(partial) {
       // Sync playback mode to the live runtime immediately
       if (partial.playbackMode !== undefined) {
         runtime.setPlaybackMode(partial.playbackMode);
       }
+    },
+    onDeckPatch(patch) {
+      if (sharedDeckStore) sharedDeckStore.updatePresentation(id, patch);
     },
   });
   inspectorSlot.appendChild(inspector.el);
@@ -391,6 +397,9 @@ export function mountWorkspace({ id, store, router, shell }) {
     const val = editIntentEl.value;
     if (val !== (scene.editIntent || "")) {
       store.updateScene(id, scene.id, { editIntent: val });
+      if (sharedDeckStore) {
+        sharedDeckStore.updatePresentation(id, { scenes: { [scene.id]: { editIntent: val } } });
+      }
     }
   });
 
@@ -500,6 +509,9 @@ export function mountWorkspace({ id, store, router, shell }) {
     const ids = scenes.map((s) => s.id);
     [ids[index], ids[targetIndex]] = [ids[targetIndex], ids[index]];
     store.reorderScenes(id, ids);
+    if (sharedDeckStore) {
+      sharedDeckStore.updatePresentation(id, { sceneOrder: ids });
+    }
 
     const newActive = ids.indexOf(scenes[activeSceneIndex]?.id);
     activeSceneIndex = newActive >= 0 ? newActive : 0;

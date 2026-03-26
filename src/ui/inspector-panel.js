@@ -49,6 +49,7 @@ export function createInspectorPanel({
   onDeleteScene,
   onRegenerate,
   onSettingsChange,
+  onDeckPatch,
 }) {
   const el = document.createElement("div");
   el.className = "ws-inspector-inner";
@@ -215,6 +216,9 @@ export function createInspectorPanel({
       const newTitle = titleInput.value.trim() || s.title;
       if (newTitle !== s.title) {
         store.updateScene(presentationId, s.id, { title: newTitle });
+        if (typeof onDeckPatch === "function") {
+          onDeckPatch({ scenes: { [s.id]: { title: newTitle } } });
+        }
       }
     });
     titleInput.addEventListener("keydown", (e) => {
@@ -242,6 +246,9 @@ export function createInspectorPanel({
       if (type === "delay")        next.delayMs = Math.max(0, parseInt(delayInput.value, 10) || 0);
       if (type === "waitForEvent") next.event   = eventInput.value.trim();
       store.updateScene(presentationId, s.id, { advance: next });
+      if (typeof onDeckPatch === "function") {
+        onDeckPatch({ scenes: { [s.id]: { advance: next } } });
+      }
     }
 
     advanceSelect.addEventListener("change", () => {
@@ -264,6 +271,7 @@ export function createInspectorPanel({
       const merged = { ...((fresh || {}).settings || {}), ...partial };
       store.update(presentationId, { settings: merged });
       if (typeof onSettingsChange === "function") onSettingsChange(partial);
+      if (typeof onDeckPatch === "function") onDeckPatch({ settings: partial });
     }
 
     el.querySelector("#ws-insp-playback").addEventListener("change", (e) => {

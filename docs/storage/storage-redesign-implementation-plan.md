@@ -87,11 +87,17 @@ Use Replit Database (Postgres via `DATABASE_URL`) for shared deck override persi
 ```sql
 create table if not exists presentation_decks (
   deck_id text primary key,
+  version bigint not null default 0,
   contract_version text null,
   payload jsonb not null,
   updated_at timestamptz not null default now()
 );
 ```
+
+Versioning model:
+- `version` is a first-class column (deck-level version)
+- optimistic update uses `where deck_id = $1 and version = $2`
+- successful write increments `version = version + 1` atomically
 
 ### Stored Payload Shape
 Store only a remote override document keyed by deck id (not a full merged deck):
@@ -116,7 +122,11 @@ Store only a remote override document keyed by deck id (not a full merged deck):
       "pd-02": {
         "title": "The Problem",
         "editIntent": "Show the painful status quo...",
-        "advance": { "type": "manual" }
+        "advance": { "type": "manual" },
+        "actions": [],
+        "presenter": {
+          "blocks": []
+        }
       }
     }
   }
@@ -165,6 +175,11 @@ Server responsibilities:
 - Increment deck-level `version` atomically
 - Persist and return updated document
 
+Deletion/reset semantics:
+- `null` in patch deletes override key at that path (reverts to baseline behavior)
+- empty object `{}` does not delete
+- arrays still replace full value
+
 ## Merge Semantics
 Use deterministic merge semantics:
 - `theme`: shallow merge
@@ -188,7 +203,6 @@ Introduce a persistence interface boundary:
 class DeckRepository {
   async getEffectiveDeck(deckId) {}
   async saveDeckOverrides(deckId, patch) {}
-  async listDecks() {}
 }
 ```
 
@@ -295,6 +309,12 @@ Use optimistic concurrency:
   2. Reapply patch
   3. Retry once
   4. Surface non-blocking warning if retry fails
+
+UX behavior when retry fails:
+- remote state remains authoritative
+- preserve unsaved local editor intent in UI state
+- present a non-blocking warning with explicit retry action
+- do not silently overwrite in-editor values
 
 ## Security and Operations (Minimal)
 - Protect write endpoint with basic token/header for initial rollout

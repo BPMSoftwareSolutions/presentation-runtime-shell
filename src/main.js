@@ -1,9 +1,10 @@
-import { createRouter }       from "./core/router.js";
-import { createLibraryStore } from "./core/library-store.js";
-import { mountAppShell }      from "./ui/app-shell.js";
-import { mountLibrary }       from "./screens/library.js";
-import { mountWorkspace }     from "./screens/workspace.js";
-import { mountImportScene }   from "./screens/import-scene.js";
+import { createRouter }          from "./core/router.js";
+import { createLibraryStore }    from "./core/library-store.js";
+import { createSharedDeckStore } from "./core/shared-deck-store.js";
+import { mountAppShell }         from "./ui/app-shell.js";
+import { mountLibrary }          from "./screens/library.js";
+import { mountWorkspace }        from "./screens/workspace.js";
+import { mountImportScene }      from "./screens/import-scene.js";
 
 function parsePresentId(hash) {
   const match = /^#\/present\/([^/?#]+)$/.exec(hash || "");
@@ -20,7 +21,7 @@ function parsePresentId(hash) {
 
 let _presentSession = null;
 
-async function bootPresentMode(id, store) {
+async function bootPresentMode(id, store, sharedDeckStore) {
   const appEl = document.getElementById("app");
   if (!appEl) return;
 
@@ -30,7 +31,7 @@ async function bootPresentMode(id, store) {
   }
 
   const { mountPresent } = await import("./screens/present.js");
-  _presentSession = mountPresent({ id, store, rootEl: appEl });
+  _presentSession = mountPresent({ id, store, sharedDeckStore, rootEl: appEl });
 }
 
 /**
@@ -78,12 +79,13 @@ async function seedIfEmpty(store) {
 }
 
 async function boot() {
-  const store  = createLibraryStore();
+  const store           = createLibraryStore();
+  const sharedDeckStore = await createSharedDeckStore();
   await seedIfEmpty(store);
 
   const presentId = parsePresentId(location.hash);
   if (presentId) {
-    await bootPresentMode(presentId, store);
+    await bootPresentMode(presentId, store, sharedDeckStore);
     return;
   }
 
@@ -95,7 +97,7 @@ async function boot() {
   });
 
   router.on("#/presentation/:id", ({ id }) => {
-    shell.setScreen(() => mountWorkspace({ id, store, router, shell }));
+    shell.setScreen(() => mountWorkspace({ id, store, sharedDeckStore, router, shell }));
   });
 
   router.on("#/presentation/:id/import", ({ id }) => {
