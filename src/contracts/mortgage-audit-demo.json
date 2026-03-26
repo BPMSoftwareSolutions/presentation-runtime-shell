@@ -33,14 +33,14 @@
     },
     {
       "id": "mortgage-01",
-      "title": "Messy Loan File Intake",
+      "title": "Your Loan File — After Import",
       "type": "narrative",
-      "editIntent": "Open with the pain state — a real loan file folder with 12 documents, no version control, and zero separation. Make the auditor questions feel visceral and familiar to anyone who has worked in mortgage compliance.",
+      "editIntent": "Maintain continuity from the import scene. The user just brought these files in — now show them inside the system, unchanged. The confirmation banner at the top reinforces that nothing was lost or altered. The mess is the same mess they started with — but now it is visible and governable.",
       "presenter": {
         "mode": "impact",
         "blocks": [
-          { "text": "This is what a loan folder actually looks like when it arrives.", "pauseMs": 700 },
-          { "text": " Twelve documents. No clear separation. No version control.", "pauseMs": 0 }
+          { "text": "These are the exact files you just brought in.", "pauseMs": 700 },
+          { "text": " Nothing has been cleaned up yet.", "pauseMs": 0 }
         ]
       },
       "content": { "route": "./src/generated/mortgage-audit/scene-01-intake/index.html" },
