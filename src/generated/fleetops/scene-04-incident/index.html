@@ -140,9 +140,9 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
       <div class="card" data-reveal>
         <h3>Signal</h3>
         <div class="signal">
-          <div class="sig" id="sig1"></div>
-          <div class="sig" id="sig2"></div>
-          <div class="sig" id="sig3"></div>
+          <div class="sig" id="sig1"><span class="sig-icon">⏱️</span><span id="sig1-text"></span><span class="tw-cursor" id="sig1-cursor"></span></div>
+          <div class="sig" id="sig2"><span class="sig-icon">📍</span><span id="sig2-text"></span><span class="tw-cursor" id="sig2-cursor"></span></div>
+          <div class="sig" id="sig3"><span class="sig-icon">🚨</span><span id="sig3-text"></span><span class="tw-cursor" id="sig3-cursor"></span></div>
         </div>
       </div>
       <div class="card" data-reveal>
@@ -250,60 +250,27 @@ function tw(container, text, delay, done){
   tick();
 }
 
-// --- Build sig items ---
-function buildSig1(done){
-  const el=document.getElementById('sig1');
-  // Icon
-  const ic=document.createElement('span');
-  ic.className='sig-icon'; ic.textContent='&#x1F550;';
-  el.appendChild(ic);
-  el.appendChild(document.createTextNode('\u00A0Inactive for\u00A0'));
-  // Timer span
-  const ts=document.createElement('span');
-  ts.className='timer-val';
-  ts.textContent=fmt(totalSec);
-  el.appendChild(ts);
-  // Tick every second
-  setInterval(()=>{ totalSec++; ts.textContent=fmt(totalSec); },1000);
-  // sig1 "types in" instantly (it's a live value), call done after short pause
-  if(done) setTimeout(done, 200);
-}
+// --- Typewriter function (unused now but keeping for reference) ---
 
-function buildSig2(done){
-  const el=document.getElementById('sig2');
-  const ic=document.createElement('span');
-  ic.className='sig-icon'; ic.textContent='&#x1F4CD;';
-  el.appendChild(ic);
-  el.appendChild(document.createTextNode('\u00A0'));
-  tw(el,'Last known location:\u00A0',18,()=>{
-    const b=document.createElement('strong');
-    el.appendChild(b);
-    tw(b,'restaurant parking lot',18,()=>{
-      if(done) setTimeout(done,300);
-    });
-  });
-}
-
-function buildSig3(done){
-  const el=document.getElementById('sig3');
-  const ic=document.createElement('span');
-  ic.className='sig-icon'; ic.textContent='&#x1F4DE;';
-  el.appendChild(ic);
-  el.appendChild(document.createTextNode('\u00A0'));
-  tw(el,'External escalation:\u00A0',18,()=>{
-    const b=document.createElement('strong');
-    el.appendChild(b);
-    tw(b,'police contact received',18,done);
-  });
-}
-
-// Signal card reveals at ~0.08 + 1*0.1 = 0.18s; start typewriter at 0.32s
+// Typewriter for signal lines — sig1 is a timer, sig2/sig3 are typewriter text
 setTimeout(()=>{
-  buildSig1(()=>{
-    buildSig2(()=>{
-      buildSig3(null);
-    });
-  });
+  const sig2TextEl=document.getElementById('sig2-text');
+  const sig3TextEl=document.getElementById('sig3-text');
+  const sig2CurEl=document.getElementById('sig2-cursor');
+  const sig3CurEl=document.getElementById('sig3-cursor');
+  let i2=0, i3=0;
+  const sig2='Last known location: restaurant parking lot';
+  const sig3='External escalation: police contact received';
+  function type2(){
+    if(i2<sig2.length) { sig2TextEl.textContent+=sig2[i2++]; setTimeout(type2,18); }
+    else sig2CurEl.style.display='none';
+  }
+  function type3(){
+    if(i3<sig3.length) { sig3TextEl.textContent+=sig3[i3++]; setTimeout(type3,18); }
+    else sig3CurEl.style.display='none';
+  }
+  setTimeout(type2, 250);
+  setTimeout(type3, 500);
 }, 320);
 </script>
 </body>

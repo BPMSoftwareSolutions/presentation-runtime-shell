@@ -42,19 +42,19 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
 .reveal-btn:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.5)}
 .list{display:grid;gap:14px}
 .item{padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.03);display:flex;gap:12px;align-items:flex-start}
-.icon{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:none}
+.icon{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:none;transition:all .3s ease}
 .g{background:rgba(16,185,129,.14);color:#6ee7b7}
-.r{background:rgba(239,68,68,.14);color:#fca5a5}
+.r{background:rgba(239,68,68,.22);color:#fecaca;border:1px solid rgba(239,68,68,.35);font-weight:700}
 .item .txt{font-size:18px;line-height:1.45}
 /* Right panel items hidden by default, revealed on button click */
 .reality-item{opacity:0;transform:translateY(10px);transition:opacity .4s ease, transform .4s ease}
 .reality-item.shown{opacity:1;transform:none}
 /* Pulsing red glow on .icon.r */
 @keyframes pulse-red{
-  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}
-  50%{box-shadow:0 0 0 6px rgba(239,68,68,.25),0 0 16px 2px rgba(239,68,68,.18)}
+  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5),inset 0 0 0 0 rgba(239,68,68,.3)}
+  50%{box-shadow:0 0 0 8px rgba(239,68,68,0),inset 0 0 8px 1px rgba(239,68,68,.4)}
 }
-.icon.r.pulsing{animation:pulse-red 2s ease-in-out infinite}
+.icon.r.pulsing{animation:pulse-red 1.8s ease-in-out infinite}
 
 .footer{padding:20px 24px;border:1px solid rgba(245,158,11,.28);border-radius:22px;background:rgba(245,158,11,.08);font-size:22px;line-height:1.5;color:#fde68a}
 .dim{color:var(--muted)}

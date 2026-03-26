@@ -79,16 +79,17 @@
       font-size: 13px;
       text-transform: uppercase;
       letter-spacing: .09em;
+      font-weight: 600;
       opacity: 0;
-      transform: scale(0);
+      transform: scale(0) rotateZ(-45deg);
     }
     .result.pop {
-      animation: badge-pop .45s cubic-bezier(.34,1.56,.64,1) forwards;
+      animation: badge-pop .5s cubic-bezier(.34,1.56,.64,1) forwards;
     }
     @keyframes badge-pop {
-      0%   { opacity: 0; transform: scale(0); }
-      70%  { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 1; transform: scale(1); }
+      0%   { opacity: 0; transform: scale(0) rotateZ(-45deg); }
+      65%  { opacity: 1; transform: scale(1.12) rotateZ(8deg); }
+      100% { opacity: 1; transform: scale(1) rotateZ(0deg); }
     }
     .ok  { background: rgba(16,185,129,.12);  color: #86efac; }
     .warn { background: rgba(245,158,11,.12); color: #fcd34d; }
@@ -234,9 +235,19 @@
         badge.classList.add('pop');
       }, 200);
 
-      // Update counter + progress bar
+      // Update counter + progress bar with count-up animation
       revealed++;
-      counter.textContent = `${Math.min(revealed, COMPLETE)} / ${TOTAL} steps`;
+      const displayNum = Math.min(revealed, COMPLETE);
+      // Count up from previous to current
+      let countIdx = revealed === 1 ? 0 : revealed - 1;
+      const countUp = () => {
+        if (countIdx <= displayNum) {
+          counter.textContent = `${countIdx} / ${TOTAL} steps`;
+          countIdx++;
+          setTimeout(countUp, 80);
+        }
+      };
+      countUp();
 
       if (revealed <= COMPLETE) {
         const pct = ((revealed / TOTAL) * 100).toFixed(1);
