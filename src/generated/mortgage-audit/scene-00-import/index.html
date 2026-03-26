@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Import from Your File System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--muted:#94a3b8;--border:rgba(255,255,255,.09);--sky:#0ea5e9;--green:#10b981;--amber:#f59e0b}
+.scene{height:100%;padding:44px;position:relative;display:flex;flex-direction:column;gap:20px}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.wrap{position:relative;z-index:1;height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:18px}
+.head{display:flex;justify-content:space-between;align-items:flex-start}
+.head-left{}
+.scene-label{font-size:12px;color:var(--sky);text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:8px}
+.title{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.subtitle{font-size:14px;color:var(--muted);margin-top:5px;line-height:1.5;max-width:52ch}
+.badge{padding:8px 16px;border-radius:999px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.28);color:#7dd3fc;font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;flex:none}
+
+.main{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;min-height:0}
+
+/* ── File browser (intentionally familiar / slightly plain) ── */
+.file-browser{border-radius:14px;overflow:hidden;background:#fff;border:1px solid #d1d9e8;display:flex;flex-direction:column;box-shadow:0 4px 18px rgba(0,0,0,.14)}
+.fb-titlebar{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#e8ecf3;border-bottom:1px solid #d1d9e8}
+.fb-dot{width:11px;height:11px;border-radius:50%}
+.fb-dot-r{background:#ef4444}
+.fb-dot-y{background:#f59e0b}
+.fb-dot-g{background:#22c55e}
+.fb-titlebar-text{font-size:12px;color:#5a6475;margin-left:6px;font-family:system-ui,sans-serif}
+
+.fb-path{display:flex;align-items:center;gap:4px;padding:5px 10px;background:#f2f4f8;border-bottom:1px solid #d8dde8;font-size:12px;color:#5a6475;font-family:system-ui,sans-serif}
+.fb-path-sep{color:#b0bbc8;font-size:11px}
+.fb-path-last{color:#1e2a3a;font-weight:600}
+
+.fb-col-header{display:grid;grid-template-columns:22px 1fr 52px 82px;gap:8px;padding:5px 10px;background:#f5f7fb;border-bottom:1px solid #e2e8f2;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8a95a8;font-family:system-ui,sans-serif}
+
+.fb-list{flex:1;overflow:auto}
+.fb-row{display:grid;grid-template-columns:22px 1fr 52px 82px;gap:8px;align-items:center;padding:5px 10px;border-bottom:1px solid #f0f3f8;transition:background 100ms ease;cursor:default;font-family:system-ui,sans-serif}
+.fb-row:last-child{border-bottom:none}
+.fb-row:hover{background:#f5f7fb}
+.fb-row.just-imported{animation:flash-row 500ms ease forwards}
+@keyframes flash-row{0%{background:#dbeafe}100%{background:transparent}}
+.fb-row input[type=checkbox]{width:13px;height:13px;accent-color:#2563eb;cursor:pointer;margin:0}
+.fb-row-name{display:flex;align-items:center;gap:6px;min-width:0}
+.fb-icon{font-size:13px;opacity:.7;flex:none}
+.fb-name{font-size:12.5px;color:#1e2a3a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fb-size{font-size:11.5px;color:#8a95a8;white-space:nowrap}
+.fb-date{font-size:11.5px;color:#8a95a8;white-space:nowrap}
+
+.fb-statusbar{padding:5px 10px;background:#f2f4f8;border-top:1px solid #d8dde8;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#8a95a8;font-family:system-ui,sans-serif}
+.fb-status-count{font-weight:600;color:#5a6475}
+.fb-deselect{background:none;border:none;color:#2563eb;font-size:11.5px;padding:0;box-shadow:none;text-decoration:underline;cursor:pointer;font-family:system-ui,sans-serif}
+.fb-deselect:hover{opacity:.75;transform:none;box-shadow:none}
+
+/* ── Right column: system intake ─────────────────────────── */
+.intake-col{display:flex;flex-direction:column;gap:14px}
+.intake-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+
+.drop-zone{border:2px dashed rgba(14,165,233,.28);border-radius:16px;background:rgba(14,165,233,.04);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;transition:border-color 320ms ease,background 320ms ease;position:relative;overflow:hidden}
+.drop-zone.receiving{border-color:rgba(14,165,233,.55);background:rgba(14,165,233,.08)}
+.drop-zone.done{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.06)}
+.dz-loan-id{font-size:14px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.06em}
+.dz-hint{font-size:13px;color:var(--muted);line-height:1.5;transition:opacity 280ms ease}
+.dz-count{font-size:36px;font-weight:800;color:var(--sky);line-height:1;transition:color 280ms ease;min-height:44px;display:flex;align-items:center;justify-content:center}
+.dz-count.done-color{color:var(--green)}
+.dz-success{opacity:0;transition:opacity 320ms ease;display:flex;flex-direction:column;align-items:center;gap:6px;position:absolute;bottom:24px;left:0;right:0}
+.dz-success.visible{opacity:1}
+.dz-success-msg{font-size:14px;font-weight:700;color:#6ee7b7}
+.dz-success-sub{font-size:12px;color:rgba(110,231,183,.65)}
+
+/* ── CTA ─────────────────────────────────────────────────── */
+.cta-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.import-btn{padding:11px 26px;border-radius:999px;background:var(--sky);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s,background .25s;box-shadow:0 8px 22px rgba(14,165,233,.25);letter-spacing:.02em}
+.import-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(14,165,233,.32)}
+.import-btn:active{transform:translateY(0)}
+.import-btn:disabled{opacity:.4;pointer-events:none}
+.import-btn.done-btn{background:var(--green);box-shadow:0 8px 22px rgba(16,185,129,.25)}
+.cta-or{font-size:13px;color:var(--muted)}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="wrap">
+
+    <div class="head" data-reveal>
+      <div class="head-left">
+        <div class="scene-label">Scene 0 — Before you begin</div>
+        <div class="title">Import from Your File System</div>
+        <div class="subtitle">Start with the files exactly where you already work. No migration, no new folder structure.</div>
+      </div>
+      <div class="badge">Loan #48291</div>
+    </div>
+
+    <div class="main">
+      <!-- File browser -->
+      <div class="file-browser" data-reveal>
+        <div class="fb-titlebar">
+          <div class="fb-dot fb-dot-r"></div>
+          <div class="fb-dot fb-dot-y"></div>
+          <div class="fb-dot fb-dot-g"></div>
+          <span class="fb-titlebar-text">File Explorer</span>
+        </div>
+        <div class="fb-path">
+          <span class="fb-path-seg">Documents</span>
+          <span class="fb-path-sep">›</span>
+          <span class="fb-path-seg">Loans</span>
+          <span class="fb-path-sep">›</span>
+          <span class="fb-path-seg fb-path-last">48291</span>
+        </div>
+        <div class="fb-col-header">
+          <div></div>
+          <div>Name</div>
+          <div>Size</div>
+          <div>Modified</div>
+        </div>
+        <div class="fb-list" id="fb-list"></div>
+        <div class="fb-statusbar">
+          <span class="fb-status-count" id="fb-status">12 items selected</span>
+          <button class="fb-deselect" id="fb-toggle">Deselect all</button>
+        </div>
+      </div>
+
+      <!-- System intake -->
+      <div class="intake-col" data-reveal>
+        <div class="intake-label">System Intake — Loan File 48291</div>
+        <div class="drop-zone" id="drop-zone">
+          <div class="dz-loan-id">LOAN FILE: 48291</div>
+          <div class="dz-hint" id="dz-hint">Drop files here<br>or use the import button below</div>
+          <div class="dz-count" id="dz-count"></div>
+          <div class="dz-success" id="dz-success">
+            <div class="dz-success-msg">✓ 12 documents imported</div>
+            <div class="dz-success-sub">from your folder — nothing was lost</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-bar" data-reveal>
+      <button class="import-btn" id="import-btn">Import Selected Files →</button>
+      <span class="cta-or" id="cta-or">or drag files directly from your folder</span>
+    </div>
+
+  </div>
+</div>
+<script>
+(function(){
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  revealEls.forEach(function(e,i){ e.style.animationDelay = (.1 + i * .12) + 's'; });
+
+  var files = [
+    {name:'Closing Disclosure FINAL.pdf',    size:'312 KB', date:'Mar 12, 2025'},
+    {name:'Closing Disclosure revised.pdf',  size:'308 KB', date:'Mar 10, 2025'},
+    {name:'Borrower ID.pdf',                 size:' 84 KB', date:'Feb 28, 2025'},
+    {name:'Note_signed.pdf',                 size:'196 KB', date:'Mar 12, 2025'},
+    {name:'Note_unsigned.pdf',               size:'192 KB', date:'Mar  8, 2025'},
+    {name:'Title Commitment.pdf',            size:'441 KB', date:'Mar  5, 2025'},
+    {name:'Wiring Instructions OLD.pdf',     size:' 56 KB', date:'Feb 14, 2025'},
+    {name:'Payoff Letter.pdf',               size:'128 KB', date:'Mar 11, 2025'},
+    {name:'Escrow Worksheet.pdf',            size:'204 KB', date:'Mar  9, 2025'},
+    {name:'Misc Addendum draft.pdf',         size:' 77 KB', date:'Mar  7, 2025'},
+    {name:'Compliance Notice.pdf',           size:' 63 KB', date:'Mar  1, 2025'},
+    {name:'Random Scan 003.pdf',             size:' 38 KB', date:'Mar  3, 2025'},
+  ];
+
+  var list = document.getElementById('fb-list');
+  files.forEach(function(f, i){
+    var row = document.createElement('div');
+    row.className = 'fb-row';
+    row.id = 'fb-row-' + i;
+    row.innerHTML =
+      '<input type="checkbox" id="chk'+i+'" checked>' +
+      '<div class="fb-row-name"><span class="fb-icon">📄</span><span class="fb-name">'+f.name+'</span></div>' +
+      '<span class="fb-size">'+f.size+'</span>' +
+      '<span class="fb-date">'+f.date+'</span>';
+    list.appendChild(row);
+  });
+
+  // Status counter
+  function updateStatus(){
+    var checked = list.querySelectorAll('input[type=checkbox]:checked').length;
+    document.getElementById('fb-status').textContent = checked + ' item' + (checked === 1 ? '' : 's') + ' selected';
+    document.getElementById('import-btn').disabled = checked === 0;
+  }
+
+  list.addEventListener('change', updateStatus);
+
+  // Select/deselect toggle
+  var allSelected = true;
+  document.getElementById('fb-toggle').addEventListener('click', function(){
+    allSelected = !allSelected;
+    list.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.checked = allSelected; });
+    this.textContent = allSelected ? 'Deselect all' : 'Select all';
+    updateStatus();
+  });
+
+  // Import animation
+  var imported = false;
+  document.getElementById('import-btn').addEventListener('click', function(){
+    if(imported) return;
+    imported = true;
+
+    var btn = this;
+    btn.disabled = true;
+
+    var dz = document.getElementById('drop-zone');
+    var dzCount = document.getElementById('dz-count');
+    var dzHint = document.getElementById('dz-hint');
+    var dzSuccess = document.getElementById('dz-success');
+    var ctaOr = document.getElementById('cta-or');
+
+    // Get checked rows
+    var rows = list.querySelectorAll('input[type=checkbox]:checked');
+    var total = rows.length;
+    var count = 0;
+
+    dz.classList.add('receiving');
+    dzHint.style.opacity = '.4';
+    dzCount.textContent = '0';
+
+    // Stagger: flash each row + increment counter
+    rows.forEach(function(cb, idx){
+      setTimeout(function(){
+        var row = cb.closest('.fb-row');
+        if(row) row.classList.add('just-imported');
+        count++;
+        dzCount.textContent = count;
+        if(count === total){
+          // Done
+          setTimeout(function(){
+            dz.classList.remove('receiving');
+            dz.classList.add('done');
+            dzCount.classList.add('done-color');
+            dzSuccess.classList.add('visible');
+            btn.textContent = '✓ Imported — viewing documents';
+            btn.classList.add('done-btn');
+            btn.disabled = false;
+            ctaOr.style.opacity = '0';
+          }, 180);
+        }
+      }, idx * 55);
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

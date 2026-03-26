@@ -17,6 +17,21 @@
   },
   "scenes": [
     {
+      "id": "mortgage-00",
+      "title": "Import from Your File System",
+      "type": "narrative",
+      "editIntent": "Open the demo from her current reality, not the new system. Show a Windows Explorer-style file browser with the 12 loan documents already in a familiar folder structure. The user selects files and imports them — psychologically this removes disorientation and makes the system feel like an extension of existing work, not a replacement.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "We don't replace how you get your files.", "pauseMs": 700 },
+          { "text": " We start from exactly where you already work.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/mortgage-audit/scene-00-import/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
       "id": "mortgage-01",
       "title": "Messy Loan File Intake",
       "type": "narrative",
