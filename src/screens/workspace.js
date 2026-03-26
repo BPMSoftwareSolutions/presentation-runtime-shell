@@ -30,9 +30,21 @@ function esc(str) {
 function copyPresentLink(id, store) {
   const deck = store.getById(id);
   const base = `${location.origin}${location.pathname}`;
+
+  // Encode per-scene advance settings so the magic link is self-contained.
+  // Clients fetch the JSON contract from disk; URL overrides are merged on top,
+  // so inspector edits flow through without requiring manual JSON edits.
+  const scenes = {};
+  (deck?.scenes || []).forEach((s) => {
+    if (s.advance && s.advance.type !== "manual") {
+      scenes[s.id] = { advance: s.advance };
+    }
+  });
+
   const url = buildMagicLink(base, id, {
     settings: deck?.settings,
     theme:    deck?.theme,
+    scenes:   Object.keys(scenes).length ? scenes : null,
   });
   navigator.clipboard.writeText(url).catch(() => {
     prompt("Copy this link:", url);

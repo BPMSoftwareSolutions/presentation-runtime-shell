@@ -55,7 +55,7 @@ A per-scene text field describing what the scene should accomplish. Used as cont
 
 ## Magic Links
 
-The **Copy Link** button in the workspace generates a self-contained URL that encodes the current presentation settings directly in the query string. No server or database required — opening the link anywhere reproduces the exact playback configuration.
+The **Copy Link** button in the workspace generates a self-contained URL that encodes the current presentation settings directly in the query string. No server or database required — opening the link anywhere reproduces the exact playback configuration, including any per-scene advance rules you configured in the inspector.
 
 ### URL format
 
@@ -74,13 +74,18 @@ The `cfg` parameter is a base64url-encoded JSON payload. If there are no overrid
 | Controls position | Collapsed sections |
 | Between-scenes delay | Search filters |
 | Theme (shell, accent, presenter position) | Any local author prefs |
+| Per-scene advance rules (type, delay, event) | |
 | Demo state (tenant, scenario, etc.) | |
+
+Per-scene advance rules are encoded automatically from the library store when you click **Copy Link**. You do not need to edit the JSON contract file to change how a scene advances for a specific client — configure it in the inspector, copy the link, and the client gets exactly what you set.
+
+Only non-`manual` advances are encoded (manual is the default and adds no payload weight). A deck with five `waitForEvent` and `delay` scenes adds roughly 200–300 bytes to the link.
 
 ### Precedence when opening a magic link
 
 1. Code defaults
 2. Contract baseline (`/src/contracts/{id}.json`)
-3. URL overrides (`?cfg=` param)
+3. URL overrides (`?cfg=` param) — including per-scene advance rules
 4. Author prefs apply in workspace only — never affect link-only playback
 
 ### Adding a new presentable deck

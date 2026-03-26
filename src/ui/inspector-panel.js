@@ -134,7 +134,15 @@ export function createInspectorPanel({
           value="${esc(advance.event || "")}"
           placeholder="e.g. chart:animated"
           aria-label="iframe event name"
+          list="ws-known-events"
+          autocomplete="off"
         />
+        <datalist id="ws-known-events">
+          ${(_presentation?.scenes ?? [])
+            .filter(s => s.advance?.type === "waitForEvent" && s.advance?.event)
+            .map(s => `<option value="${esc(s.advance.event)}">${esc(s.title || s.id)}: ${esc(s.advance.event)}</option>`)
+            .join("")}
+        </datalist>
       </div>
 
       <div class="ws-inspector-divider"></div>

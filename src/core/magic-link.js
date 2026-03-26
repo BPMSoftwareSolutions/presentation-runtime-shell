@@ -18,6 +18,17 @@ function decodePayload(input) {
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
+// ── Advance validator (shared by sanitizer and builder) ──────────────────────
+
+function isValidAdvance(a) {
+  if (!a || typeof a !== "object") return false;
+  const valid = ["manual", "auto", "delay", "waitForEvent"];
+  if (!valid.includes(a.type)) return false;
+  if (a.type === "delay" && !(Number.isFinite(a.delayMs) && a.delayMs >= 0)) return false;
+  if (a.type === "waitForEvent" && !(typeof a.event === "string" && a.event.length > 0)) return false;
+  return true;
+}
+
 // ── Per-field value validators ───────────────────────────────────────────────
 
 const SETTINGS_VALIDATORS = {
@@ -73,6 +84,20 @@ function sanitize(parsed) {
     if (entries.length) out.demo = Object.fromEntries(entries);
   }
 
+  // Per-scene overrides: { [sceneId]: { advance?: {...} } }
+  if (parsed.scenes && typeof parsed.scenes === "object" && !Array.isArray(parsed.scenes)) {
+    const scenes = {};
+    for (const [id, override] of Object.entries(parsed.scenes)) {
+      if (typeof id !== "string" || !id || typeof override !== "object" || !override) continue;
+      const entry = {};
+      if (override.advance !== undefined && isValidAdvance(override.advance)) {
+        entry.advance = override.advance;
+      }
+      if (Object.keys(entry).length) scenes[id] = entry;
+    }
+    if (Object.keys(scenes).length) out.scenes = scenes;
+  }
+
   return out;
 }
 
@@ -110,6 +135,20 @@ export function mergeDeck(contractDeck, urlOverrides) {
     };
   }
 
+  // Apply per-scene advance overrides onto a fresh copy of the scenes array
+  let scenes = contractDeck.scenes || [];
+  const sceneOverrides = urlOverrides.scenes;
+  if (sceneOverrides && scenes.length) {
+    scenes = scenes.map((s) => {
+      const ov = sceneOverrides[s.id];
+      if (!ov) return s;
+      return {
+        ...s,
+        ...(ov.advance !== undefined ? { advance: ov.advance } : {}),
+      };
+    });
+  }
+
   return {
     deck: {
       ...contractDeck,
@@ -121,6 +160,7 @@ export function mergeDeck(contractDeck, urlOverrides) {
         ...contractDeck.theme,
         ...(urlOverrides.theme || {}),
       },
+      scenes,
     },
     demoOverrides: urlOverrides.demo || null,
   };
@@ -142,11 +182,11 @@ const MAGIC_LINK_WARN_LENGTH = 1800;
  *
  * @param {string} baseUrl          - e.g. `${location.origin}${location.pathname}`
  * @param {string} deckId
- * @param {{ settings?: object, theme?: object, demoOverrides?: object|null }} [shareableConfig]
+ * @param {{ settings?: object, theme?: object, scenes?: object, demoOverrides?: object|null }} [shareableConfig]
  * @returns {string} Full URL. Omits `?cfg=` entirely when there are no shareable overrides.
  */
 export function buildMagicLink(baseUrl, deckId, shareableConfig = {}) {
-  const { settings = {}, theme = {}, demoOverrides = null } = shareableConfig;
+  const { settings = {}, theme = {}, scenes = null, demoOverrides = null } = shareableConfig;
   const payload = {};
 
   const filteredSettings = Object.fromEntries(
@@ -161,6 +201,17 @@ export function buildMagicLink(baseUrl, deckId, shareableConfig = {}) {
 
   if (demoOverrides && Object.keys(demoOverrides).length) {
     payload.demo = demoOverrides;
+  }
+
+  // Per-scene advance overrides — only include scenes with a valid advance
+  if (scenes && typeof scenes === "object") {
+    const filteredScenes = {};
+    for (const [id, override] of Object.entries(scenes)) {
+      if (override?.advance && isValidAdvance(override.advance)) {
+        filteredScenes[id] = { advance: override.advance };
+      }
+    }
+    if (Object.keys(filteredScenes).length) payload.scenes = filteredScenes;
   }
 
   const base = `${baseUrl}#/present/${encodeURIComponent(deckId)}`;
