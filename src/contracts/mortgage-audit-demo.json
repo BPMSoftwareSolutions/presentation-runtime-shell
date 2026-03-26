@@ -92,7 +92,7 @@
         ]
       },
       "content": { "route": "./src/generated/mortgage-audit/scene-04-separate/index.html" },
-      "advance": { "type": "manual" }
+      "advance": { "type": "waitForEvent", "event": "separation:complete" }
     },
     {
       "id": "mortgage-05",
