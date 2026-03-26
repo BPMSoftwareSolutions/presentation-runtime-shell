@@ -29,12 +29,20 @@ Apply values from lowest to highest precedence:
 4. Optional ephemeral URL/session overrides (non-persistent)
 5. Local author prefs (UI-only; must never override deck-owned behavior)
 
+Invariant: local author prefs are never part of effective deck computation.
+
 ### Link-Only Rule
 For `#/present/:id`, effective deck composition is:
 
 `effectiveDeck = merge(contractBaseline, remoteDeckOverrides)`
 
 Local browser deck state must not influence link-only behavior.
+
+### Link-Only Remote Failure Behavior
+For `#/present/:id`:
+- If remote override fetch succeeds: use `merge(contractBaseline, remoteDeckOverrides)`
+- If remote override fetch fails: use `contractBaseline` only
+- Never fall back to browser-local deck state for client-visible behavior
 
 ## Persistence Boundary
 
@@ -86,7 +94,7 @@ create table if not exists presentation_decks (
 ```
 
 ### Stored Payload Shape
-Store a remote override document keyed by deck id:
+Store only a remote override document keyed by deck id (not a full merged deck):
 
 ```json
 {
@@ -103,6 +111,7 @@ Store a remote override document keyed by deck id:
       "playbackMode": "interactive",
       "typingSpeedMs": 20
     },
+    "sceneOrder": ["pd-01", "pd-03", "pd-02"],
     "scenes": {
       "pd-02": {
         "title": "The Problem",
@@ -114,10 +123,53 @@ Store a remote override document keyed by deck id:
 }
 ```
 
+Notes:
+- `overrides.scenes` is keyed by `scene.id`
+- `overrides.sceneOrder` is the sole remote source for explicit scene ordering
+- Contracts remain immutable baseline seed content
+
+### API Contract (Strict)
+`GET /api/decks/:deckId` returns:
+
+```json
+{
+  "deckId": "msp-demo-deck",
+  "version": 12,
+  "updatedAt": "2026-03-25T22:30:00Z",
+  "overrides": {
+    "settings": {},
+    "theme": {},
+    "sceneOrder": [],
+    "scenes": {}
+  }
+}
+```
+
+`PUT /api/decks/:deckId` accepts:
+
+```json
+{
+  "expectedVersion": 12,
+  "patch": {
+    "settings": {
+      "presentControlsPosition": "bottom"
+    }
+  },
+  "updatedBy": "author"
+}
+```
+
+Server responsibilities:
+- Read current override document
+- Merge patch into `overrides`
+- Increment deck-level `version` atomically
+- Persist and return updated document
+
 ## Merge Semantics
 Use deterministic merge semantics:
 - `theme`: shallow merge
 - `settings`: shallow merge
+- `sceneOrder`: replace full array when present
 - `scenes`: merge by `scene.id`, not array index
 - `actions`: replace full array
 - `presenter.blocks`: replace full array
@@ -125,6 +177,7 @@ Use deterministic merge semantics:
 Rationale:
 - Scene ids are stable identifiers and should be the patch anchor.
 - Array patch semantics are deferred for simplicity.
+- Scene order is represented explicitly via `overrides.sceneOrder`.
 
 ## Frontend Design Changes
 
@@ -138,6 +191,11 @@ class DeckRepository {
   async listDecks() {}
 }
 ```
+
+Data model separation is strict:
+- `DeckOverrides` schema: remote-only deck-owned runtime state
+- `AuthorPrefs` schema: local-only browser preferences
+- No shared write helper should write both domains
 
 Implement:
 - `RemoteDeckRepository` for runtime shared deck data
@@ -169,6 +227,8 @@ When deck-owned fields change in workspace/inspector:
 When browser-owned prefs change:
 - Write only to `LocalAuthorPrefsStore`
 
+Server owns patch merge and version increment; clients submit patches only.
+
 ### Link-Only Mode
 For `#/present/:id`:
 - Ignore local author prefs except inert UI niceties
@@ -183,7 +243,10 @@ For `#/present/:id`:
 ### Phase 1: Read Path Migration
 - Introduce merge utility and remote repository
 - Load contract + remote overrides for effective deck
-- Keep existing local behavior as fallback
+- Keep existing local behavior as fallback for authoring UI only
+
+Migration invariant:
+- `prs_library` is legacy/cache and must not be authoritative for deck-owned fields
 
 ### Phase 2: Write Path Migration
 - Route deck-owned writes to remote `PUT /api/decks/:id`
@@ -192,6 +255,7 @@ For `#/present/:id`:
 ### Phase 3: Link-Only Hardening
 - Enforce no local deck override usage in link-only player
 - Add regression checks for `presentControlsPosition`
+- Add runtime assertion/logging if link-only load path attempts local deck merge
 
 ### Phase 4: Local Storage Narrowing
 - Reduce `prs_library` to cache/prefs/offline fallback only
@@ -225,6 +289,7 @@ server/
 ## Conflict Handling
 Use optimistic concurrency:
 - Include `expectedVersion` in `PUT`
+- Versioning is deck-level (single integer per override document)
 - On conflict:
   1. Refetch latest remote doc
   2. Reapply patch
@@ -243,6 +308,7 @@ Use optimistic concurrency:
 3. Clearing browser localStorage does not change client-facing link-only behavior.
 4. Two separate browsers resolve the same deck-owned settings.
 5. Authoring prefs remain per-browser and do not leak into client playback.
+6. Remote outage in link-only mode falls back to contract baseline only and never browser-local deck state.
 
 ## Test Plan
 
