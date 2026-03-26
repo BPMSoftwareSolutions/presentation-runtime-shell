@@ -1,0 +1,143 @@
+{
+  "id": "fleetops-demo",
+  "title": "FleetOps AI Command Center",
+  "status": "ready",
+  "theme": {
+    "shell": "dark",
+    "accent": "violet",
+    "presenterPosition": "left"
+  },
+  "settings": {
+    "typingSpeedMs": 20,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1600,
+    "waitForIframeReadyTimeoutMs": 8000,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "fleetops-01",
+      "title": "Title Card",
+      "type": "title",
+      "editIntent": "Open with a cinematic title card for FleetOps AI Command Center. Position the story as a transformation from late-night reactive fleet management to real-time operational control for Uber and Sprinter van operations in Michigan.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "This is not just another dashboard.", "pauseMs": 700 },
+          { "text": " It is an operations command center for a fleet that cannot afford surprises.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-01-title/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-02",
+      "title": "The Problem",
+      "type": "narrative",
+      "editIntent": "Show the current state: manual operations, unknown issues, late-night calls, and the owner sleeping only 3 to 5 hours because there is no governance system. Visually contrast what appears calm with what is actually happening beneath the surface.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Drivers are moving.", "pauseMs": 500 },
+          { "text": " Money is coming in.", "pauseMs": 500 },
+          { "text": " But the system is blind until something breaks.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-02-problem/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-03",
+      "title": "Normal Operations",
+      "type": "framework",
+      "editIntent": "Show the FleetOps command center at rest with active drivers, event stream, healthy fleet metrics, and AI operator monitoring. Establish confidence and baseline before the incident occurs.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "This is what a controlled operation looks like.", "pauseMs": 600 },
+          { "text": " Drivers, events, and alerts all visible in one place.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-03-command-center/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-04",
+      "title": "Incident Detected",
+      "type": "narrative",
+      "editIntent": "Trigger a high-risk driver incident. Make the alert feel urgent and specific: long inactivity, restaurant parking lot, police contact. This should emotionally mirror the real incident Adrian described.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Now the difference appears.", "pauseMs": 600 },
+          { "text": " The system does not wait for a midnight phone call.", "pauseMs": 600 },
+          { "text": " It detects the event as an incident.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-04-incident/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-05",
+      "title": "AI Diagnosis",
+      "type": "chart",
+      "editIntent": "Have the AI operator explain likely root cause, business impact, and recommended actions. This is the differentiation scene where FleetOps becomes decision support, not passive reporting.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "The alert is only the beginning.", "pauseMs": 600 },
+          { "text": " The real value is diagnosis, impact, and the next best action.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-05-analysis/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-06",
+      "title": "Playbook Execution",
+      "type": "framework",
+      "editIntent": "Show a deterministic incident playbook executing step by step: contact attempt, suspension, vehicle reassignment, compliance logging, owner notification. Sell the idea of governed operations.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Instead of improvising under pressure,", "pauseMs": 500 },
+          { "text": " the team runs the playbook.", "pauseMs": 500 },
+          { "text": " The incident gets contained the same way every time.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-06-playbook/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-07",
+      "title": "System Recovery",
+      "type": "narrative",
+      "editIntent": "Return to the command center view after the incident is contained. Show one driver suspended, another vehicle reassigned, and the fleet stabilized. Make the after-state feel calm, governed, and trustworthy.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "The goal is not just to detect problems.", "pauseMs": 550 },
+          { "text": " It is to recover fast, contain risk, and keep the fleet running.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-07-recovery/index.html" },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "fleetops-08",
+      "title": "Operational Impact",
+      "type": "closing",
+      "editIntent": "Close with the operational and human impact: faster detection, faster response, fewer sleepless nights, and an owner finally running a logistics operation through a command center rather than reactive calls.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "This is the payoff.", "pauseMs": 550 },
+          { "text": " Less chaos, faster response, and a system that lets the owner sleep again.", "pauseMs": 0 }
+        ]
+      },
+      "content": { "route": "./src/generated/fleetops/scene-08-impact/index.html" },
+      "advance": { "type": "manual" }
+    }
+  ]
+}
