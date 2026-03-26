@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mortgage Audit Storyboard Demo</title>
-    <style>
+      <style>
       :root {
         --bg: #f5f7fb;
         --surface: #ffffff;
@@ -119,13 +119,6 @@
         box-shadow: 0 10px 22px rgba(18, 31, 53, 0.08);
       }
 
-      #scene-navigation button.active-scene {
-        background: var(--primary-soft);
-        border-color: rgba(47, 91, 234, 0.32);
-        color: var(--primary);
-        font-weight: 600;
-      }
-
       #demo-shell {
         position: relative;
       }
@@ -233,11 +226,6 @@
 
       #scene-2 > header,
       #scene-5 > header {
-        grid-column: 1 / -1;
-      }
-
-      #scene-2 .learner-prompt,
-      #scene-5 .learner-prompt {
         grid-column: 1 / -1;
       }
 
@@ -400,263 +388,6 @@
         box-shadow: var(--shadow);
       }
 
-      /* ── Guided Training Layer ────────────────────────────────── */
-
-      #coach-panel {
-        margin-bottom: 1.25rem;
-        border-radius: var(--radius-xl);
-        background: linear-gradient(135deg, #f0f4ff 0%, #eaf0ff 100%);
-        border: 1px solid rgba(47, 91, 234, 0.2);
-        box-shadow: 0 8px 28px rgba(47, 91, 234, 0.09);
-        transition: opacity 220ms ease;
-      }
-
-      #coach-panel[hidden] {
-        display: none;
-      }
-
-      #coach-inner {
-        padding: 1.5rem 2rem;
-        display: grid;
-        gap: 1.1rem;
-      }
-
-      #coach-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      #coach-meta {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      #coach-progress {
-        display: flex;
-        align-items: center;
-        gap: 0.45rem;
-      }
-
-      .coach-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: rgba(47, 91, 234, 0.14);
-        border: 1.5px solid rgba(47, 91, 234, 0.22);
-        transition: background 250ms ease, border-color 250ms ease, box-shadow 250ms ease;
-      }
-
-      .coach-dot.current {
-        background: var(--primary);
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(47, 91, 234, 0.18);
-      }
-
-      .coach-dot.done {
-        background: var(--success);
-        border-color: var(--success);
-      }
-
-      #coach-step-counter {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--primary);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-
-      #coach-dismiss {
-        background: transparent;
-        color: var(--muted);
-        border: 1px solid var(--line);
-        font-size: 0.8rem;
-        padding: 0.38rem 0.9rem;
-        box-shadow: none;
-      }
-
-      #coach-dismiss:hover {
-        background: rgba(255, 255, 255, 0.65);
-        transform: none;
-        box-shadow: none;
-      }
-
-      #coach-body {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0.9rem;
-      }
-
-      .coach-block {
-        background: rgba(255, 255, 255, 0.78);
-        border: 1px solid rgba(47, 91, 234, 0.13);
-        border-radius: var(--radius-md);
-        padding: 0.9rem 1rem;
-      }
-
-      .coach-block-label {
-        display: block;
-        font-size: 0.7rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--primary);
-        margin-bottom: 0.45rem;
-      }
-
-      .coach-block p {
-        margin: 0;
-        font-size: 0.9rem;
-        line-height: 1.6;
-        color: var(--text);
-      }
-
-      .coach-block.coach-reflect {
-        background: rgba(255, 248, 220, 0.72);
-        border-color: rgba(154, 103, 0, 0.15);
-      }
-
-      .coach-block.coach-reflect .coach-block-label {
-        color: var(--warn);
-      }
-
-      #coach-footer {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-      }
-
-      #coach-complete-btn {
-        font-size: 0.88rem;
-        padding: 0.65rem 1.25rem;
-      }
-
-      #coach-next-btn {
-        font-size: 0.88rem;
-        padding: 0.65rem 1.25rem;
-        background: var(--success);
-        box-shadow: 0 8px 20px rgba(24, 121, 78, 0.22);
-      }
-
-      #coach-next-btn:hover {
-        box-shadow: 0 10px 24px rgba(24, 121, 78, 0.3);
-      }
-
-      #coach-next-btn:disabled {
-        opacity: 0.36;
-        pointer-events: none;
-        box-shadow: none;
-      }
-
-      #coach-hint {
-        font-size: 0.82rem;
-        color: var(--muted);
-        margin-left: 0.25rem;
-      }
-
-      /* Training complete state */
-      #coach-panel.training-complete #coach-body {
-        grid-template-columns: 1fr;
-      }
-
-      #coach-complete-card {
-        display: none;
-        grid-column: 1 / -1;
-        background: var(--success-soft);
-        border: 1px solid #c5e7d3;
-        border-radius: var(--radius-md);
-        padding: 1.25rem 1.5rem;
-        text-align: center;
-      }
-
-      #coach-panel.training-complete #coach-complete-card {
-        display: block;
-      }
-
-      #coach-panel.training-complete .coach-block:not(#coach-complete-card),
-      #coach-panel.training-complete #coach-footer {
-        display: none;
-      }
-
-      #coach-complete-card p {
-        margin: 0;
-        color: var(--success);
-        font-weight: 600;
-        font-size: 1rem;
-      }
-
-      #coach-complete-card .complete-sub {
-        margin-top: 0.35rem;
-        font-weight: 400;
-        color: #2e6c4a;
-        font-size: 0.88rem;
-      }
-
-      /* Learner prompt ─────────────────────────────────────────── */
-
-      .learner-prompt {
-        border-radius: var(--radius-lg);
-        background: linear-gradient(135deg, #f0f5ff 0%, #eaf0ff 100%);
-        border: 1.5px solid rgba(47, 91, 234, 0.2);
-        padding: 1.25rem 1.4rem;
-        display: grid;
-        gap: 0.75rem;
-      }
-
-      .learner-prompt-label {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        font-size: 0.72rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--primary);
-      }
-
-      .learner-prompt-label::before {
-        content: '';
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--primary);
-      }
-
-      .learner-prompt p {
-        margin: 0;
-        font-size: 0.94rem;
-        line-height: 1.6;
-        color: var(--text);
-      }
-
-      .prompt-confirm-btn {
-        justify-self: start;
-        font-size: 0.88rem;
-        padding: 0.65rem 1.3rem;
-        background: var(--primary);
-        box-shadow: 0 8px 20px rgba(47, 91, 234, 0.2);
-      }
-
-      .prompt-confirm-btn.confirmed {
-        background: var(--success);
-        box-shadow: 0 8px 20px rgba(24, 121, 78, 0.2);
-        pointer-events: none;
-      }
-
-      /* When training mode is dismissed */
-      body.training-off .learner-prompt {
-        display: none;
-      }
-
-      body.training-off #coach-panel {
-        display: none;
-      }
-
-      /* ── Responsive ──────────────────────────────────────────── */
-
       @media (max-width: 900px) {
         #scene-2,
         #scene-5,
@@ -664,10 +395,6 @@
         .routing-layout,
         #audit-filters,
         dl {
-          grid-template-columns: 1fr;
-        }
-
-        #coach-body {
           grid-template-columns: 1fr;
         }
       }
@@ -694,13 +421,8 @@
 
         .review-card form > div,
         .quick-actions,
-        #scene-navigation,
-        #coach-footer {
+        #scene-navigation {
           flex-direction: column;
-        }
-
-        #coach-inner {
-          padding: 1.1rem;
         }
       }
     </style>
@@ -710,54 +432,21 @@
       <header id="demo-header">
         <h1>From Messy Loan File to Audit-Ready Closing Package</h1>
         <p>
-          Interactive storyboard demo for mortgage closing document organization,
+          Guided training demo for mortgage closing document organization,
           separation, and audit readiness.
         </p>
+        <section id="training-intro" aria-labelledby="training-intro-title">
+          <h2 id="training-intro-title">Hands-On Walkthrough</h2>
+          <p>
+            This version is designed to coach Ms. Roni through the process step by step,
+            so she can click, review, confirm, and feel what the future workflow would be like.
+          </p>
+          <div id="training-status" aria-live="polite">
+            <p><strong>Mode:</strong> Guided training</p>
+            <p><strong>Goal:</strong> Review a mixed loan file and produce an audit-ready package.</p>
+          </div>
+        </section>
       </header>
-
-      <!-- ── Guided Training Coach Panel ────────────────────────── -->
-      <aside id="coach-panel" aria-label="Guided training coach">
-        <div id="coach-inner">
-          <div id="coach-top">
-            <div id="coach-meta">
-              <div id="coach-progress" aria-label="Training progress" role="list">
-                <div class="coach-dot" role="listitem" aria-label="Step 1"></div>
-                <div class="coach-dot" role="listitem" aria-label="Step 2"></div>
-                <div class="coach-dot" role="listitem" aria-label="Step 3"></div>
-                <div class="coach-dot" role="listitem" aria-label="Step 4"></div>
-                <div class="coach-dot" role="listitem" aria-label="Step 5"></div>
-              </div>
-              <span id="coach-step-counter">Step 1 of 5</span>
-            </div>
-            <button id="coach-dismiss" type="button">Exit training mode</button>
-          </div>
-
-          <div id="coach-body">
-            <div class="coach-block" id="coach-task-block">
-              <span class="coach-block-label">Your task</span>
-              <p id="coach-task-text"></p>
-            </div>
-            <div class="coach-block" id="coach-notice-block">
-              <span class="coach-block-label">What to notice</span>
-              <p id="coach-notice-text"></p>
-            </div>
-            <div class="coach-block coach-reflect" id="coach-reflect-block">
-              <span class="coach-block-label">Reflect</span>
-              <p id="coach-reflect-text"></p>
-            </div>
-            <div class="coach-block" id="coach-complete-card">
-              <p>Training complete. You have walked through all five steps of the closing document audit process.</p>
-              <p class="complete-sub">You now have a tactile understanding of how each document gets classified, confirmed, separated, and made audit-ready — and what that feels like compared to the current manual process.</p>
-            </div>
-          </div>
-
-          <div id="coach-footer">
-            <button id="coach-complete-btn" type="button">Mark this step complete</button>
-            <button id="coach-next-btn" type="button" disabled>Next step →</button>
-            <span id="coach-hint">Complete this step first to advance.</span>
-          </div>
-        </div>
-      </aside>
 
       <nav id="scene-navigation" aria-label="Storyboard scenes">
         <button type="button" data-target="scene-1">1. Messy Intake</button>
@@ -767,9 +456,48 @@
         <button type="button" data-target="scene-5">5. Audit Report</button>
       </nav>
 
-      <section id="demo-shell" aria-label="Storyboard presentation area">
+      <section id="training-console" aria-label="Guided training console">
+        <section id="coach-panel" aria-labelledby="coach-panel-title">
+          <h2 id="coach-panel-title">Coach Panel</h2>
+          <p id="coach-step-label">Step 1 of 5</p>
+          <h3 id="coach-title">Start with the messy loan folder</h3>
+          <p id="coach-instruction">
+            Review the incoming file and notice that final closing documents, drafts,
+            duplicates, and ancillary documents are all mixed together.
+          </p>
+          <div id="coach-actions">
+            <button type="button" id="complete-step">Complete This Step</button>
+            <button type="button" id="next-guided-step">Next Guided Step</button>
+          </div>
+          <section id="coach-checklist" aria-labelledby="coach-checklist-title">
+            <h4 id="coach-checklist-title">What Ms. Roni experiences</h4>
+            <ul id="coach-checklist-items">
+              <li>She starts from a realistic, messy loan folder.</li>
+              <li>She is prompted to inspect the file instead of just watching it.</li>
+              <li>She learns what the system is looking for before any automation happens.</li>
+            </ul>
+          </section>
+        </section>
 
-        <!-- ── Scene 1: Messy Intake ─────────────────────────────── -->
+        <aside id="task-panel" aria-labelledby="task-panel-title">
+          <h2 id="task-panel-title">Training Task</h2>
+          <p id="task-prompt">
+            Click into each scene and move forward only after you understand the task on screen.
+          </p>
+          <div id="task-state">
+            <p><strong>Current task:</strong> Identify why this file is risky for audit preparation.</p>
+            <p><strong>Status:</strong> Waiting for learner action</p>
+          </div>
+          <section id="task-reflection" aria-labelledby="task-reflection-title">
+            <h3 id="task-reflection-title">Reflection Prompt</h3>
+            <p id="reflection-text">
+              Could you quickly explain which documents actually closed the loan if an auditor asked right now?
+            </p>
+          </section>
+        </aside>
+      </section>
+
+      <section id="demo-shell" aria-label="Storyboard presentation area">
         <article id="scene-1" class="scene" data-scene="1">
           <header>
             <p>Scene 1</p>
@@ -810,14 +538,17 @@
             </ul>
           </section>
 
-          <div class="learner-prompt" data-step="0">
-            <div class="learner-prompt-label">Your task — Scene 1</div>
-            <p>Look at the 12 documents above. Find the ones that would create a problem in an audit: version conflicts, unsigned originals, documents labeled OLD or draft. There are at least four.</p>
-            <button type="button" class="prompt-confirm-btn" data-step="0">I see the problem — ready to fix it →</button>
-          </div>
+          <section aria-labelledby="scene-1-training-title">
+            <h3 id="scene-1-training-title">Learner Prompt</h3>
+            <p>
+              Imagine you are preparing this file for an audit. What would make you hesitate?
+            </p>
+            <button type="button" class="training-response" data-response="scene-1">
+              I see the risk
+            </button>
+          </section>
         </article>
 
-        <!-- ── Scene 2: Identity + Classification ─────────────────── -->
         <article id="scene-2" class="scene" data-scene="2" hidden>
           <header>
             <p>Scene 2</p>
@@ -861,14 +592,17 @@
             </ul>
           </section>
 
-          <div class="learner-prompt" data-step="1">
-            <div class="learner-prompt-label">Your task — Scene 2</div>
-            <p>Review the tagged document stack. Notice that DISC-CD-V2 and DISC-CD-V3 are now clearly linked as the same document type. NOTE-V1 (unsigned) and NOTE-V2 (signed) are paired. Every conflict has been surfaced automatically — no manual sorting required.</p>
-            <button type="button" class="prompt-confirm-btn" data-step="1">I understand the classification — ready to review →</button>
-          </div>
+          <section aria-labelledby="scene-2-training-title">
+            <h3 id="scene-2-training-title">Learner Prompt</h3>
+            <p>
+              The system is now assigning identity and grouping likely duplicates. This is the automated version of manual file coding.
+            </p>
+            <button type="button" class="training-response" data-response="scene-2">
+              Identity and grouping make sense
+            </button>
+          </section>
         </article>
 
-        <!-- ── Scene 3: Used in Closing? ──────────────────────────── -->
         <article id="scene-3" class="scene" data-scene="3" hidden>
           <header>
             <p>Scene 3</p>
@@ -956,14 +690,17 @@
             </div>
           </section>
 
-          <div class="learner-prompt" data-step="2">
-            <div class="learner-prompt-label">Your task — Scene 3</div>
-            <p>Click <strong>"Mark as Used in Closing"</strong> for both the Closing Disclosure and the Note above. V3 and V2 (signed) are already pre-selected. You are explicitly confirming the closing version — not assuming it was somewhere in the folder.</p>
-            <button type="button" class="prompt-confirm-btn" data-step="2">Both versions confirmed — ready to separate →</button>
-          </div>
+          <section aria-labelledby="scene-3-training-title">
+            <h3 id="scene-3-training-title">Learner Prompt</h3>
+            <p>
+              Choose the version actually used in closing. The workflow is designed to support your judgment, not replace it.
+            </p>
+            <button type="button" class="training-response" data-response="scene-3">
+              I confirmed the final versions
+            </button>
+          </section>
         </article>
 
-        <!-- ── Scene 4: Separation of Record ─────────────────────── -->
         <article id="scene-4" class="scene" data-scene="4" hidden>
           <header>
             <p>Scene 4</p>
@@ -1012,14 +749,17 @@
             </button>
           </section>
 
-          <div class="learner-prompt" data-step="3">
-            <div class="learner-prompt-label">Your task — Scene 4</div>
-            <p>Review the three buckets above. Verify that nothing from the Inactive Archive appears in the Closing Package, and that the Exceptions are isolated in their own column — not buried at the bottom of a list. Then click <strong>"Generate Audit Report"</strong> to finalize the file.</p>
-            <button type="button" class="prompt-confirm-btn" data-step="3">Separation verified — I'm ready →</button>
-          </div>
+          <section aria-labelledby="scene-4-training-title">
+            <h3 id="scene-4-training-title">Learner Prompt</h3>
+            <p>
+              Notice the separation: the closing package is now clean, and inactive documents are archived outside the official closing set.
+            </p>
+            <button type="button" class="training-response" data-response="scene-4">
+              Separation is clear
+            </button>
+          </section>
         </article>
 
-        <!-- ── Scene 5: Audit Report ──────────────────────────────── -->
         <article id="scene-5" class="scene" data-scene="5" hidden>
           <header>
             <p>Scene 5</p>
@@ -1167,13 +907,16 @@
             </ol>
           </section>
 
-          <div class="learner-prompt" data-step="4">
-            <div class="learner-prompt-label">Your task — Scene 5</div>
-            <p>Read the Chain of Custody on the right. Then answer this question out loud: <em>"Which Closing Disclosure was used to close this loan, and why was the other version excluded?"</em> — The audit report should let you answer it without hesitation.</p>
-            <button type="button" class="prompt-confirm-btn" data-step="4">I can answer the auditor question — training complete ✓</button>
-          </div>
+          <section aria-labelledby="scene-5-training-title">
+            <h3 id="scene-5-training-title">Learner Prompt</h3>
+            <p>
+              This final screen is the relief moment. You can explain what closed the loan, what did not, and why, without rebuilding anything.
+            </p>
+            <button type="button" class="training-response" data-response="scene-5">
+              I can see how I would use this in an audit
+            </button>
+          </section>
         </article>
-
       </section>
 
       <footer id="demo-footer">
@@ -1184,161 +927,151 @@
     </main>
 
     <script>
-      // ── Scene navigation ──────────────────────────────────────────
       const sceneButtons = document.querySelectorAll('[data-target]');
       const scenes = document.querySelectorAll('.scene');
+      const coachStepLabel = document.getElementById('coach-step-label');
+      const coachTitle = document.getElementById('coach-title');
+      const coachInstruction = document.getElementById('coach-instruction');
+      const checklistItems = document.getElementById('coach-checklist-items');
+      const taskPrompt = document.getElementById('task-prompt');
+      const taskState = document.getElementById('task-state');
+      const reflectionText = document.getElementById('reflection-text');
+      const completeStepButton = document.getElementById('complete-step');
+      const nextGuidedStepButton = document.getElementById('next-guided-step');
+      const trainingResponses = document.querySelectorAll('.training-response');
+
+      const guidedSteps = {
+        'scene-1': {
+          step: 'Step 1 of 5',
+          title: 'Start with the messy loan folder',
+          instruction: 'Review the mixed file and recognize why audit preparation is stressful when everything is blended together.',
+          task: 'Identify why this file is risky for audit preparation.',
+          status: 'Waiting for learner action',
+          reflection: 'Could you quickly explain which documents actually closed the loan if an auditor asked right now?',
+          checklist: [
+            'The learner begins with a realistic starting point.',
+            'The pain is experienced before the solution is shown.',
+            'The workflow feels relevant to daily work, not abstract.'
+          ]
+        },
+        'scene-2': {
+          step: 'Step 2 of 5',
+          title: 'See how the system identifies and groups documents',
+          instruction: 'Watch the system assign document identity, recognize types, and group versions so the folder starts making sense.',
+          task: 'Understand how identity and grouping reduce manual file coding.',
+          status: 'Prompting learner to confirm the classification logic',
+          reflection: 'Does this feel like a better version of the numbering and sorting you already do by hand?',
+          checklist: [
+            'Document identity becomes explicit.',
+            'Versions and duplicates are grouped instead of hidden.',
+            'Manual coding is reframed as something the system can support.'
+          ]
+        },
+        'scene-3': {
+          step: 'Step 3 of 5',
+          title: 'Make the closing decision',
+          instruction: 'Interact with the review queue and confirm which versions were actually used in closing.',
+          task: 'Mark the final versions and understand why the others are archived or superseded.',
+          status: 'Learner is making review decisions',
+          reflection: 'Does this preserve your judgment while reducing uncertainty?',
+          checklist: [
+            'The learner is not passive.',
+            'The system supports human judgment.',
+            'Disposition becomes explicit and auditable.'
+          ]
+        },
+        'scene-4': {
+          step: 'Step 4 of 5',
+          title: 'Separate the official closing record',
+          instruction: 'Review how the system splits the official closing package from inactive and ancillary records.',
+          task: 'Verify that the closing package is clean and the inactive archive is separate.',
+          status: 'Learner is confirming the separation of record',
+          reflection: 'If an auditor reviewed the file now, would the separation feel clear and defensible?',
+          checklist: [
+            'Closing documentation is isolated.',
+            'Inactive and ancillary records are separated.',
+            'Exceptions remain visible instead of being buried.'
+          ]
+        },
+        'scene-5': {
+          step: 'Step 5 of 5',
+          title: 'Generate and explore the audit report',
+          instruction: 'Use the audit view to understand what closed the loan, what was excluded, and why.',
+          task: 'Review the audit summary, timeline, and optional filters like you are preparing for an actual audit.',
+          status: 'Learner is exploring the audit-ready result',
+          reflection: 'Does this feel like preparing for an audit, or simply opening a file that is already ready?',
+          checklist: [
+            'The learner sees the one-click audit result.',
+            'Filters feel like drill-down tools, not setup work.',
+            'The process ends with confidence, not reconstruction.'
+          ]
+        }
+      };
+
+      let currentSceneId = 'scene-1';
+      let completedSteps = new Set();
+
+      function renderCoach(sceneId) {
+        const step = guidedSteps[sceneId];
+        if (!step) return;
+
+        currentSceneId = sceneId;
+        coachStepLabel.textContent = step.step;
+        coachTitle.textContent = step.title;
+        coachInstruction.textContent = step.instruction;
+        taskPrompt.textContent = 'Training task for this scene';
+        taskState.innerHTML = `
+          <p><strong>Current task:</strong> ${step.task}</p>
+          <p><strong>Status:</strong> ${completedSteps.has(sceneId) ? 'Completed' : step.status}</p>
+        `;
+        reflectionText.textContent = step.reflection;
+        checklistItems.innerHTML = step.checklist.map((item) => `<li>${item}</li>`).join('');
+      }
 
       function showScene(sceneId) {
         scenes.forEach((scene) => {
           scene.hidden = scene.id !== sceneId;
         });
-        // Sync active state on nav buttons
-        sceneButtons.forEach((btn) => {
-          btn.classList.toggle('active-scene', btn.dataset.target === sceneId);
-        });
+        renderCoach(sceneId);
       }
 
-      sceneButtons.forEach((button, idx) => {
+      sceneButtons.forEach((button) => {
         button.addEventListener('click', () => {
           showScene(button.dataset.target);
-          // Sync coach to match whichever scene was manually selected
-          const stepIndex = parseInt(button.dataset.target.replace('scene-', ''), 10) - 1;
-          if (stepIndex !== currentStep) {
-            currentStep = stepIndex;
-            renderCoach();
-          }
         });
+      });
+
+      trainingResponses.forEach((button) => {
+        button.addEventListener('click', () => {
+          const sceneId = button.dataset.response;
+          completedSteps.add(sceneId);
+          renderCoach(sceneId);
+          button.textContent = 'Step confirmed';
+          button.disabled = true;
+        });
+      });
+
+      completeStepButton.addEventListener('click', () => {
+        completedSteps.add(currentSceneId);
+        renderCoach(currentSceneId);
+      });
+
+      nextGuidedStepButton.addEventListener('click', () => {
+        const currentIndex = Array.from(scenes).findIndex((scene) => scene.id === currentSceneId);
+        const nextScene = scenes[currentIndex + 1];
+        if (nextScene) {
+          showScene(nextScene.id);
+        }
       });
 
       const generateAuditReportButton = document.getElementById('generate-audit-report');
       if (generateAuditReportButton) {
         generateAuditReportButton.addEventListener('click', () => {
           showScene('scene-5');
-          currentStep = 4;
-          renderCoach();
         });
       }
 
-      // Mark scene-1 nav button as active on load
       showScene('scene-1');
-
-      // ── Guided Training Coach ─────────────────────────────────────
-
-      const coachData = [
-        {
-          scene: 'scene-1',
-          task: 'Look at the incoming loan folder below. Find the documents that would create a problem during an audit — version conflicts, unsigned originals, and anything labeled OLD or draft.',
-          notice: 'Two different Closing Disclosures. A signed and an unsigned Note. A file labeled "OLD". These are the exact conflicts that surface in mortgage audits. They are in every real loan folder.',
-          reflect: 'If an auditor asked right now: "Which Closing Disclosure was used to close this loan?" — how long would it take you to answer with complete confidence?'
-        },
-        {
-          scene: 'scene-2',
-          task: 'Review the tagged document stack on the right. Notice how the system grouped the version conflicts automatically — no manual sorting required.',
-          notice: 'DISC-CD-V2 and DISC-CD-V3 are now linked as the same document type. NOTE-V1 (unsigned) and NOTE-V2 (signed) are clearly paired. Every document has a traceable, permanent ID.',
-          reflect: 'Which version grouping matters most for your next audit? Does having a formal ID on each document change how you think about the completeness of a loan file?'
-        },
-        {
-          scene: 'scene-3',
-          task: 'Click "Mark as Used in Closing" for both the Closing Disclosure and the Note in the Review Queue. V3 and the signed Note are already pre-selected.',
-          notice: 'You are the decision-maker here. The system surfaced the version conflicts — you are explicitly confirming what actually happened at closing. This confirmation is now logged and traceable.',
-          reflect: 'How does it feel to make this decision explicitly, compared to assuming the right version was "somewhere in the folder"? What changes about the audit conversation when this decision is on record?'
-        },
-        {
-          scene: 'scene-4',
-          task: 'Review the three buckets above. Verify that nothing from the Inactive Archive appears in the Closing Package. Then click "Generate Audit Report" to finalize the file.',
-          notice: 'Every document now has exactly one destination. The Closing Package is clean. The Inactive Archive is separate. The Exceptions are isolated and flagged — not buried at the bottom of a list.',
-          reflect: 'If your current loan folder was audited tomorrow, could you produce this same three-way separation in under five minutes? What would make it faster or harder?'
-        },
-        {
-          scene: 'scene-5',
-          task: 'Read the Chain of Custody on the right. Then answer out loud: "Which Closing Disclosure was used to close this loan, and why was the other version excluded?"',
-          notice: 'The system can answer every auditor question instantly. Every decision is timestamped. The file tells its own story — without you needing to reconstruct what happened from memory.',
-          reflect: 'If an auditor walked in tomorrow morning — where would you start the conversation, and how long would it take to feel fully prepared? Compare that to today.'
-        }
-      ];
-
-      let currentStep = 0;
-      const completedSteps = new Set();
-
-      function renderCoach() {
-        const data = coachData[currentStep];
-
-        document.getElementById('coach-task-text').textContent = data.task;
-        document.getElementById('coach-notice-text').textContent = data.notice;
-        document.getElementById('coach-reflect-text').textContent = data.reflect;
-        document.getElementById('coach-step-counter').textContent =
-          'Step ' + (currentStep + 1) + ' of ' + coachData.length;
-
-        // Progress dots
-        document.querySelectorAll('.coach-dot').forEach((dot, i) => {
-          dot.classList.toggle('current', i === currentStep);
-          dot.classList.toggle('done', completedSteps.has(i) && i !== currentStep);
-        });
-
-        // Next button state
-        const nextBtn = document.getElementById('coach-next-btn');
-        const hint = document.getElementById('coach-hint');
-        const isLastStep = currentStep === coachData.length - 1;
-        const isStepComplete = completedSteps.has(currentStep);
-
-        nextBtn.disabled = !isStepComplete;
-        nextBtn.textContent = isLastStep ? 'Finish training ✓' : 'Next step →';
-        hint.hidden = isStepComplete;
-      }
-
-      function completeCurrentStep() {
-        completedSteps.add(currentStep);
-
-        // Mark the learner prompt button in the active scene
-        const promptBtn = document.querySelector(
-          '#' + coachData[currentStep].scene + ' .prompt-confirm-btn'
-        );
-        if (promptBtn && !promptBtn.classList.contains('confirmed')) {
-          promptBtn.classList.add('confirmed');
-          promptBtn.textContent = '✓ Step complete';
-        }
-
-        renderCoach();
-      }
-
-      function advanceToNextStep() {
-        if (currentStep < coachData.length - 1) {
-          currentStep++;
-          showScene(coachData[currentStep].scene);
-          renderCoach();
-        } else {
-          // All steps done — show completion state
-          document.getElementById('coach-panel').classList.add('training-complete');
-        }
-      }
-
-      document.getElementById('coach-complete-btn').addEventListener('click', () => {
-        completeCurrentStep();
-      });
-
-      document.getElementById('coach-next-btn').addEventListener('click', () => {
-        advanceToNextStep();
-      });
-
-      document.getElementById('coach-dismiss').addEventListener('click', () => {
-        document.body.classList.add('training-off');
-      });
-
-      // Learner prompt confirm buttons also complete the current step
-      document.querySelectorAll('.prompt-confirm-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          // Determine which step this prompt belongs to
-          const stepIndex = parseInt(btn.dataset.step, 10);
-          if (!completedSteps.has(stepIndex)) {
-            // If the user clicked a prompt in a non-current scene, sync the step
-            currentStep = stepIndex;
-            completeCurrentStep();
-          }
-        });
-      });
-
-      // Initialize coach
-      renderCoach();
     </script>
   </body>
 </html>
