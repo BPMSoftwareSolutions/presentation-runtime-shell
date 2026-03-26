@@ -68,42 +68,59 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
   background:rgba(16,185,129,.28);
 }
 
-/* Confidence gauge bar */
-.gauge-bar-wrap{margin-top:2px}
-.gauge-bar-track{
-  height:8px;border-radius:999px;
-  background:rgba(255,255,255,.07);
-  overflow:hidden;
-  position:relative;
+/* Confidence gauge — radial arc */
+.gauge-arc-wrap{
+  position:relative;width:120px;height:70px;margin:12px auto 0;
 }
-.gauge-bar-fill{
-  height:100%;
-  width:0%;
-  border-radius:999px;
-  background:linear-gradient(90deg,#a78bfa,#f59e0b);
-  transition:width 1.2s cubic-bezier(.4,0,.2,1);
+.gauge-arc{
+  width:100%;height:100%;
 }
-.gauge-bar-meta{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-top:6px;font-size:13px;
+.gauge-arc-fill{
+  fill:none;stroke-linecap:round;
+  stroke-dasharray:0 200;
+  animation:gaugeArc 1.4s cubic-bezier(.25,.1,.25,1) forwards;
 }
-.gauge-bar-pct{color:#f59e0b;font-weight:700}
-.gauge-bar-label-right{color:var(--muted)}
+.gauge-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px;
+}
+.gauge-number{
+  font-size:22px;font-weight:800;color:#a78bfa;line-height:1;
+}
+.gauge-label{
+  font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.08em;text-transform:uppercase;
+}
+@keyframes gaugeArc{
+  from{stroke-dasharray:0 200}
+  to{stroke-dasharray:132 200}
+}
 
-/* Risk chips — hidden initially, slide in from left */
+/* Risk chips — color-coded with icons */
 .chips{display:flex;gap:10px;flex-wrap:wrap}
 .chip{
-  padding:8px 12px;border-radius:999px;font-size:13px;
-  border:1px solid var(--border);color:var(--muted);
-  opacity:0;
-  transform:translateX(-18px);
-  transition:opacity .3s ease, transform .3s ease, box-shadow .4s ease, border-color .4s ease;
+  display:flex;gap:8px;align-items:center;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:500;border:1.5px solid;
+  opacity:0;transform:translateX(-18px);
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);cursor:pointer;position:relative;overflow:hidden;
 }
-.chip.visible{opacity:1;transform:translateX(0)}
-.chip.glow{
-  border-color:rgba(245,158,11,.5);
-  box-shadow:0 0 10px rgba(245,158,11,.25);
-}
+.chip.visible{opacity:1;transform:translateX(0);animation:chipBounce .5s ease .1s;}
+.chip-icon{font-size:14px;display:inline-block;flex:none}
+.chip-label{flex:1}
+.chip-value{display:none;margin-left:6px;padding-left:8px;border-left:1px solid currentColor;opacity:.8;font-weight:600;font-size:12px}
+.chip:hover .chip-value{display:inline;animation:fadeInSlide .3s ease}
+
+/* Legal — Red */
+.chip-legal{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#fecaca}
+.chip-legal:hover{border-color:rgba(239,68,68,.55);background:rgba(239,68,68,.15);box-shadow:0 0 16px rgba(239,68,68,.2);transform:translateX(0) scale(1.04)}
+
+/* Insurance — Amber */
+.chip-insurance{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);color:#fcd34d}
+.chip-insurance:hover{border-color:rgba(245,158,11,.55);background:rgba(245,158,11,.15);box-shadow:0 0 16px rgba(245,158,11,.2);transform:translateX(0) scale(1.04)}
+
+/* Revenue — Violet */
+.chip-revenue{border-color:rgba(168,85,247,.35);background:rgba(168,85,247,.08);color:#e9d5ff}
+.chip-revenue:hover{border-color:rgba(168,85,247,.55);background:rgba(168,85,247,.15);box-shadow:0 0 16px rgba(168,85,247,.2);transform:translateX(0) scale(1.04)}
+
+@keyframes chipBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes fadeInSlide{from{opacity:0;transform:translateX(-6px)}to{opacity:.8;transform:translateX(0)}}
 
 [data-reveal]{opacity:0;transform:translateY(12px);animation:reveal .55s ease forwards}
 @keyframes reveal{to{opacity:1;transform:none}}
@@ -125,9 +142,21 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
       </div>
       <!-- Risk chips -->
       <div class="chips" data-reveal>
-        <div class="chip" id="chip0">Risk: Legal exposure</div>
-        <div class="chip" id="chip1">Risk: Insurance claim</div>
-        <div class="chip" id="chip2">Risk: Lost revenue</div>
+        <div class="chip chip-legal" id="chip0" data-impact="Legal exposure" data-value="$50K–$150K">
+          <span class="chip-icon">⚖️</span>
+          <span class="chip-label">Legal exposure</span>
+          <span class="chip-value">$50K–$150K</span>
+        </div>
+        <div class="chip chip-insurance" id="chip1" data-impact="Insurance claim" data-value="$75K–$200K">
+          <span class="chip-icon">🛡️</span>
+          <span class="chip-label">Insurance claim</span>
+          <span class="chip-value">$75K–$200K</span>
+        </div>
+        <div class="chip chip-revenue" id="chip2" data-impact="Lost revenue" data-value="$8K–$12K">
+          <span class="chip-icon">💰</span>
+          <span class="chip-label">Lost revenue</span>
+          <span class="chip-value">$8K–$12K</span>
+        </div>
       </div>
     </div>
 
@@ -138,16 +167,19 @@ html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-fami
         <div class="box">Revenue from one productive driver pauses immediately. Dispatch coverage narrows. Owner attention is pulled into reactive coordination unless the platform absorbs the response workflow.</div>
       </div>
 
-      <!-- AI Confidence gauge -->
+      <!-- AI Confidence gauge — Radial Arc -->
       <div class="section" data-reveal id="gaugeSection">
         <h3>AI Confidence</h3>
-        <div class="gauge-bar-wrap">
-          <div class="gauge-bar-track">
-            <div class="gauge-bar-fill" id="gaugeBarFill"></div>
-          </div>
-          <div class="gauge-bar-meta">
-            <div class="gauge-bar-pct">74%</div>
-            <div class="gauge-bar-label-right">Medium-High</div>
+        <div class="gauge-arc-wrap">
+          <svg class="gauge-arc" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid meet">
+            <!-- Background track -->
+            <path d="M 20 60 A 40 40 0 0 1 100 60" stroke="rgba(255,255,255,.1)" stroke-width="8" fill="none" stroke-linecap="round" />
+            <!-- Animated fill (violet) -->
+            <path class="gauge-arc-fill" d="M 20 60 A 40 40 0 0 1 100 60" stroke="#a78bfa" stroke-width="8" fill="none" />
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-number">74%</div>
+            <div class="gauge-label">Medium-High</div>
           </div>
         </div>
       </div>
@@ -245,11 +277,11 @@ function showActions(){
 }
 setTimeout(showActions, 1200);
 
-// ===================== CONFIDENCE GAUGE BAR =====================
-// Gauge section is revealed around 0.8s; animate bar at 1s
+// ===================== CONFIDENCE GAUGE ARC =====================
+// Gauge section is revealed around 0.8s; animate arc at 1s
 setTimeout(()=>{
-  const fill=document.getElementById('gaugeBarFill');
-  if(fill) fill.style.width='74%';
+  const arcFill=document.querySelector('.gauge-arc-fill');
+  if(arcFill) arcFill.style.animation='gaugeArc 1.4s cubic-bezier(.25,.1,.25,1) forwards';
 },1000);
 
 // ===================== RISK CHIP SLIDE-IN =====================
