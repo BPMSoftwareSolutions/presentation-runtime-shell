@@ -44,7 +44,7 @@
         ]
       },
       "content": { "route": "./src/generated/mortgage-audit/scene-01-intake/index.html" },
-      "advance": { "type": "manual" }
+      "advance": { "type": "delay", "delayMs": 2000 }
     },
     {
       "id": "mortgage-02",
@@ -59,7 +59,7 @@
         ]
       },
       "content": { "route": "./src/generated/mortgage-audit/scene-02-classify/index.html" },
-      "advance": { "type": "manual" }
+      "advance": { "type": "waitForEvent", "event": "classify:complete" }
     },
     {
       "id": "mortgage-03",
