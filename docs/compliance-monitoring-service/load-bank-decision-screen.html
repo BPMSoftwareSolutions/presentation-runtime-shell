@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Load Bank Decision Engine — Shell Station 184</title>
+  <style>
+    /* ─── Design Tokens (matches project system) ─────────────────── */
+    :root {
+      --bg:          #08101d;
+      --bg-elev:     rgba(255,255,255,0.035);
+      --bg-elev-2:   rgba(255,255,255,0.055);
+      --bg-elev-3:   rgba(255,255,255,0.08);
+      --bg-card:     rgba(12,22,42,0.82);
+
+      --text:        #eef2ff;
+      --text-soft:   #c7d2fe;
+      --text-muted:  #94a3b8;
+      --text-dim:    #64748b;
+
+      --border:        rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+
+      --green:       #10b981;
+      --green-bg:    rgba(16,185,129,0.12);
+      --green-glow:  rgba(16,185,129,0.22);
+      --amber:       #f59e0b;
+      --amber-bg:    rgba(245,158,11,0.12);
+      --amber-glow:  rgba(245,158,11,0.22);
+      --red:         #ef4444;
+      --red-bg:      rgba(239,68,68,0.12);
+      --red-glow:    rgba(239,68,68,0.22);
+      --violet:      #a78bfa;
+      --violet-bg:   rgba(167,139,250,0.12);
+      --indigo:      #818cf8;
+      --cyan:        #22d3ee;
+      --cyan-bg:     rgba(34,211,238,0.10);
+
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
+
+      --font:      "IBM Plex Sans", Inter, ui-sans-serif, system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 70% 55% at 90% -5%,  rgba(245,158,11,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at -5% 90%,  rgba(167,139,250,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 50% 110%, rgba(239,68,68,0.05)  0%, transparent 50%),
+        linear-gradient(180deg, #08101d 0%, #0a1220 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* grain texture */
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5; z-index: 0;
+    }
+
+    /* ─── Layout ─────────────────────────────────────────────────── */
+    .shell {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ─── Top Bar ─────────────────────────────────────────────────── */
+    .topbar {
+      display: flex; align-items: center; gap: 14px;
+      padding: 0 28px;
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,16,29,0.72);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 50;
+      flex-shrink: 0;
+    }
+    .topbar-back {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: 13px;
+      cursor: pointer; transition: color .15s;
+      text-decoration: none;
+    }
+    .topbar-back:hover { color: var(--text-soft); }
+    .topbar-back svg { width: 16px; height: 16px; }
+
+    .topbar-divider { width: 1px; height: 22px; background: var(--border-strong); }
+
+    .topbar-breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .topbar-breadcrumb .crumb-active { color: var(--text-soft); font-weight: 500; }
+    .topbar-breadcrumb .sep { color: var(--text-dim); }
+
+    .topbar-spacer { flex: 1; }
+
+    .topbar-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 11px;
+      background: var(--amber-bg);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 20px;
+      font-size: 12px; font-weight: 600; color: var(--amber);
+      letter-spacing: .03em;
+    }
+    .topbar-chip .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 6px var(--amber-glow);
+      animation: pulse-amber 2s ease-in-out infinite;
+    }
+    @keyframes pulse-amber {
+      0%,100% { opacity: 1; box-shadow: 0 0 6px var(--amber-glow); }
+      50%      { opacity: .55; box-shadow: 0 0 12px var(--amber-glow); }
+    }
+
+    /* ─── Main content ────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 32px 28px 48px;
+      max-width: 1060px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ─── Page header ─────────────────────────────────────────────── */
+    .page-header {
+      margin-bottom: 28px;
+      animation: fadeUp .35s ease both;
+    }
+    .page-header-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 20px;
+    }
+    .page-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-md);
+      background: var(--amber-bg);
+      border: 1px solid rgba(245,158,11,0.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .page-icon svg { width: 22px; height: 22px; color: var(--amber); }
+    .page-title-block { display: flex; align-items: center; gap: 14px; }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
+    .page-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+    .page-meta {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .meta-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px;
+      background: var(--bg-elev);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      font-size: 12px; color: var(--text-muted);
+    }
+    .meta-chip svg { width: 13px; height: 13px; color: var(--text-dim); }
+    .meta-chip strong { color: var(--text-soft); font-weight: 600; }
+
+    /* ─── Customer context strip ──────────────────────────────────── */
+    .context-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-bottom: 24px;
+      animation: fadeUp .35s .05s ease both;
+    }
+    .ctx-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+    .ctx-label { font-size: 11px; font-weight: 600; text-transform: uppercase;
+                  letter-spacing: .08em; color: var(--text-dim); margin-bottom: 4px; }
+    .ctx-value { font-size: 15px; font-weight: 600; color: var(--text); }
+    .ctx-value.plan-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px;
+      background: var(--violet-bg);
+      border: 1px solid rgba(167,139,250,0.2);
+      border-radius: 20px;
+      font-size: 13px; color: var(--violet);
+    }
+    .ctx-value.trigger-yes {
+      color: var(--red);
+    }
+    .ctx-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+    /* ─── Section label ───────────────────────────────────────────── */
+    .section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--text-dim);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after {
+      content: ""; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ─── Month table ─────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+      animation: fadeUp .35s .1s ease both;
+    }
+    .table-wrap table {
+      width: 100%; border-collapse: collapse;
+    }
+    .table-wrap thead th {
+      padding: 11px 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .09em; color: var(--text-dim);
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .table-wrap thead th:nth-child(2),
+    .table-wrap thead th:nth-child(3) { text-align: center; }
+
+    .table-wrap tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    .table-wrap tbody tr:last-child { border-bottom: none; }
+    .table-wrap tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+    .table-wrap tbody td {
+      padding: 13px 20px;
+      font-size: 13.5px; color: var(--text-soft);
+    }
+    .table-wrap tbody td:nth-child(2) { text-align: center; }
+    .table-wrap tbody td:nth-child(3) { text-align: center; }
+
+    .month-name { font-weight: 600; color: var(--text); }
+
+    /* threshold status pill */
+    .pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; letter-spacing: .02em;
+    }
+    .pill-yes {
+      background: var(--green-bg);
+      border: 1px solid rgba(16,185,129,0.22);
+      color: var(--green);
+    }
+    .pill-no {
+      background: var(--red-bg);
+      border: 1px solid rgba(239,68,68,0.22);
+      color: var(--red);
+    }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .source-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+    .source-tag svg { width: 12px; height: 12px; }
+
+    /* missed-row highlight */
+    .row-missed { background: rgba(239,68,68,0.04); }
+    .row-missed:hover { background: rgba(239,68,68,0.07) !important; }
+
+    /* future months */
+    .row-future td { opacity: .38; }
+    .row-future .month-name { font-style: italic; }
+
+    /* ─── Rule result card ─────────────────────────────────────────── */
+    .rule-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 24px;
+      animation: fadeUp .35s .15s ease both;
+    }
+    .rule-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      position: relative; overflow: hidden;
+    }
+    .rule-card::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+    .rule-card.flag-red::before   { background: var(--red);   box-shadow: 2px 0 8px var(--red-glow); }
+    .rule-card.flag-amber::before { background: var(--amber); box-shadow: 2px 0 8px var(--amber-glow); }
+    .rule-card.flag-green::before { background: var(--green); box-shadow: 2px 0 8px var(--green-glow); }
+    .rule-card.flag-violet::before{ background: var(--violet); }
+
+    .rule-card-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .09em; color: var(--text-dim); margin-bottom: 6px;
+    }
+    .rule-card-value {
+      font-size: 18px; font-weight: 700; color: var(--text);
+    }
+    .rule-card-value.val-yes { color: var(--red); }
+    .rule-card-value.val-no  { color: var(--green); }
+    .rule-card-value.val-info{ color: var(--amber); }
+    .rule-card-value.val-money{
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .rule-card-sub {
+      font-size: 12px; color: var(--text-dim); margin-top: 4px;
+    }
+
+    /* ─── Recommendation banner ────────────────────────────────────── */
+    .rec-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.10) 0%, rgba(239,68,68,0.06) 100%);
+      border: 1px solid rgba(245,158,11,0.22);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex; align-items: flex-start; gap: 14px;
+      margin-bottom: 24px;
+      animation: fadeUp .35s .2s ease both;
+    }
+    .rec-icon {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      background: var(--amber-bg);
+      border: 1px solid rgba(245,158,11,0.22);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .rec-icon svg { width: 18px; height: 18px; color: var(--amber); }
+    .rec-body { flex: 1; }
+    .rec-title { font-size: 14px; font-weight: 700; color: var(--amber); margin-bottom: 4px; }
+    .rec-text  { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+    .rec-text strong { color: var(--text-soft); }
+
+    /* ─── Logic explainer ──────────────────────────────────────────── */
+    .logic-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      animation: fadeUp .35s .25s ease both;
+    }
+    .logic-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .logic-header svg { width: 15px; height: 15px; color: var(--indigo); }
+    .logic-header-title { font-size: 13px; font-weight: 600; color: var(--text-soft); }
+
+    .logic-flow {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap;
+    }
+    .logic-step {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      min-width: 130px;
+    }
+    .logic-step-icon {
+      width: 38px; height: 38px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logic-step-icon svg { width: 18px; height: 18px; }
+    .logic-step-label { font-size: 11px; color: var(--text-dim); text-align: center; }
+    .logic-step-value { font-size: 12px; font-weight: 700; text-align: center; }
+
+    .logic-arrow {
+      color: var(--text-dim); font-size: 18px; flex-shrink: 0;
+      margin-bottom: 12px;
+    }
+
+    /* ─── Action footer ────────────────────────────────────────────── */
+    .action-footer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+      animation: fadeUp .35s .3s ease both;
+      box-shadow: var(--shadow-card);
+    }
+    .action-footer-label {
+      font-size: 13px; color: var(--text-muted);
+      flex: 1; min-width: 200px;
+    }
+    .action-footer-label strong { color: var(--text-soft); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      border: none; transition: all .15s; white-space: nowrap;
+      font-family: var(--font);
+    }
+    .btn svg { width: 15px; height: 15px; }
+
+    .btn-primary {
+      background: var(--amber);
+      color: #0e1117;
+      box-shadow: 0 2px 12px rgba(245,158,11,0.35);
+    }
+    .btn-primary:hover {
+      background: #fbbf24;
+      box-shadow: 0 4px 20px rgba(245,158,11,0.50);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--bg-elev-2);
+      color: var(--text-soft);
+      border: 1px solid var(--border-strong);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-elev-3);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      color: var(--text-soft);
+      border-color: var(--border-strong);
+    }
+
+    /* ─── Missed-months summary strip ─────────────────────────────── */
+    .missed-strip {
+      background: var(--red-bg);
+      border: 1px solid rgba(239,68,68,0.18);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .missed-strip svg { width: 15px; height: 15px; color: var(--red); flex-shrink: 0; }
+    .missed-strip-text { font-size: 13px; color: var(--text-muted); }
+    .missed-strip-text strong { color: var(--red); }
+    .missed-months-list { display: flex; gap: 6px; flex-wrap: wrap; }
+    .month-tag {
+      padding: 2px 9px;
+      background: rgba(239,68,68,0.14);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 20px;
+      font-size: 11px; font-weight: 700; color: var(--red);
+    }
+
+    /* ─── Animations ──────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Toast notification ──────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 18px;
+      background: rgba(12,22,42,0.96);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      font-size: 13px; color: var(--text-soft);
+      z-index: 999; opacity: 0; pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .toast-icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .toast-icon.green { color: var(--green); }
+    .toast-icon.amber { color: var(--amber); }
+
+    /* ─── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 720px) {
+      .main { padding: 20px 16px 40px; }
+      .context-strip { grid-template-columns: 1fr 1fr; }
+      .rule-grid { grid-template-columns: 1fr; }
+      .page-header-row { flex-direction: column; gap: 12px; }
+      .page-meta { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <a class="topbar-back" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-breadcrumb">
+      <span>Shell Station 184</span>
+      <span class="sep">›</span>
+      <span>Compliance</span>
+      <span class="sep">›</span>
+      <span class="crumb-active">Load Bank Decision</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-chip">
+      <span class="dot"></span>
+      Threshold Triggered
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-row">
+        <div class="page-title-block">
+          <div class="page-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="page-title">Load Bank Decision Engine</div>
+            <div class="page-sub">Threshold-based load test evaluation · Annual Review Window</div>
+          </div>
+        </div>
+        <div class="page-meta">
+          <div class="meta-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <strong>Jan – Dec 2026</strong>
+          </div>
+          <div class="meta-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Last updated <strong>Aug 31, 2026</strong>
+          </div>
+          <div class="meta-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Thomas V.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Context -->
+    <div class="context-strip">
+      <div class="ctx-card">
+        <div class="ctx-label">Customer</div>
+        <div class="ctx-value">Shell Station 184</div>
+        <div class="ctx-sub">Commercial · Active</div>
+      </div>
+      <div class="ctx-card">
+        <div class="ctx-label">Service Plan</div>
+        <div class="ctx-value"><span class="plan-badge">Standard</span></div>
+      </div>
+      <div class="ctx-card">
+        <div class="ctx-label">Months Evaluated</div>
+        <div class="ctx-value">8 of 12</div>
+        <div class="ctx-sub">Jan – Aug 2026</div>
+      </div>
+      <div class="ctx-card">
+        <div class="ctx-label">Threshold Rule</div>
+        <div class="ctx-value">≥ 30% load</div>
+        <div class="ctx-sub">Monthly exercise requirement</div>
+      </div>
+    </div>
+
+    <!-- Missed months callout -->
+    <div class="missed-strip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span class="missed-strip-text"><strong>2 months missed threshold:</strong></span>
+      <div class="missed-months-list">
+        <span class="month-tag">April</span>
+        <span class="month-tag">August</span>
+      </div>
+    </div>
+
+    <!-- Month Table -->
+    <div class="section-label">Monthly Exercise Log</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:18%">Month</th>
+            <th style="width:22%">Exercise Run</th>
+            <th style="width:28%">Met 30% Threshold?</th>
+            <th style="width:32%">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="month-name">January</span></td>
+            <td style="text-align:center">
+              <svg style="width:14px;height:14px;color:var(--green);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Yes
+            </td>
+            <td><span class="pill pill-yes"><span class="pill-dot"></span>YES</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr>
+            <td><span class="month-name">February</span></td>
+            <td style="text-align:center">
+              <svg style="width:14px;height:14px;color:var(--green);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Yes
+            </td>
+            <td><span class="pill pill-yes"><span class="pill-dot"></span>YES</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr>
+            <td><span class="month-name">March</span></td>
+            <td style="text-align:center">
+              <svg style="width:14px;height:14px;color:var(--green);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Yes
+            </td>
+            <td><span class="pill pill-yes"><span class="pill-dot"></span>YES</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr class="row-missed">
+            <td><span class="month-name">April</span></td>
+            <td style="text-align:center; color:var(--red)">
+              <svg style="width:14px;height:14px;color:var(--red);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              No
+            </td>
+            <td><span class="pill pill-no"><span class="pill-dot"></span>NO</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr>
+            <td><span class="month-name">May</span></td>
+            <td style="text-align:center">
+              <svg style="width:14px;height:14px;color:var(--green);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Yes
+            </td>
+            <td><span class="pill pill-yes"><span class="pill-dot"></span>YES</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr>
+            <td><span class="month-name">June</span></td>
+            <td style="text-align:center">
+              <svg style="width:14px;height:14px;color:var(--green);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Yes
+            </td>
+            <td><span class="pill pill-yes"><span class="pill-dot"></span>YES</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr>
+            <td><span class="month-name">July</span></td>
+            <td style="text-align:center">
+              <svg style="width:14px;height:14px;color:var(--green);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Yes
+            </td>
+            <td><span class="pill pill-yes"><span class="pill-dot"></span>YES</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <tr class="row-missed">
+            <td><span class="month-name">August</span></td>
+            <td style="text-align:center; color:var(--red)">
+              <svg style="width:14px;height:14px;color:var(--red);vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              No
+            </td>
+            <td><span class="pill pill-no"><span class="pill-dot"></span>NO</span></td>
+            <td><span class="source-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Monitoring / manual log
+            </span></td>
+          </tr>
+          <!-- Future months (greyed) -->
+          <tr class="row-future">
+            <td><span class="month-name">September</span></td>
+            <td style="text-align:center; color:var(--text-dim)">Pending</td>
+            <td><span style="font-size:12px; color:var(--text-dim)">— Not yet</span></td>
+            <td><span class="source-tag" style="color:var(--text-dim)">—</span></td>
+          </tr>
+          <tr class="row-future">
+            <td><span class="month-name">October</span></td>
+            <td style="text-align:center; color:var(--text-dim)">Pending</td>
+            <td><span style="font-size:12px; color:var(--text-dim)">— Not yet</span></td>
+            <td><span class="source-tag" style="color:var(--text-dim)">—</span></td>
+          </tr>
+          <tr class="row-future">
+            <td><span class="month-name">November</span></td>
+            <td style="text-align:center; color:var(--text-dim)">Pending</td>
+            <td><span style="font-size:12px; color:var(--text-dim)">— Not yet</span></td>
+            <td><span class="source-tag" style="color:var(--text-dim)">—</span></td>
+          </tr>
+          <tr class="row-future">
+            <td><span class="month-name">December</span></td>
+            <td style="text-align:center; color:var(--text-dim)">Pending</td>
+            <td><span style="font-size:12px; color:var(--text-dim)">— Not yet</span></td>
+            <td><span class="source-tag" style="color:var(--text-dim)">—</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Rule Results Grid -->
+    <div class="section-label">Rule Evaluation</div>
+    <div class="rule-grid">
+      <div class="rule-card flag-red">
+        <div class="rule-card-label">Monthly Threshold Missed</div>
+        <div class="rule-card-value val-yes">YES</div>
+        <div class="rule-card-sub">April and August failed the 30% load threshold</div>
+      </div>
+      <div class="rule-card flag-red">
+        <div class="rule-card-label">Trigger Annual Load Bank Requirement</div>
+        <div class="rule-card-value val-yes">YES</div>
+        <div class="rule-card-sub">≥ 1 missed threshold month in review period</div>
+      </div>
+      <div class="rule-card flag-amber">
+        <div class="rule-card-label">Recommended Timing</div>
+        <div class="rule-card-value val-info">Spring PM Visit</div>
+        <div class="rule-card-sub">Bundle with next scheduled preventive maintenance</div>
+      </div>
+      <div class="rule-card flag-violet">
+        <div class="rule-card-label">Estimated Charge</div>
+        <div class="rule-card-value val-money">$275</div>
+        <div class="rule-card-sub">Load bank test add-on · Subject to scheduling</div>
+      </div>
+    </div>
+
+    <!-- Decision Logic explainer -->
+    <div class="logic-block">
+      <div class="logic-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span class="logic-header-title">How this decision was reached</span>
+      </div>
+      <div class="logic-flow">
+        <div class="logic-step">
+          <div class="logic-step-icon" style="background:var(--bg-elev-2); border:1px solid var(--border-strong)">
+            <svg style="color:var(--indigo)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="logic-step-value" style="color:var(--text-soft)">Monthly data</div>
+          <div class="logic-step-label">8 months pulled<br>from monitoring</div>
+        </div>
+        <div class="logic-arrow">→</div>
+        <div class="logic-step">
+          <div class="logic-step-icon" style="background:var(--bg-elev-2); border:1px solid var(--border-strong)">
+            <svg style="color:var(--amber)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <div class="logic-step-value" style="color:var(--amber)">30% rule</div>
+          <div class="logic-step-label">Each month scored<br>vs threshold</div>
+        </div>
+        <div class="logic-arrow">→</div>
+        <div class="logic-step">
+          <div class="logic-step-icon" style="background:var(--red-bg); border:1px solid rgba(239,68,68,0.2)">
+            <svg style="color:var(--red)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="logic-step-value" style="color:var(--red)">2 misses</div>
+          <div class="logic-step-label">Apr + Aug below<br>threshold</div>
+        </div>
+        <div class="logic-arrow">→</div>
+        <div class="logic-step">
+          <div class="logic-step-icon" style="background:var(--amber-bg); border:1px solid rgba(245,158,11,0.2)">
+            <svg style="color:var(--amber)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="logic-step-value" style="color:var(--amber)">Triggered</div>
+          <div class="logic-step-label">Annual load bank<br>test required</div>
+        </div>
+        <div class="logic-arrow">→</div>
+        <div class="logic-step">
+          <div class="logic-step-icon" style="background:var(--green-bg); border:1px solid rgba(16,185,129,0.2)">
+            <svg style="color:var(--green)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="logic-step-value" style="color:var(--green)">Scheduled</div>
+          <div class="logic-step-label">Spring PM visit<br>add-on</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendation Banner -->
+    <div class="rec-banner">
+      <div class="rec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <div class="rec-body">
+        <div class="rec-title">Recommendation: Schedule load bank test at next spring PM visit</div>
+        <div class="rec-text">
+          Shell Station 184 missed the 30% exercise threshold in <strong>April</strong> and <strong>August</strong>, triggering the annual load bank requirement under the Standard plan. 
+          Bundle the $275 add-on with the next scheduled spring preventive maintenance visit to minimize site disruption and service cost. 
+          Creating a task now ensures it is captured in the spring PM work order before scheduling closes.
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Footer -->
+    <div class="action-footer">
+      <div class="action-footer-label">
+        Load bank test is <strong>required for this annual window</strong>. Select an action to proceed.
+      </div>
+      <button class="btn btn-primary" onclick="handleAction('task')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Task
+      </button>
+      <button class="btn btn-secondary" onclick="handleAction('report')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Add to Report
+      </button>
+      <button class="btn btn-ghost" onclick="handleAction('dismiss')">
+        Dismiss
+      </button>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg class="toast-icon" id="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+  <span id="toast-msg">Action completed.</span>
+</div>
+
+<script>
+  function showToast(msg, type = 'green') {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const msgEl = document.getElementById('toast-msg');
+    icon.className = 'toast-icon ' + type;
+    msgEl.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  function handleAction(type) {
+    if (type === 'task') {
+      showToast('Task created — Spring PM · Load bank add-on · $275', 'green');
+    } else if (type === 'report') {
+      showToast('Load bank finding added to monthly report', 'amber');
+    } else if (type === 'dismiss') {
+      showToast('Decision dismissed. Review window remains open.', 'amber');
+    }
+  }
+</script>
+
+</body>
+</html>

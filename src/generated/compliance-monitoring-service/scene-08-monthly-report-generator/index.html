@@ -3,43 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monthly Report Generator</title>
+  <title>Generator Command Center — Monthly Report Generator</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-    .scene{height:100%;padding:22px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px}
-    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
-    .title{font-size:22px;font-weight:800}
-    .meta{font-size:12px;color:#94a3b8}
-    .main{display:grid;grid-template-columns:.9fr 1.1fr;gap:10px;min-height:0}
-    .h{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-    ul{list-style:none;display:grid;gap:7px}.li{font-size:12px;padding:8px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.02)}
-    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.14);font-size:12px}.pri{color:#22d3ee;border-color:rgba(34,211,238,.3)}
+    :root{--bg:#08101d;--s:rgba(255,255,255,.035);--s2:rgba(255,255,255,.055);--b:rgba(255,255,255,.08);--t:#eef2ff;--m:#94a3b8;--g:#10b981;--a:#f59e0b;--c:#22d3ee;--v:#a78bfa;--font:Inter,ui-sans-serif,system-ui,sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{overflow:hidden;background:linear-gradient(180deg,#08101d,#091321);font-family:var(--font);color:var(--t)}
+    .scene{height:100%;padding:18px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}.card{background:var(--s);border:1px solid var(--b);border-radius:12px;backdrop-filter:blur(8px)}
+    .hero{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:22px;letter-spacing:-.03em}.sub{font-size:12px;color:var(--m);margin-top:2px}.badge{font-size:11px;color:var(--v);border:1px solid rgba(167,139,250,.35);border-radius:999px;padding:4px 9px}
+    .controls{padding:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ctl{padding:8px;border-radius:8px;border:1px solid var(--b);background:var(--s2);font-size:12px;color:#cbd5e1}
+    .main{min-height:0;display:grid;grid-template-columns:.9fr 1.1fr;gap:10px}.panel{min-height:0;display:grid;grid-template-rows:auto 1fr}.ph{padding:10px 12px;border-bottom:1px solid var(--b);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--m);font-weight:700}.pb{padding:10px;overflow:auto}
+    .list{list-style:none;display:grid;gap:8px}.item{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:center;padding:8px;border-radius:8px;border:1px solid var(--b);background:var(--s2);font-size:12px}
+    .box{padding:10px;border:1px solid var(--b);border-radius:10px;background:var(--s2);font-size:12px;line-height:1.5}
+    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid var(--b);background:var(--s2);color:var(--t)}.btn.pri{color:var(--c);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.1)}
   </style>
 </head>
 <body>
   <div class="scene">
-    <div class="card title">Report Generator</div>
-    <div class="card meta">Type: Monthly Status Report · Customer: Carter Residence · Period: August 2026</div>
-    <div class="main">
-      <div class="card">
-        <div class="h">Include Sections</div>
-        <ul>
-          <li class="li">☑ Service history</li><li class="li">☑ Monitoring events</li><li class="li">☑ Current generator status</li>
-          <li class="li">☑ Fault summary</li><li class="li">☐ Compliance section</li><li class="li">☐ Fuel quality section</li>
-          <li class="li">☑ Recommendations</li>
-        </ul>
+    <section class="card hero" data-focus-region="report-header">
+      <div>
+        <h1>Report Generator</h1>
+        <div class="sub">Assemble monthly customer outputs from structured operations data</div>
       </div>
-      <div class="card">
-        <div class="h">Preview Summary</div>
-        <ul>
-          <li class="li">Generator online and reporting normally</li>
-          <li class="li">1 battery weakness alert detected and resolved</li>
-          <li class="li">No outage events this period</li>
-          <li class="li">Recommendation: replace battery during next visit</li>
-        </ul>
-      </div>
-    </div>
-    <div class="actions"><div class="btn">Generate PDF</div><div class="btn">Email to Customer</div><div class="btn pri">Save to Files</div></div>
+      <div class="badge" id="summary-count">4 sections selected</div>
+    </section>
+
+    <section class="card controls" data-focus-region="report-controls">
+      <div class="ctl">Report Type: Monthly Status Report</div>
+      <div class="ctl">Customer: Carter Residence</div>
+      <div class="ctl">Period: August 2026</div>
+    </section>
+
+    <section class="main">
+      <article class="card panel" data-focus-region="section-selection">
+        <header class="ph">Include Sections</header>
+        <div class="pb">
+          <ul class="list" id="checks">
+            <li class="item"><input type="checkbox" checked />Service history</li>
+            <li class="item"><input type="checkbox" checked />Monitoring events</li>
+            <li class="item"><input type="checkbox" checked />Current generator status</li>
+            <li class="item"><input type="checkbox" checked />Fault summary</li>
+            <li class="item"><input type="checkbox" />Compliance section</li>
+            <li class="item"><input type="checkbox" />Fuel quality section</li>
+            <li class="item"><input type="checkbox" checked />Recommendations</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card panel" data-focus-region="preview-summary">
+        <header class="ph">Preview Summary</header>
+        <div class="pb" id="preview">
+          <div class="box">Generator online and reporting normally.</div>
+          <div class="box">1 battery weakness alert detected and resolved.</div>
+          <div class="box">No outage events this period.</div>
+          <div class="box">Recommendation: replace battery during next visit.</div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="actions" data-focus-region="output-actions">
+      <button class="btn">Generate PDF</button>
+      <button class="btn">Email to Customer</button>
+      <button class="btn pri">Save to Files</button>
+    </footer>
   </div>
+
+  <script>
+    (function(){
+      const checks = Array.from(document.querySelectorAll('#checks input[type="checkbox"]'));
+      const summary = document.getElementById('summary-count');
+      function refresh(){
+        const n = checks.filter(c => c.checked).length;
+        summary.textContent = `${n} sections selected`;
+      }
+      checks.forEach(c => c.addEventListener('change', refresh));
+      refresh();
+    })();
+  </script>
 </body>
 </html>

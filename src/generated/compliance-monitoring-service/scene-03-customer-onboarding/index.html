@@ -3,48 +3,1288 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Customer Setup</title>
+  <title>Generator Command Center — New Customer Onboarding</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-    .scene{height:100%;padding:20px;display:grid;grid-template-rows:auto 1fr auto;gap:10px}
-    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
-    .title{font-size:22px;font-weight:800}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
-    .h{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-    .f{display:grid;grid-template-columns:1fr 1fr;gap:8px}.i{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);font-size:12px;color:#cbd5e1}
-    .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.15)}
-    .ok{color:#10b981;border-color:rgba(16,185,129,.35)} .violet{color:#a78bfa;border-color:rgba(167,139,250,.35)} .amber{color:#f59e0b;border-color:rgba(245,158,11,.35)}
-    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.14);font-size:12px}.pri{background:rgba(34,211,238,.14);color:#22d3ee}
+    :root {
+      --bg: #08101d;
+      --bg-elev: rgba(255,255,255,0.035);
+      --bg-elev-2: rgba(255,255,255,0.055);
+      --bg-elev-3: rgba(255,255,255,0.08);
+      --bg-card: rgba(12,22,42,0.82);
+      --text: #eef2ff;
+      --text-soft: #c7d2fe;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --green: #10b981;
+      --green-bg: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.12);
+      --violet: #a78bfa;
+      --violet-bg: rgba(167,139,250,0.12);
+      --indigo: #818cf8;
+      --cyan: #22d3ee;
+      --cyan-bg: rgba(34,211,238,0.10);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
+      --sidebar-w: 64px;
+      --header-h: 60px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 80% 60% at 80% -10%, rgba(34,211,238,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(167,139,250,0.10) 0%, transparent 55%),
+        linear-gradient(180deg, #08101d 0%, #091321 100%);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .shell {
+      display: flex;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0 20px;
+      gap: 6px;
+      background: rgba(5,12,24,0.72);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .sidebar-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 24px rgba(34,211,238,0.25);
+    }
+
+    .nav-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      color: var(--text-dim);
+      font-size: 17px;
+      position: relative;
+      border: none;
+      background: transparent;
+    }
+    .nav-item:hover { background: var(--bg-elev-2); color: var(--text-soft); }
+    .nav-item.active {
+      background: rgba(34,211,238,0.12);
+      color: var(--cyan);
+      box-shadow: 0 0 16px rgba(34,211,238,0.15);
+    }
+    .nav-item .nav-badge {
+      position: absolute;
+      top: 5px; right: 5px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      border: 2px solid var(--bg);
+    }
+    .nav-tooltip {
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(10,20,40,0.95);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100;
+    }
+    .nav-item:hover .nav-tooltip { opacity: 1; }
+    .sidebar-spacer { flex: 1; }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .crumb { color: var(--text-muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .crumb.current { color: var(--text); font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+    .crumb-sep { color: var(--text-dim); }
+
+    .topbar-search {
+      margin-left: auto;
+      flex: 1;
+      max-width: 320px;
+      position: relative;
+    }
+    .topbar-search input {
+      width: 100%;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 7px 12px 7px 34px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .topbar-search input::placeholder { color: var(--text-dim); }
+    .topbar-search input:focus { border-color: rgba(34,211,238,0.35); background: var(--bg-elev-3); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn-ghost {
+      background: var(--bg-elev-2);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg-elev-3); color: var(--text); }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(34,211,238,0.9), rgba(129,140,248,0.9));
+      color: #060f1e;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(34,211,238,0.22);
+    }
+    .btn-primary:hover { box-shadow: 0 0 26px rgba(34,211,238,0.35); transform: translateY(-1px); }
+    .btn-success {
+      background: rgba(16,185,129,0.15);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,0.25);
+    }
+    .btn-success:hover { background: rgba(16,185,129,0.22); }
+    .btn-xs {
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text-muted);
+      transition: all 0.12s;
+    }
+    .btn-xs:hover { background: var(--bg-elev-3); color: var(--text-soft); border-color: var(--border-strong); }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .page {
+      flex: 1;
+      overflow: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .page::-webkit-scrollbar { width: 6px; }
+    .page::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.45fr auto;
+      gap: 18px;
+      align-items: center;
+    }
+    .hero-main { display: flex; flex-direction: column; gap: 10px; }
+    .hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .hero-title { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+    .hero-sub { font-size: 13px; color: var(--text-muted); }
+    .hero-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pill-green { background: var(--green-bg); color: var(--green); border-color: rgba(16,185,129,0.18); }
+    .pill-amber { background: var(--amber-bg); color: var(--amber); border-color: rgba(245,158,11,0.18); }
+    .pill-red { background: var(--red-bg); color: var(--red); border-color: rgba(239,68,68,0.18); }
+    .pill-violet { background: var(--violet-bg); color: var(--violet); border-color: rgba(167,139,250,0.18); }
+    .pill-cyan { background: var(--cyan-bg); color: var(--cyan); border-color: rgba(34,211,238,0.18); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 104px;
+      position: relative;
+      overflow: hidden;
+    }
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .summary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+    .summary-value { font-size: 24px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
+    .summary-meta { font-size: 12px; color: var(--text-muted); margin-top: auto; }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+      gap: 14px;
+      min-height: 0;
+    }
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+    .card-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .card-body { padding: 16px 18px; min-width: 0; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+    .field, .field-wide { display: flex; flex-direction: column; gap: 7px; }
+    .field-wide { grid-column: 1 / -1; }
+    .field label, .field-wide label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+    .input, .select, .textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text);
+      border-radius: var(--radius-md);
+      padding: 11px 13px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .textarea { min-height: 96px; resize: vertical; }
+    .input::placeholder, .textarea::placeholder { color: var(--text-dim); }
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: rgba(34,211,238,0.35);
+      background: var(--bg-elev-3);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.10);
+    }
+
+    .segmented {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+    }
+    .segmented input { display: none; }
+    .segmented label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+    .segmented input:checked + label {
+      background: rgba(34,211,238,0.10);
+      border-color: rgba(34,211,238,0.20);
+      color: var(--cyan);
+      box-shadow: inset 0 0 0 1px rgba(34,211,238,0.08);
+    }
+
+    .section-stack { display: flex; flex-direction: column; gap: 16px; }
+    .subhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .subhead-title { font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-soft); }
+    .subhead-meta { font-size: 11px; color: var(--text-dim); }
+
+    .plan-grid, .flag-grid, .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+    }
+    .flag-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .quick-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+    .choice-card, .flag-card, .quick-card {
+      position: relative;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .choice-card:hover, .flag-card:hover, .quick-card:hover { background: var(--bg-elev-3); border-color: var(--border-strong); transform: translateY(-1px); }
+    .choice-card input, .flag-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .choice-card.selected, .flag-card.selected {
+      border-color: rgba(34,211,238,0.28);
+      background: rgba(34,211,238,0.10);
+      box-shadow: inset 0 0 0 1px rgba(34,211,238,0.08);
+    }
+    .choice-top, .quick-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .choice-title, .flag-title, .quick-title { font-size: 13px; font-weight: 700; }
+    .choice-sub, .flag-sub, .quick-sub { font-size: 12px; color: var(--text-muted); }
+    .choice-badge, .quick-badge {
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .choice-badge.resi, .quick-badge.green { background: var(--green-bg); color: var(--green); }
+    .choice-badge.comm, .quick-badge.violet { background: var(--violet-bg); color: var(--violet); }
+    .quick-badge.amber { background: var(--amber-bg); color: var(--amber); }
+    .quick-badge.cyan { background: var(--cyan-bg); color: var(--cyan); }
+
+    .equipment-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+    .equipment-grid .field-wide { grid-column: 1 / -1; }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-green { background: var(--green-bg); color: var(--green); border-color: rgba(16,185,129,0.2); }
+    .status-amber { background: var(--amber-bg); color: var(--amber); border-color: rgba(245,158,11,0.2); }
+    .status-red { background: var(--red-bg); color: var(--red); border-color: rgba(239,68,68,0.2); }
+    .status-cyan { background: var(--cyan-bg); color: var(--cyan); border-color: rgba(34,211,238,0.2); }
+    .status-violet { background: var(--violet-bg); color: var(--violet); border-color: rgba(167,139,250,0.2); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+    .mini-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .mini-stat {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      min-height: 92px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mini-stat-label { color: var(--text-dim); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .mini-stat-value { font-size: 22px; font-weight: 800; letter-spacing: -0.04em; }
+    .mini-stat-sub { color: var(--text-muted); font-size: 12px; margin-top: auto; }
+
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .check-item {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 13px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+    }
+    .check-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .check-icon.ok { color: var(--green); background: var(--green-bg); }
+    .check-icon.warn { color: var(--amber); background: var(--amber-bg); }
+    .check-title { font-size: 12px; font-weight: 700; }
+    .check-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .summary-box {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      color: var(--text-soft);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .summary-box strong { color: var(--text); }
+    .summary-row { display: flex; justify-content: space-between; gap: 12px; }
+    .summary-key { color: var(--text-dim); }
+    .summary-value-right { color: var(--text); font-weight: 700; text-align: right; }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 2px;
+      flex-wrap: wrap;
+    }
+    .footer-actions .left, .footer-actions .right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .footer {
+      height: 36px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+    .footer-spacer { flex: 1; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.7); }
+    .divider { width: 1px; height: 16px; background: var(--border-strong); }
+
+    @media (max-width: 1360px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-actions { justify-content: flex-start; }
+      .equipment-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .shell { min-height: 100vh; height: auto; }
+      .sidebar { display: none; }
+      .topbar { flex-wrap: wrap; height: auto; padding: 14px 18px; }
+      .topbar-search { order: 3; max-width: none; width: 100%; margin-left: 0; }
+      .page { padding: 18px; }
+      .summary-grid, .form-grid, .equipment-grid, .plan-grid, .flag-grid, .quick-grid, .mini-stat-grid { grid-template-columns: 1fr; }
+      .footer { padding: 0 18px; flex-wrap: wrap; height: auto; min-height: 36px; }
+    }
   </style>
 </head>
 <body>
-  <div class="scene">
-    <div class="card"><div class="title">New Customer Setup</div></div>
-    <div class="grid">
-      <div class="card">
-        <div class="h">Account & Equipment</div>
-        <div class="f">
-          <div class="i">Customer Type: Commercial</div><div class="i">Name: Shell Station 184</div>
-          <div class="i">Address: Birmingham, MI</div><div class="i">Contact: Site Manager</div>
-          <div class="i">Generator: Kohler 60kW</div><div class="i">Fuel: Diesel</div>
-          <div class="i">Transfer Switch: Yes</div><div class="i">Monitoring: PT Series</div>
+  <div class="shell">
+    <nav class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-logo">⚡</div>
+      <button class="nav-item" title="Dashboard">🏠<span class="nav-tooltip">Dashboard</span></button>
+      <button class="nav-item active" title="Customers">👥<span class="nav-tooltip">Customers</span></button>
+      <button class="nav-item" title="Schedule">📅<span class="nav-tooltip">Schedule</span></button>
+      <button class="nav-item" title="Monitoring">📡<span class="nav-badge"></span><span class="nav-tooltip">Monitoring</span></button>
+      <button class="nav-item" title="Compliance">🛡️<span class="nav-tooltip">Compliance</span></button>
+      <button class="nav-item" title="Reports">📊<span class="nav-tooltip">Reports</span></button>
+      <button class="nav-item" title="Equipment">🔧<span class="nav-tooltip">Equipment</span></button>
+      <div class="sidebar-spacer"></div>
+      <button class="nav-item" title="Settings">⚙️<span class="nav-tooltip">Settings</span></button>
+    </nav>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="crumbs" aria-label="Breadcrumb">
+          <span class="crumb">Customers</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb">Onboarding</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">New Customer Setup</span>
         </div>
-      </div>
-      <div class="card">
-        <div class="h">Plan & Compliance Flags</div>
-        <div class="chips" style="margin-bottom:12px">
-          <span class="chip violet">Plan: Premium+</span>
-          <span class="chip ok">Monitoring Enabled</span>
-          <span class="chip amber">Compliance-heavy setup</span>
+
+        <div class="topbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="search" placeholder="Search plans, equipment, templates…" aria-label="Search within onboarding" />
         </div>
-        <div class="f">
-          <div class="i">☑ UST involved</div><div class="i">☑ EPA run-hour logging</div>
-          <div class="i">☑ Monthly threshold verification</div><div class="i">☑ Annual compliance report</div>
-          <div class="i">☑ Load bank review applicable</div><div class="i">☐ Customer portal access</div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-ghost">← Back</button>
+          <button class="btn btn-ghost">Save Draft</button>
+          <button class="btn btn-primary" id="header-save">＋ Save Customer</button>
+          <div class="avatar" title="Thomas B.">TB</div>
         </div>
-      </div>
+      </header>
+
+      <main class="page" data-focus-region="onboarding-full">
+        <section class="hero" data-focus-region="onboarding-hero">
+          <div class="hero-main">
+            <div class="hero-title-row">
+              <h1 class="hero-title">New Customer Onboarding</h1>
+              <span class="pill pill-cyan"><span class="dot"></span>Internal Ops Workflow</span>
+              <span class="pill pill-violet">Residential + Commercial</span>
+            </div>
+            <div class="hero-sub">Capture account details, equipment, service plan, and compliance flags in one structured workflow.</div>
+            <div class="pill-row">
+              <span class="pill pill-green">Structured record creation</span>
+              <span class="pill pill-amber">Compliance-aware setup</span>
+              <span class="pill pill-cyan">Monitoring-ready</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-ghost" id="prefill-commercial">Prefill Commercial</button>
+            <button class="btn btn-ghost" id="prefill-residential">Prefill Residential</button>
+            <button class="btn btn-success" id="validate-btn">Validate Setup</button>
+          </div>
+        </section>
+
+        <section class="summary-grid" aria-label="Onboarding summary metrics" data-focus-region="onboarding-summary">
+          <article class="summary-card">
+            <div class="summary-label">Customer Mode</div>
+            <div class="summary-value" style="color: var(--cyan);" id="customer-mode-label">Commercial</div>
+            <div class="summary-meta">Switches plan and compliance recommendations</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Monitoring</div>
+            <div class="summary-value" style="color: var(--violet);" id="monitoring-summary">PT Series</div>
+            <div class="summary-meta">Ready for live alerting and monthly reporting</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Compliance Flags</div>
+            <div class="summary-value" style="color: var(--amber);" id="flag-count">3</div>
+            <div class="summary-meta">Auto-counted from current selection</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Plan Selection</div>
+            <div class="summary-value" style="color: var(--green);" id="plan-summary">Premium+</div>
+            <div class="summary-meta">Used for workflow, schedule, and reporting defaults</div>
+          </article>
+        </section>
+
+        <section class="content-grid" data-focus-region="onboarding-content-grid">
+          <div class="left-col">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">🧾 Account Setup</div>
+                <div class="card-actions">
+                  <span class="status-chip status-cyan"><span class="status-dot"></span>Draft</span>
+                  <button class="btn-xs">Template Library</button>
+                </div>
+              </div>
+              <div class="card-body section-stack">
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Customer Type</div>
+                    <div class="subhead-meta">Select the service motion first</div>
+                  </div>
+                  <div class="segmented" role="radiogroup" aria-label="Customer Type">
+                    <input type="radio" id="type-residential" name="customerType" value="Residential" />
+                    <label for="type-residential">Residential</label>
+                    <input type="radio" id="type-commercial" name="customerType" value="Commercial" checked />
+                    <label for="type-commercial">Commercial</label>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Customer Information</div>
+                    <div class="subhead-meta">Primary account and site contact</div>
+                  </div>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="customer-name">Customer Name</label>
+                      <input class="input" id="customer-name" type="text" placeholder="Shell Station 184" value="Shell Station 184" />
+                    </div>
+                    <div class="field">
+                      <label for="account-id">Internal Account ID</label>
+                      <input class="input" id="account-id" type="text" placeholder="COM-0184" value="COM-0184" />
+                    </div>
+                    <div class="field-wide">
+                      <label for="address">Service Address</label>
+                      <input class="input" id="address" type="text" placeholder="1980 Woodward Ave, Birmingham, MI" value="1980 Woodward Ave, Birmingham, MI" />
+                    </div>
+                    <div class="field">
+                      <label for="contact-name">Primary Contact</label>
+                      <input class="input" id="contact-name" type="text" placeholder="Danielle Brooks" value="Danielle Brooks" />
+                    </div>
+                    <div class="field">
+                      <label for="contact-role">Contact Role</label>
+                      <input class="input" id="contact-role" type="text" placeholder="Site Manager" value="Site Manager" />
+                    </div>
+                    <div class="field">
+                      <label for="phone">Phone</label>
+                      <input class="input" id="phone" type="tel" placeholder="(555) 555-0198" value="(555) 555-0198" />
+                    </div>
+                    <div class="field">
+                      <label for="email">Email</label>
+                      <input class="input" id="email" type="email" placeholder="manager@shell184.com" value="manager@shell184.com" />
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Equipment Details</div>
+                    <div class="subhead-meta">Core unit, fuel, switch, and monitoring</div>
+                  </div>
+                  <div class="equipment-grid">
+                    <div class="field">
+                      <label for="generator-brand">Generator Brand</label>
+                      <select class="select" id="generator-brand">
+                        <option>Generac</option>
+                        <option selected>Kohler</option>
+                        <option>Cummins</option>
+                        <option>CAT</option>
+                        <option>Briggs & Stratton</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="generator-size">Generator Size</label>
+                      <select class="select" id="generator-size">
+                        <option>20kW</option>
+                        <option>30kW</option>
+                        <option selected>60kW</option>
+                        <option>100kW</option>
+                        <option>150kW</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="fuel-type">Fuel Type</label>
+                      <select class="select" id="fuel-type">
+                        <option>Natural Gas</option>
+                        <option selected>Diesel</option>
+                        <option>Propane</option>
+                        <option>Dual Fuel</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="transfer-switch">Transfer Switch</label>
+                      <select class="select" id="transfer-switch">
+                        <option selected>Yes</option>
+                        <option>No</option>
+                        <option>Unknown</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="serial-number">Serial Number</label>
+                      <input class="input" id="serial-number" type="text" placeholder="KH-60-D-184" value="KH-60-D-184" />
+                    </div>
+                    <div class="field">
+                      <label for="install-date">Install Date</label>
+                      <input class="input" id="install-date" type="date" value="2026-05-20" />
+                    </div>
+                    <div class="field-wide">
+                      <label for="monitoring-unit">Monitoring Unit</label>
+                      <select class="select" id="monitoring-unit">
+                        <option>None</option>
+                        <option selected>PT Series</option>
+                        <option>Existing Customer Hardware</option>
+                        <option>Planned Later</option>
+                      </select>
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Plan Assignment</div>
+                    <div class="subhead-meta">Plans adapt based on customer type</div>
+                  </div>
+                  <div class="plan-grid" id="plan-grid">
+                    <label class="choice-card selected" data-mode="Residential">
+                      <input type="radio" name="plan" value="Annual" />
+                      <div class="choice-top">
+                        <div class="choice-title">Annual</div>
+                        <span class="choice-badge resi">Residential</span>
+                      </div>
+                      <div class="choice-sub">One preventive maintenance cycle per year with baseline reporting.</div>
+                    </label>
+                    <label class="choice-card" data-mode="Residential">
+                      <input type="radio" name="plan" value="Semi-Annual" />
+                      <div class="choice-top">
+                        <div class="choice-title">Semi-Annual</div>
+                        <span class="choice-badge resi">Residential</span>
+                      </div>
+                      <div class="choice-sub">Two annual service visits with stronger readiness coverage.</div>
+                    </label>
+                    <label class="choice-card" data-mode="Residential">
+                      <input type="radio" name="plan" value="Plus+ Monitoring" />
+                      <div class="choice-top">
+                        <div class="choice-title">Plus+ Monitoring</div>
+                        <span class="choice-badge resi">Residential</span>
+                      </div>
+                      <div class="choice-sub">Monitoring, fault alerts, and monthly status reporting.</div>
+                    </label>
+                    <label class="choice-card" data-mode="Commercial">
+                      <input type="radio" name="plan" value="Essential" />
+                      <div class="choice-top">
+                        <div class="choice-title">Essential</div>
+                        <span class="choice-badge comm">Commercial</span>
+                      </div>
+                      <div class="choice-sub">Core service coverage with basic documentation controls.</div>
+                    </label>
+                    <label class="choice-card" data-mode="Commercial">
+                      <input type="radio" name="plan" value="Standard" />
+                      <div class="choice-top">
+                        <div class="choice-title">Standard</div>
+                        <span class="choice-badge comm">Commercial</span>
+                      </div>
+                      <div class="choice-sub">Threshold tracking and stronger compliance workflow support.</div>
+                    </label>
+                    <label class="choice-card selected" data-mode="Commercial">
+                      <input type="radio" name="plan" value="Premium+" checked />
+                      <div class="choice-top">
+                        <div class="choice-title">Premium+</div>
+                        <span class="choice-badge comm">Commercial</span>
+                      </div>
+                      <div class="choice-sub">Monitoring, monthly threshold verification, and full compliance reporting.</div>
+                    </label>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Compliance Flags</div>
+                    <div class="subhead-meta">These drive downstream tasks, reports, and alerts</div>
+                  </div>
+                  <div class="flag-grid" id="flag-grid">
+                    <label class="flag-card selected">
+                      <input type="checkbox" value="UST involved" checked />
+                      <div class="flag-title">UST involved</div>
+                      <div class="flag-sub">Underground storage tank documentation and review workflow.</div>
+                    </label>
+                    <label class="flag-card selected">
+                      <input type="checkbox" value="EPA run-hour logging required" checked />
+                      <div class="flag-title">EPA run-hour logging required</div>
+                      <div class="flag-sub">Separate exercise runtime from outage runtime for reporting.</div>
+                    </label>
+                    <label class="flag-card selected">
+                      <input type="checkbox" value="Monthly threshold verification required" checked />
+                      <div class="flag-title">Monthly threshold verification required</div>
+                      <div class="flag-sub">Needed for load bank logic and monthly compliance review.</div>
+                    </label>
+                    <label class="flag-card">
+                      <input type="checkbox" value="Annual compliance report required" />
+                      <div class="flag-title">Annual compliance report required</div>
+                      <div class="flag-sub">Generates yearly audit-ready packet with exceptions and evidence.</div>
+                    </label>
+                    <label class="flag-card">
+                      <input type="checkbox" value="Load bank review applicable" />
+                      <div class="flag-title">Load bank review applicable</div>
+                      <div class="flag-sub">Show decision workflow when threshold logic is missed.</div>
+                    </label>
+                    <label class="flag-card">
+                      <input type="checkbox" value="Customer portal access" />
+                      <div class="flag-title">Customer portal access</div>
+                      <div class="flag-sub">Expose reports, status, and service history externally.</div>
+                    </label>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Internal Notes</div>
+                    <div class="subhead-meta">Context for operations and future expansion</div>
+                  </div>
+                  <div class="field-wide">
+                    <label for="notes">Notes</label>
+                    <textarea class="textarea" id="notes" placeholder="Add onboarding notes, special handling instructions, or renewal cues...">Commercial gas station account. Position documentation bundle as core value proposition. Monitoring should be active at launch and monthly compliance summary should start immediately.</textarea>
+                  </div>
+                </section>
+
+                <div class="footer-actions">
+                  <div class="left">
+                    <button class="btn btn-ghost" id="cancel-btn">Cancel</button>
+                    <button class="btn btn-ghost">Save Draft</button>
+                  </div>
+                  <div class="right">
+                    <button class="btn btn-ghost">Create Another</button>
+                    <button class="btn btn-primary" id="footer-save">Save Customer</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <aside class="right-col">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">⚙️ Quick Setup Options</div>
+                <div class="card-actions"><button class="btn-xs">Apply Template</button></div>
+              </div>
+              <div class="card-body">
+                <div class="quick-grid">
+                  <div class="quick-card">
+                    <div class="quick-top">
+                      <div class="quick-title">Residential Ready</div>
+                      <span class="quick-badge green">Fast</span>
+                    </div>
+                    <div class="quick-sub">Annual or semi-annual service defaults with lighter compliance setup.</div>
+                  </div>
+                  <div class="quick-card">
+                    <div class="quick-top">
+                      <div class="quick-title">Gas Station</div>
+                      <span class="quick-badge violet">High Value</span>
+                    </div>
+                    <div class="quick-sub">Compliance-heavy path with monitoring and threshold verification enabled.</div>
+                  </div>
+                  <div class="quick-card">
+                    <div class="quick-top">
+                      <div class="quick-title">Monitoring First</div>
+                      <span class="quick-badge cyan">Live Data</span>
+                    </div>
+                    <div class="quick-sub">Prioritize device setup, alert routing, and monthly summaries.</div>
+                  </div>
+                  <div class="quick-card">
+                    <div class="quick-top">
+                      <div class="quick-title">Audit Ready</div>
+                      <span class="quick-badge amber">Docs</span>
+                    </div>
+                    <div class="quick-sub">Attach annual packet, retention settings, and evidence checklist early.</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📊 Setup Snapshot</div>
+                <div class="card-actions"><button class="btn-xs">Refresh</button></div>
+              </div>
+              <div class="card-body">
+                <div class="mini-stat-grid">
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Workflow Type</div>
+                    <div class="mini-stat-value" style="color: var(--cyan);" id="stat-type">Commercial</div>
+                    <div class="mini-stat-sub">Affects plans and flags</div>
+                  </div>
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Plan Tier</div>
+                    <div class="mini-stat-value" style="color: var(--green);" id="stat-plan">Premium+</div>
+                    <div class="mini-stat-sub">Default report cadence</div>
+                  </div>
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Monitoring</div>
+                    <div class="mini-stat-value" style="color: var(--violet);" id="stat-monitoring">PT Series</div>
+                    <div class="mini-stat-sub">Alert stream eligible</div>
+                  </div>
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Required Flags</div>
+                    <div class="mini-stat-value" style="color: var(--amber);" id="stat-flags">3</div>
+                    <div class="mini-stat-sub">Drives compliance tasks</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">✅ Expected Outputs</div>
+                <div class="card-actions"><button class="btn-xs">Preview</button></div>
+              </div>
+              <div class="card-body">
+                <ul class="checklist">
+                  <li class="check-item">
+                    <div class="check-icon ok">✓</div>
+                    <div>
+                      <div class="check-title">Customer profile created</div>
+                      <div class="check-sub">Unified service, monitoring, compliance, and file record.</div>
+                    </div>
+                    <span class="status-chip status-green">Ready</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon ok">✓</div>
+                    <div>
+                      <div class="check-title">Plan defaults assigned</div>
+                      <div class="check-sub">Visit cadence, reporting rules, and workflows follow the chosen tier.</div>
+                    </div>
+                    <span class="status-chip status-cyan">Active</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon warn">!</div>
+                    <div>
+                      <div class="check-title">Compliance tasks generated</div>
+                      <div class="check-sub">UST, EPA runtime logging, and threshold verification where applicable.</div>
+                    </div>
+                    <span class="status-chip status-amber">Conditional</span>
+                  </li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📝 Generated Summary</div>
+                <div class="card-actions"><button class="btn-xs">Copy</button></div>
+              </div>
+              <div class="card-body">
+                <div class="summary-box" id="generated-summary">
+                  <div class="summary-row"><span class="summary-key">Customer</span><span class="summary-value-right">Shell Station 184</span></div>
+                  <div class="summary-row"><span class="summary-key">Type</span><span class="summary-value-right">Commercial</span></div>
+                  <div class="summary-row"><span class="summary-key">Plan</span><span class="summary-value-right">Premium+</span></div>
+                  <div class="summary-row"><span class="summary-key">Equipment</span><span class="summary-value-right">Kohler 60kW Diesel</span></div>
+                  <div class="summary-row"><span class="summary-key">Monitoring</span><span class="summary-value-right">PT Series</span></div>
+                  <div class="summary-row"><span class="summary-key">Flags</span><span class="summary-value-right" id="summary-flag-list">UST involved, EPA run-hour logging required, Monthly threshold verification required</span></div>
+                </div>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="live-dot"></div>
+        <span>Onboarding workflow active</span>
+        <div class="divider"></div>
+        <span id="footer-time">08:42:17 AM</span>
+        <div class="footer-spacer"></div>
+        <span>New Customer Onboarding Screen · MVP Monolith</span>
+        <div class="divider"></div>
+        <span>Generator Command Center</span>
+      </footer>
     </div>
-    <div class="actions"><div class="btn">Cancel</div><div class="btn pri">Save Customer</div></div>
   </div>
+
+  <script>
+    (function () {
+      const typeInputs = Array.from(document.querySelectorAll('input[name="customerType"]'));
+      const planInputs = Array.from(document.querySelectorAll('input[name="plan"]'));
+      const planCards = Array.from(document.querySelectorAll('.choice-card'));
+      const flagInputs = Array.from(document.querySelectorAll('.flag-card input[type="checkbox"]'));
+      const flagCards = Array.from(document.querySelectorAll('.flag-card'));
+      const monitoringSelect = document.getElementById('monitoring-unit');
+      const customerName = document.getElementById('customer-name');
+      const generatorBrand = document.getElementById('generator-brand');
+      const generatorSize = document.getElementById('generator-size');
+      const fuelType = document.getElementById('fuel-type');
+
+      const outputs = {
+        modeLabels: [document.getElementById('customer-mode-label'), document.getElementById('stat-type')],
+        planLabels: [document.getElementById('plan-summary'), document.getElementById('stat-plan')],
+        monitoringLabels: [document.getElementById('monitoring-summary'), document.getElementById('stat-monitoring')],
+        flagLabels: [document.getElementById('flag-count'), document.getElementById('stat-flags')],
+        summaryFlags: document.getElementById('summary-flag-list'),
+        summaryBox: document.getElementById('generated-summary')
+      };
+
+      function getType() {
+        return typeInputs.find(input => input.checked)?.value || 'Commercial';
+      }
+
+      function activePlan() {
+        return planInputs.find(input => input.checked)?.value || '';
+      }
+
+      function selectedFlags() {
+        return flagInputs.filter(input => input.checked).map(input => input.value);
+      }
+
+      function syncPlanVisibility() {
+        const mode = getType();
+        planCards.forEach(card => {
+          const visible = card.dataset.mode === mode;
+          card.style.display = visible ? '' : 'none';
+        });
+
+        const visiblePlans = planCards.filter(card => card.dataset.mode === mode);
+        const selectedVisible = visiblePlans.find(card => card.querySelector('input').checked);
+        if (!selectedVisible && visiblePlans[0]) {
+          visiblePlans[0].querySelector('input').checked = true;
+        }
+      }
+
+      function syncCardStates() {
+        planCards.forEach(card => {
+          const input = card.querySelector('input');
+          card.classList.toggle('selected', input.checked);
+        });
+        flagCards.forEach(card => {
+          const input = card.querySelector('input');
+          card.classList.toggle('selected', input.checked);
+        });
+      }
+
+      function syncSummary() {
+        const mode = getType();
+        const plan = activePlan();
+        const monitoring = monitoringSelect.value;
+        const flags = selectedFlags();
+
+        outputs.modeLabels.forEach(el => el.textContent = mode);
+        outputs.planLabels.forEach(el => el.textContent = plan || 'Unassigned');
+        outputs.monitoringLabels.forEach(el => el.textContent = monitoring);
+        outputs.flagLabels.forEach(el => el.textContent = String(flags.length));
+        outputs.summaryFlags.textContent = flags.length ? flags.join(', ') : 'No flags selected';
+
+        const equipmentText = `${generatorBrand.value} ${generatorSize.value} ${fuelType.value}`;
+        outputs.summaryBox.innerHTML = `
+          <div class="summary-row"><span class="summary-key">Customer</span><span class="summary-value-right">${customerName.value || 'Untitled customer'}</span></div>
+          <div class="summary-row"><span class="summary-key">Type</span><span class="summary-value-right">${mode}</span></div>
+          <div class="summary-row"><span class="summary-key">Plan</span><span class="summary-value-right">${plan || 'Unassigned'}</span></div>
+          <div class="summary-row"><span class="summary-key">Equipment</span><span class="summary-value-right">${equipmentText}</span></div>
+          <div class="summary-row"><span class="summary-key">Monitoring</span><span class="summary-value-right">${monitoring}</span></div>
+          <div class="summary-row"><span class="summary-key">Flags</span><span class="summary-value-right">${flags.length ? flags.join(', ') : 'No flags selected'}</span></div>
+        `;
+      }
+
+      function updateUI() {
+        syncPlanVisibility();
+        syncCardStates();
+        syncSummary();
+      }
+
+      function setCommercialTemplate() {
+        document.getElementById('type-commercial').checked = true;
+        customerName.value = 'Shell Station 184';
+        document.getElementById('account-id').value = 'COM-0184';
+        document.getElementById('address').value = '1980 Woodward Ave, Birmingham, MI';
+        document.getElementById('contact-name').value = 'Danielle Brooks';
+        document.getElementById('contact-role').value = 'Site Manager';
+        document.getElementById('phone').value = '(555) 555-0198';
+        document.getElementById('email').value = 'manager@shell184.com';
+        generatorBrand.value = 'Kohler';
+        generatorSize.value = '60kW';
+        fuelType.value = 'Diesel';
+        document.getElementById('transfer-switch').value = 'Yes';
+        document.getElementById('serial-number').value = 'KH-60-D-184';
+        document.getElementById('install-date').value = '2026-05-20';
+        monitoringSelect.value = 'PT Series';
+        planInputs.forEach(input => input.checked = input.value === 'Premium+');
+        flagInputs.forEach(input => {
+          input.checked = ['UST involved', 'EPA run-hour logging required', 'Monthly threshold verification required', 'Annual compliance report required'].includes(input.value);
+        });
+        document.getElementById('notes').value = 'Commercial gas station account. Position documentation bundle as core value proposition. Monitoring should be active at launch and monthly compliance summary should start immediately.';
+        updateUI();
+      }
+
+      function setResidentialTemplate() {
+        document.getElementById('type-residential').checked = true;
+        customerName.value = 'Johnson Residence';
+        document.getElementById('account-id').value = 'RES-0108';
+        document.getElementById('address').value = '411 Maple Grove Ln, Auburn Hills, MI';
+        document.getElementById('contact-name').value = 'Erin Johnson';
+        document.getElementById('contact-role').value = 'Homeowner';
+        document.getElementById('phone').value = '(555) 555-0142';
+        document.getElementById('email').value = 'erin.johnson@email.com';
+        generatorBrand.value = 'Generac';
+        generatorSize.value = '20kW';
+        fuelType.value = 'Natural Gas';
+        document.getElementById('transfer-switch').value = 'Yes';
+        document.getElementById('serial-number').value = 'GN-20-R-108';
+        document.getElementById('install-date').value = '2025-09-12';
+        monitoringSelect.value = 'PT Series';
+        planInputs.forEach(input => input.checked = input.value === 'Plus+ Monitoring');
+        flagInputs.forEach(input => {
+          input.checked = ['Customer portal access'].includes(input.value);
+        });
+        document.getElementById('notes').value = 'Residential monitoring-first account. Monthly status report and customer portal access should be enabled at go-live.';
+        updateUI();
+      }
+
+      function validateSetup() {
+        const missing = [];
+        ['customer-name', 'address', 'contact-name', 'phone', 'email', 'serial-number'].forEach(id => {
+          const el = document.getElementById(id);
+          if (!el.value.trim()) missing.push(el.previousElementSibling?.textContent || id);
+        });
+
+        if (!activePlan()) missing.push('Plan assignment');
+
+        const btn = document.getElementById('validate-btn');
+        if (missing.length) {
+          btn.textContent = `Missing ${missing.length} field${missing.length > 1 ? 's' : ''}`;
+          btn.classList.remove('btn-success');
+          btn.classList.add('btn-ghost');
+        } else {
+          btn.textContent = 'Validated';
+          btn.classList.remove('btn-ghost');
+          btn.classList.add('btn-success');
+        }
+        setTimeout(() => {
+          btn.textContent = 'Validate Setup';
+          btn.classList.remove('btn-ghost');
+          btn.classList.add('btn-success');
+        }, 1800);
+      }
+
+      function pulseSave(label) {
+        const original = label.textContent;
+        label.textContent = 'Customer Saved';
+        label.classList.remove('btn-primary');
+        label.classList.add('btn-success');
+        setTimeout(() => {
+          label.textContent = original;
+          label.classList.remove('btn-success');
+          label.classList.add('btn-primary');
+        }, 1800);
+      }
+
+      typeInputs.forEach(input => input.addEventListener('change', updateUI));
+      planInputs.forEach(input => input.addEventListener('change', updateUI));
+      flagInputs.forEach(input => input.addEventListener('change', updateUI));
+      [monitoringSelect, customerName, generatorBrand, generatorSize, fuelType].forEach(el => el.addEventListener('input', syncSummary));
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+      document.getElementById('prefill-commercial').addEventListener('click', setCommercialTemplate);
+      document.getElementById('prefill-residential').addEventListener('click', setResidentialTemplate);
+      document.getElementById('validate-btn').addEventListener('click', validateSetup);
+      document.getElementById('header-save').addEventListener('click', (e) => pulseSave(e.currentTarget));
+      document.getElementById('footer-save').addEventListener('click', (e) => pulseSave(e.currentTarget));
+      document.getElementById('cancel-btn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+      function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const footer = document.getElementById('footer-time');
+        if (footer) footer.textContent = time;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      updateUI();
+    })();
+  </script>
 </body>
 </html>

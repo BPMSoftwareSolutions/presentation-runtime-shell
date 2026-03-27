@@ -3,48 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customer Portal</title>
+  <title>Generator Customer Portal</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-    .scene{height:100%;padding:22px;display:grid;grid-template-rows:auto auto 1fr;gap:10px}
-    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
-    .title{font-size:22px;font-weight:800}
-    .status{display:flex;align-items:center;gap:8px;font-size:12px;color:#10b981}.dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 10px rgba(16,185,129,.7)}
-    .main{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
-    .h{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-    ul{list-style:none;display:grid;gap:7px}.li{font-size:12px;padding:8px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.02)}
-    .btns{display:flex;gap:8px;flex-wrap:wrap}.btn{font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(34,211,238,.3);color:#22d3ee}
+    :root{--bg:#08101d;--s:rgba(255,255,255,.035);--s2:rgba(255,255,255,.055);--b:rgba(255,255,255,.08);--t:#eef2ff;--m:#94a3b8;--g:#10b981;--a:#f59e0b;--c:#22d3ee;--font:Inter,ui-sans-serif,system-ui,sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{overflow:hidden;background:linear-gradient(180deg,#08101d,#091321);font-family:var(--font);color:var(--t)}
+    .scene{height:100%;padding:18px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}.card{background:var(--s);border:1px solid var(--b);border-radius:12px;backdrop-filter:blur(8px)}
+    .hero{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:22px;letter-spacing:-.03em}.sub{font-size:12px;color:var(--m);margin-top:2px}
+    .status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g)}.dot{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 8px rgba(16,185,129,.7)}
+    .summary{padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kv{padding:8px;border:1px solid var(--b);border-radius:8px;background:var(--s2);font-size:12px}.kv b{display:block;font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.06em}
+    .main{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}.panel{min-height:0;display:grid;grid-template-rows:auto 1fr}.ph{padding:10px 12px;border-bottom:1px solid var(--b);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--m);font-weight:700}.pb{padding:10px;overflow:auto}
+    .list{list-style:none;display:grid;gap:8px}.item{padding:9px;border:1px solid var(--b);border-radius:8px;background:var(--s2);font-size:12px;line-height:1.5}
+    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.1);color:var(--c)}
+    .foot{font-size:11px;color:var(--m);padding:0 4px}
   </style>
 </head>
 <body>
   <div class="scene">
-    <div class="card title">My Generator Status</div>
-    <div class="card status"><span class="dot"></span>Generator online · Last check-in: Today 07:42 · Plan: Plus+ Monitoring</div>
-    <div class="main">
-      <div class="card">
-        <div class="h">Recent Events</div>
-        <ul>
-          <li class="li">08/22 Battery weakness alert</li>
-          <li class="li">08/22 Alert cleared</li>
-          <li class="li">08/14 Semi-annual service completed</li>
-          <li class="li">Next planned service: 02/14/2027</li>
-        </ul>
+    <section class="card hero" data-focus-region="portal-header">
+      <div>
+        <h1>My Generator Status</h1>
+        <div class="sub">Customer: Carter Residence · Plan: Plus+ Monitoring</div>
       </div>
-      <div class="card">
-        <div class="h">Documents & Recommendations</div>
-        <ul>
-          <li class="li">Latest service report available</li>
-          <li class="li">Monthly status report available</li>
-          <li class="li">Service history available</li>
-          <li class="li">Recommendation: replace battery at next visit</li>
-        </ul>
-        <div class="btns" style="margin-top:10px">
-          <div class="btn">Download Service Report</div>
-          <div class="btn">Download Monthly Report</div>
-          <div class="btn">View Service History</div>
+      <div class="status"><span class="dot"></span>Generator online</div>
+    </section>
+
+    <section class="card summary" data-focus-region="portal-status-summary">
+      <div class="kv"><b>Last Check-in</b>Today 07:42</div>
+      <div class="kv"><b>Last Service</b>08/14/2026</div>
+      <div class="kv"><b>Next Planned Service</b>02/14/2027</div>
+      <div class="kv"><b>Current Recommendation</b><span style="color:#f59e0b">Battery replacement next visit</span></div>
+    </section>
+
+    <section class="main">
+      <article class="card panel" data-focus-region="recent-events">
+        <header class="ph">Recent Events</header>
+        <div class="pb">
+          <ul class="list">
+            <li class="item">08/22 Battery weakness alert detected</li>
+            <li class="item">08/22 Alert cleared after follow-up check</li>
+            <li class="item">08/14 Semi-annual service completed</li>
+            <li class="item">07/01 Monitoring heartbeat verified</li>
+          </ul>
         </div>
-      </div>
-    </div>
+      </article>
+
+      <article class="card panel" data-focus-region="documents-and-recommendations">
+        <header class="ph">Documents + Recommendations</header>
+        <div class="pb">
+          <ul class="list">
+            <li class="item">Latest service report is available for download</li>
+            <li class="item">Monthly status report is available for download</li>
+            <li class="item">Full service history is available in timeline view</li>
+            <li class="item">Recommendation: replace battery at next scheduled service window</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <footer class="actions" data-focus-region="portal-actions">
+      <button class="btn">Download Service Report</button>
+      <button class="btn">Download Monthly Report</button>
+      <button class="btn">View Service History</button>
+    </footer>
+    <div class="foot">Customer-facing portal is intentionally reduced in complexity versus internal operations screens.</div>
   </div>
 </body>
 </html>

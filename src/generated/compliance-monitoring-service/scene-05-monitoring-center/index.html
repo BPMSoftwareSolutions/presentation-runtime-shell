@@ -3,50 +3,110 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitoring Center</title>
+  <title>Generator Command Center — Monitoring Center</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-    .scene{height:100%;padding:22px;display:grid;grid-template-rows:auto auto 1fr;gap:10px}
-    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
-    .title{font-size:22px;font-weight:800}
-    .filters{display:flex;gap:8px;flex-wrap:wrap}.f{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.14);color:#94a3b8}
-    .f.active{color:#22d3ee;border-color:rgba(34,211,238,.35)}
-    .main{display:grid;grid-template-columns:1fr .9fr;gap:10px;min-height:0}
-    table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}th{color:#94a3b8;font-size:11px;text-transform:uppercase}
-    .alert{color:#ef4444}.online{color:#10b981}.offline{color:#94a3b8}
-    .h{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-    ul{list-style:none;display:grid;gap:7px}.li{font-size:12px;padding:8px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.02)}
+    :root {
+      --bg:#08101d; --surface:rgba(255,255,255,.035); --surface-2:rgba(255,255,255,.055); --border:rgba(255,255,255,.08);
+      --text:#eef2ff; --muted:#94a3b8; --dim:#64748b; --green:#10b981; --amber:#f59e0b; --red:#ef4444; --violet:#a78bfa; --cyan:#22d3ee;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%}
+    body{overflow:hidden;font-family:var(--font);color:var(--text);background:linear-gradient(180deg,#08101d,#091321)}
+    .scene{height:100%;padding:18px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(8px)}
+    .hero{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+    h1{font-size:22px;letter-spacing:-.03em}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .badge{font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid rgba(34,211,238,.35);color:var(--cyan)}
+    .filters{padding:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .chip{font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:var(--muted);cursor:pointer;background:var(--surface-2)}
+    .chip.active{color:var(--cyan);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.1)}
+    .main{min-height:0;display:grid;grid-template-columns:1.1fr .9fr;gap:10px}
+    .panel{min-height:0;display:grid;grid-template-rows:auto 1fr}
+    .ph{padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:flex;justify-content:space-between}
+    .pb{padding:10px;overflow:auto}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{padding:9px;border-bottom:1px solid var(--border);text-align:left} th{font-size:11px;color:var(--muted);text-transform:uppercase}
+    tbody tr{cursor:pointer} tbody tr:hover{background:var(--surface-2)} tbody tr.active{background:rgba(34,211,238,.08)}
+    .s{font-weight:700;font-size:11px;text-transform:uppercase}
+    .s.alert{color:var(--red)} .s.online{color:var(--green)} .s.offline{color:var(--dim)}
+    .stack{display:grid;gap:10px}
+    .box{padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);font-size:12px;line-height:1.5}
+    .box h3{font-size:12px;margin-bottom:6px}
+    .actions{display:flex;justify-content:flex-end;gap:8px}
+    .btn{font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text)}
+    .btn.pri{color:var(--cyan);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.1)}
   </style>
 </head>
 <body>
   <div class="scene">
-    <div class="card title">Monitoring Center</div>
-    <div class="card filters">
-      <span class="f active">All</span><span class="f">Residential</span><span class="f">Commercial</span><span class="f">Open Alerts</span><span class="f">Battery</span><span class="f">Fault</span><span class="f">Offline</span>
-    </div>
-    <div class="main">
-      <div class="card">
-        <table>
-          <thead><tr><th>Unit / Site</th><th>Status</th><th>Last Event</th><th>Action</th></tr></thead>
-          <tbody>
-            <tr><td>Carter Residence</td><td class="alert">ALERT</td><td>Battery weakness</td><td>Open</td></tr>
-            <tr><td>Shell Station 184</td><td class="alert">ALERT</td><td>Threshold missed</td><td>Open</td></tr>
-            <tr><td>BP Station 12</td><td class="online">ONLINE</td><td>Normal heartbeat</td><td>View</td></tr>
-            <tr><td>Kroger Backup Unit</td><td class="offline">OFFLINE</td><td>No signal for 14 hrs</td><td>Open</td></tr>
-          </tbody>
-        </table>
+    <section class="card hero" data-focus-region="monitoring-title">
+      <div>
+        <h1>Monitoring Center</h1>
+        <div class="sub">Live telemetry triage across residential and commercial units</div>
       </div>
-      <div class="card">
-        <div class="h">Selected Alert: Shell Station 184</div>
-        <ul>
-          <li class="li">Alert Type: Monthly exercise threshold not met</li>
-          <li class="li">Risk: Load bank test may be required at next service interval</li>
-          <li class="li">☑ Create compliance task</li>
-          <li class="li">☑ Flag customer record</li>
-          <li class="li">☑ Include note in monthly report</li>
-        </ul>
-      </div>
-    </div>
+      <div class="badge">4 open alerts</div>
+    </section>
+
+    <section class="card filters" data-focus-region="filters">
+      <button class="chip active">All</button><button class="chip">Residential</button><button class="chip">Commercial</button>
+      <button class="chip">Open Alerts</button><button class="chip">Battery</button><button class="chip">Fault</button><button class="chip">Offline</button>
+    </section>
+
+    <section class="main">
+      <article class="card panel" data-focus-region="unit-list">
+        <header class="ph"><span>Unit / Site</span><span>Action Queue</span></header>
+        <div class="pb">
+          <table>
+            <thead><tr><th>Unit / Site</th><th>Status</th><th>Last Event</th><th>Action</th></tr></thead>
+            <tbody id="rows">
+              <tr class="active" data-site="Shell Station 184" data-risk="Load bank test may be required at next service interval"><td>Shell Station 184</td><td><span class="s alert">ALERT</span></td><td>Threshold missed</td><td>Open</td></tr>
+              <tr data-site="Carter Residence" data-risk="Battery replacement should be scheduled within 30 days"><td>Carter Residence</td><td><span class="s alert">ALERT</span></td><td>Battery weakness</td><td>Open</td></tr>
+              <tr data-site="BP Station 12" data-risk="No immediate risk; monitor heartbeat consistency"><td>BP Station 12</td><td><span class="s online">ONLINE</span></td><td>Normal heartbeat</td><td>View</td></tr>
+              <tr data-site="Kroger Backup Unit" data-risk="Extended offline period may hide fault events"><td>Kroger Backup Unit</td><td><span class="s offline">OFFLINE</span></td><td>No signal for 14 hrs</td><td>Open</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card panel" data-focus-region="selected-alert-detail">
+        <header class="ph"><span id="detail-title">Selected Alert: Shell Station 184</span><span>Detail + Actions</span></header>
+        <div class="pb">
+          <div class="stack">
+            <div class="box"><h3>Alert Type</h3>Monthly exercise threshold not met (triggered 2026-08-31 07:15)</div>
+            <div class="box"><h3>Risk</h3><span id="risk-text">Load bank test may be required at next service interval</span></div>
+            <div class="box" data-focus-region="suggested-actions"><h3>Suggested Actions</h3>☑ Create compliance task<br/>☑ Flag customer record<br/>☑ Include note in monthly report<br/>☐ Schedule load bank evaluation</div>
+            <div class="box"><h3>Operator Note</h3>Attach this alert to the next service planning cycle and keep it visible in the account timeline.</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="actions" data-focus-region="resolve-actions">
+      <button class="btn">Resolve</button>
+      <button class="btn">Escalate</button>
+      <button class="btn pri">Create Work Order</button>
+    </footer>
   </div>
+
+  <script>
+    (function(){
+      const rows = Array.from(document.querySelectorAll('#rows tr'));
+      const chips = Array.from(document.querySelectorAll('.chip'));
+      const title = document.getElementById('detail-title');
+      const risk = document.getElementById('risk-text');
+
+      rows.forEach(r => r.addEventListener('click', () => {
+        rows.forEach(x => x.classList.remove('active'));
+        r.classList.add('active');
+        title.textContent = `Selected Alert: ${r.dataset.site}`;
+        risk.textContent = r.dataset.risk;
+      }));
+
+      chips.forEach(c => c.addEventListener('click', () => {
+        chips.forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+      }));
+    })();
+  </script>
 </body>
 </html>

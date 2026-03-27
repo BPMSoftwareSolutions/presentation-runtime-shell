@@ -3,41 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compliance Tracker</title>
+  <title>Generator Command Center — Compliance Tracker</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-    .scene{height:100%;padding:22px;display:grid;grid-template-rows:auto auto 1fr;gap:10px}
-    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
-    .title{font-size:22px;font-weight:800}
-    .filters{font-size:12px;color:#94a3b8}
-    table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}th{color:#94a3b8;font-size:11px;text-transform:uppercase}
-    .ok{color:#10b981}.warn{color:#f59e0b}.alert{color:#ef4444}
-    .notes{font-size:12px;color:#cbd5e1;display:grid;gap:8px}
+    :root{--bg:#08101d;--surface:rgba(255,255,255,.035);--surface2:rgba(255,255,255,.055);--b:rgba(255,255,255,.08);--t:#eef2ff;--m:#94a3b8;--d:#64748b;--g:#10b981;--a:#f59e0b;--r:#ef4444;--c:#22d3ee;--font:Inter,ui-sans-serif,system-ui,sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{overflow:hidden;background:linear-gradient(180deg,#08101d,#091321);font-family:var(--font);color:var(--t)}
+    .scene{height:100%;padding:18px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}
+    .card{background:var(--surface);border:1px solid var(--b);border-radius:12px;backdrop-filter:blur(8px)}
+    .hero{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:22px;letter-spacing:-.03em}.hero .sub{font-size:12px;color:var(--m);margin-top:2px}
+    .badge{font-size:11px;color:var(--c);border:1px solid rgba(34,211,238,.34);border-radius:999px;padding:4px 9px}
+    .filters{padding:10px;display:flex;gap:8px;flex-wrap:wrap}.f{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--b);background:var(--surface2);color:var(--m)}
+    .main{min-height:0;display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+    .panel{min-height:0;display:grid;grid-template-rows:auto 1fr}.ph{padding:10px 12px;border-bottom:1px solid var(--b);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--m);font-weight:700}
+    .pb{padding:10px;overflow:auto}
+    table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px;border-bottom:1px solid var(--b);text-align:left}th{font-size:11px;color:var(--m);text-transform:uppercase}
+    tbody tr{cursor:pointer}tbody tr:hover{background:var(--surface2)}tbody tr.active{background:rgba(34,211,238,.08)}
+    .s{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:6px}
+    .s.ok{color:var(--g);background:rgba(16,185,129,.14)} .s.warn{color:var(--a);background:rgba(245,158,11,.14)} .s.alert{color:var(--r);background:rgba(239,68,68,.14)}
+    .stack{display:grid;gap:10px}.box{padding:10px;border:1px solid var(--b);border-radius:10px;background:var(--surface2);font-size:12px;line-height:1.55}
+    .box h3{font-size:12px;margin-bottom:6px}.box ul{padding-left:14px;color:#cbd5e1}
+    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid var(--b);background:var(--surface2);color:var(--t)}.btn.pri{color:var(--c);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.1)}
   </style>
 </head>
 <body>
   <div class="scene">
-    <div class="card title">Compliance Tracker</div>
-    <div class="card filters">Site: Shell Station 184 · Status: GREEN · Period: 2026</div>
-    <div class="card" style="display:grid;grid-template-rows:1fr auto;gap:10px;min-height:0;">
-      <div style="min-height:0;overflow:auto">
-        <table>
-          <thead><tr><th>Requirement</th><th>Status</th><th>Last Updated</th><th>Next Action</th></tr></thead>
-          <tbody>
-            <tr><td>EPA run-hour logging</td><td class="ok">OK</td><td>08/31/2026</td><td>Monthly review</td></tr>
-            <tr><td>Exercise vs outage separation</td><td class="ok">OK</td><td>08/31/2026</td><td>Auto from monitoring</td></tr>
-            <tr><td>UST documentation review</td><td class="warn">WARNING</td><td>08/14/2026</td><td>Missing August upload</td></tr>
-            <tr><td>NFPA 110 monthly threshold</td><td class="alert">ALERT</td><td>08/31/2026</td><td>Evaluate load bank need</td></tr>
-            <tr><td>Annual compliance report</td><td class="ok">OK</td><td>01/12/2026</td><td>Due Jan 2027</td></tr>
-          </tbody>
-        </table>
+    <section class="card hero" data-focus-region="compliance-header">
+      <div>
+        <h1>Compliance Tracker</h1>
+        <div class="sub">Requirement-level compliance posture for commercial accounts</div>
       </div>
-      <div class="notes">
-        <div>• August threshold missed</div>
-        <div>• Review if spring PM should include triggered load bank test</div>
-        <div>• Missing UST documentation from customer manager</div>
-      </div>
-    </div>
+      <div class="badge">Status: GREEN (1 warning · 1 alert)</div>
+    </section>
+
+    <section class="card filters" data-focus-region="compliance-filters">
+      <span class="f">Site: Shell Station 184</span>
+      <span class="f">Period: 2026</span>
+      <span class="f">Scope: Full</span>
+      <span class="f">Owner: Operations</span>
+    </section>
+
+    <section class="main">
+      <article class="card panel" data-focus-region="requirements-table">
+        <header class="ph">Requirements</header>
+        <div class="pb">
+          <table>
+            <thead><tr><th>Requirement</th><th>Status</th><th>Last Updated</th><th>Next Action</th><th>Owner</th></tr></thead>
+            <tbody id="req-rows">
+              <tr><td>EPA run-hour logging</td><td><span class="s ok">OK</span></td><td>08/31/2026</td><td>Monthly review</td><td>Automation</td></tr>
+              <tr><td>Exercise vs outage separation</td><td><span class="s ok">OK</span></td><td>08/31/2026</td><td>Auto from monitoring</td><td>PT Series</td></tr>
+              <tr class="active"><td>UST documentation review</td><td><span class="s warn">Warning</span></td><td>08/14/2026</td><td>Missing August upload</td><td>Site Manager</td></tr>
+              <tr><td>NFPA 110 monthly threshold</td><td><span class="s alert">Alert</span></td><td>08/31/2026</td><td>Evaluate load bank need</td><td>Thomas</td></tr>
+              <tr><td>Annual compliance report</td><td><span class="s ok">OK</span></td><td>01/12/2026</td><td>Due Jan 2027</td><td>Reporting</td></tr>
+              <tr><td>CEDRI filing</td><td><span class="s ok">OK</span></td><td>01/12/2026</td><td>None</td><td>Compliance</td></tr>
+              <tr><td>Records retention</td><td><span class="s ok">OK</span></td><td>08/31/2026</td><td>Maintain 3-year history</td><td>Platform</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card panel" data-focus-region="notes-and-evidence">
+        <header class="ph">Notes / Evidence</header>
+        <div class="pb">
+          <div class="stack">
+            <div class="box"><h3>Current Notes</h3><ul><li>August threshold missed</li><li>Review if spring PM should include triggered load bank test</li><li>Missing UST documentation from customer manager</li></ul></div>
+            <div class="box"><h3>Evidence Index</h3>Run-hour logs, PM reports, monitoring exports, and annual packet artifacts are linked and retained.</div>
+            <div class="box"><h3>Export Readiness</h3>Packet can be exported now with one open warning attached as exception note.</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="actions" data-focus-region="export-actions">
+      <button class="btn">Add Note</button>
+      <button class="btn">Open Packet Preview</button>
+      <button class="btn pri">Export Compliance Packet</button>
+    </footer>
   </div>
+
+  <script>
+    (function(){
+      const rows = Array.from(document.querySelectorAll('#req-rows tr'));
+      rows.forEach(r => r.addEventListener('click', () => {
+        rows.forEach(x => x.classList.remove('active'));
+        r.classList.add('active');
+      }));
+    })();
+  </script>
 </body>
 </html>
