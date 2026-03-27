@@ -36,6 +36,8 @@ src/generated/my-deck/
 ...
 ```
 
+This repo's required scaffold convention is **one folder per scene with `index.html` inside**. Do not place scene files directly under `src/generated/<deck-name>/`.
+
 Each scene is a **self-contained HTML file** — inline CSS, inline JS, no external dependencies. See [`scene-authoring.md`](scene-authoring.md) for the full scene HTML pattern.
 
 Minimal scene template:

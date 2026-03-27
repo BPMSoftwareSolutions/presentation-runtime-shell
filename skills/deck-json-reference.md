@@ -138,7 +138,7 @@ Complete reference for the presentation contract JSON format. Files live in `src
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `route` | string | `""` | Path to the scene HTML file. Relative to `index.html`. |
+| `route` | string | `""` | Path to the scene HTML file. Relative to `index.html`. In this repo, use folder-per-scene routes like `./src/generated/<deck-id>/scene-01-title/index.html`. |
 | `waitForReady` | boolean | `false` | If `true`, the runtime waits for the iframe to post `{ type: "iframe:ready" }` before starting narration. Use when the scene has a heavy initialisation step. |
 | `reloadOnEnter` | boolean | `false` | If `true`, the iframe is force-reloaded each time the scene is entered. Useful for scenes with non-resettable animations. |
 

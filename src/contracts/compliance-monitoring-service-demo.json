@@ -1,0 +1,199 @@
+{
+  "id": "compliance-monitoring-service-demo",
+  "title": "Compliance Monitoring Service Demo",
+  "status": "ready",
+  "theme": {
+    "shell": "dark",
+    "accent": "violet",
+    "presenterPosition": "left"
+  },
+  "settings": {
+    "typingSpeedMs": 21,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1800,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "cms-01",
+      "title": "Operations Dashboard",
+      "type": "narrative",
+      "editIntent": "Open on the daily command center that combines schedule, monitoring alerts, reporting deadlines, and compliance tasks.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "This is the morning command center.", "pauseMs": 600 },
+          { "text": " Visits, alerts, and compliance pressure are visible in one place.", "pauseMs": 600 },
+          { "text": " It creates fast operational awareness.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-01-operations-dashboard/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-02",
+      "title": "Customer Profile",
+      "type": "framework",
+      "editIntent": "Show a single customer record that unifies service history, monitoring status, compliance posture, reports, and files.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Each customer has one operational source of truth.", "pauseMs": 600 },
+          { "text": " Service and monitoring context live together.", "pauseMs": 550 },
+          { "text": " Compliance and reporting are attached to the same record.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-02-customer-profile/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-03",
+      "title": "New Customer Setup",
+      "type": "narrative",
+      "editIntent": "Capture onboarding flow for residential and commercial customers with equipment, plan assignment, and compliance flags.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Onboarding captures customer, equipment, and plan data quickly.", "pauseMs": 600 },
+          { "text": " Residential and commercial paths are both supported.", "pauseMs": 550 },
+          { "text": " Compliance flags are set up at creation time.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-03-customer-onboarding/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-04",
+      "title": "Service Visit Report",
+      "type": "framework",
+      "editIntent": "Demonstrate structured visit entry so one technician workflow powers reports, compliance evidence, and historical records.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "This is the highest-value operator screen.", "pauseMs": 600 },
+          { "text": " Structured service data replaces ad hoc report writing.", "pauseMs": 600 },
+          { "text": " Every visit contributes directly to compliance outputs.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-04-service-report/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-05",
+      "title": "Monitoring Center",
+      "type": "narrative",
+      "editIntent": "Present telemetry alert triage with risk context and action paths that feed service, reporting, and compliance workflows.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Monitoring events become actionable operations.", "pauseMs": 600 },
+          { "text": " Alerts are filtered, assessed, and escalated from one workspace.", "pauseMs": 550 },
+          { "text": " Follow-up actions are explicitly tracked.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-05-monitoring-center/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-06",
+      "title": "Compliance Tracker",
+      "type": "framework",
+      "editIntent": "Show requirement-level compliance tracking for EPA, UST, threshold checks, filings, and records retention.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Compliance is displayed as explicit requirements.", "pauseMs": 550 },
+          { "text": " Warnings and alerts become concrete work items.", "pauseMs": 550 },
+          { "text": " Evidence and export are inspection-ready.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-06-compliance-tracker/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-07",
+      "title": "Load Bank Decision Engine",
+      "type": "chart",
+      "editIntent": "Visualize threshold-based load bank logic so testing is triggered by operational evidence rather than blanket scheduling.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Load bank actions are rule-driven.", "pauseMs": 550 },
+          { "text": " Monthly threshold misses trigger a defensible recommendation.", "pauseMs": 600 },
+          { "text": " The decision is logged into downstream reporting.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-07-load-bank-decision/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-08",
+      "title": "Monthly Report Generator",
+      "type": "narrative",
+      "editIntent": "Demonstrate monthly customer report assembly using selected sections and generated summary output.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Monthly reporting is generated from structured operations data.", "pauseMs": 600 },
+          { "text": " Teams choose included sections per customer context.", "pauseMs": 550 },
+          { "text": " Output can be generated, sent, and archived immediately.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-08-monthly-report-generator/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-09",
+      "title": "Annual Compliance Report Builder",
+      "type": "framework",
+      "editIntent": "Show annual commercial compliance packet generation with source-data checks, section assembly, and warning visibility.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Annual compliance reporting consolidates service and telemetry evidence.", "pauseMs": 600 },
+          { "text": " Data source completeness is transparent before export.", "pauseMs": 550 },
+          { "text": " Warnings are surfaced without blocking delivery.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-09-annual-compliance-report/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "cms-10",
+      "title": "Customer Portal",
+      "type": "closing",
+      "editIntent": "Close on the customer-facing view with status transparency, recent events, and downloadable reports.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "The customer sees clear readiness, not backend complexity.", "pauseMs": 600 },
+          { "text": " Status, events, and documents are always accessible.", "pauseMs": 550 },
+          { "text": " Transparency reinforces long-term retention.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/compliance-monitoring-service/scene-10-customer-portal/index.html"
+      },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

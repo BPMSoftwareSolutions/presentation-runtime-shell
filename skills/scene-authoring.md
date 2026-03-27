@@ -2,6 +2,8 @@
 
 A scene is a self-contained HTML file. It lives inside an iframe and is responsible for its own visual content. The shell handles narration, navigation, and timing — the scene just needs to look great.
 
+Location convention in this repo: place each scene at `src/generated/<deck-id>/<scene-folder>/index.html` (one folder per scene), not as flat HTML files under the deck root.
+
 ---
 
 ## The Golden Rules

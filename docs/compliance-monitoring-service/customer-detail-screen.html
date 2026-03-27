@@ -1,0 +1,1383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator Command Center — Customer Detail</title>
+  <style>
+    :root {
+      --bg: #08101d;
+      --bg-elev: rgba(255,255,255,0.035);
+      --bg-elev-2: rgba(255,255,255,0.055);
+      --bg-elev-3: rgba(255,255,255,0.08);
+      --bg-card: rgba(12,22,42,0.82);
+      --text: #eef2ff;
+      --text-soft: #c7d2fe;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --green: #10b981;
+      --green-bg: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.12);
+      --violet: #a78bfa;
+      --violet-bg: rgba(167,139,250,0.12);
+      --indigo: #818cf8;
+      --cyan: #22d3ee;
+      --cyan-bg: rgba(34,211,238,0.10);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
+      --shadow-glow-green: 0 0 20px rgba(16,185,129,0.18);
+      --shadow-glow-amber: 0 0 20px rgba(245,158,11,0.18);
+      --shadow-glow-red:   0 0 20px rgba(239,68,68,0.18);
+      --sidebar-w: 64px;
+      --header-h: 60px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 80% 60% at 80% -10%, rgba(34,211,238,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(167,139,250,0.10) 0%, transparent 55%),
+        linear-gradient(180deg, #08101d 0%, #091321 100%);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .shell {
+      display: flex;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0 20px;
+      gap: 6px;
+      background: rgba(5,12,24,0.72);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .sidebar-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 24px rgba(34,211,238,0.25);
+    }
+
+    .nav-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      color: var(--text-dim);
+      font-size: 17px;
+      position: relative;
+      border: none;
+      background: transparent;
+    }
+    .nav-item:hover { background: var(--bg-elev-2); color: var(--text-soft); }
+    .nav-item.active {
+      background: rgba(34,211,238,0.12);
+      color: var(--cyan);
+      box-shadow: 0 0 16px rgba(34,211,238,0.15);
+    }
+    .nav-item .nav-badge {
+      position: absolute;
+      top: 5px; right: 5px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      border: 2px solid var(--bg);
+    }
+    .nav-tooltip {
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(10,20,40,0.95);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100;
+    }
+    .nav-item:hover .nav-tooltip { opacity: 1; }
+    .sidebar-spacer { flex: 1; }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .crumb {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .crumb.current {
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .crumb-sep { color: var(--text-dim); }
+
+    .topbar-search {
+      margin-left: auto;
+      flex: 1;
+      max-width: 320px;
+      position: relative;
+    }
+    .topbar-search input {
+      width: 100%;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 7px 12px 7px 34px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .topbar-search input::placeholder { color: var(--text-dim); }
+    .topbar-search input:focus {
+      border-color: rgba(34,211,238,0.35);
+      background: var(--bg-elev-3);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn-ghost {
+      background: var(--bg-elev-2);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg-elev-3); color: var(--text); }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(34,211,238,0.9), rgba(129,140,248,0.9));
+      color: #060f1e;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(34,211,238,0.22);
+    }
+    .btn-primary:hover { box-shadow: 0 0 26px rgba(34,211,238,0.35); transform: translateY(-1px); }
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.20);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.18); }
+    .btn-xs {
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text-muted);
+      transition: all 0.12s;
+    }
+    .btn-xs:hover { background: var(--bg-elev-3); color: var(--text-soft); border-color: var(--border-strong); }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .page {
+      flex: 1;
+      overflow: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .page::-webkit-scrollbar { width: 6px; }
+    .page::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.5fr auto;
+      gap: 18px;
+      align-items: center;
+    }
+    .hero-main {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .hero-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+    .hero-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pill-green  { background: var(--green-bg);  color: var(--green);  border-color: rgba(16,185,129,0.18); }
+    .pill-amber  { background: var(--amber-bg);  color: var(--amber);  border-color: rgba(245,158,11,0.18); }
+    .pill-red    { background: var(--red-bg);    color: var(--red);    border-color: rgba(239,68,68,0.18); }
+    .pill-violet { background: var(--violet-bg); color: var(--violet); border-color: rgba(167,139,250,0.18); }
+    .pill-cyan   { background: var(--cyan-bg);   color: var(--cyan);   border-color: rgba(34,211,238,0.18); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 104px;
+      position: relative;
+      overflow: hidden;
+    }
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .summary-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+    .summary-value {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+    }
+    .summary-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+      gap: 14px;
+      min-height: 0;
+    }
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .card-body {
+      padding: 16px 18px;
+      min-width: 0;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 18px;
+    }
+
+    .kv-list {
+      display: grid;
+      grid-template-columns: minmax(130px, 150px) 1fr;
+      row-gap: 10px;
+      column-gap: 14px;
+      align-items: center;
+    }
+    .kv-label {
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .kv-value {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 0;
+    }
+    .kv-inline {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-green { background: var(--green-bg); color: var(--green); border-color: rgba(16,185,129,0.2); }
+    .status-amber { background: var(--amber-bg); color: var(--amber); border-color: rgba(245,158,11,0.2); }
+    .status-red { background: var(--red-bg); color: var(--red); border-color: rgba(239,68,68,0.2); }
+    .status-cyan { background: var(--cyan-bg); color: var(--cyan); border-color: rgba(34,211,238,0.2); }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .site-contact {
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      gap: 12px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    .site-contact-avatar {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(34,211,238,0.22), rgba(129,140,248,0.22));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--cyan);
+      border: 1px solid rgba(34,211,238,0.18);
+    }
+    .contact-name { font-size: 15px; font-weight: 700; }
+    .contact-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .contact-actions { display: flex; gap: 8px; }
+
+    .tabbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text-muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab:hover { background: var(--bg-elev-3); color: var(--text-soft); }
+    .tab.active {
+      background: rgba(34,211,238,0.10);
+      border-color: rgba(34,211,238,0.20);
+      color: var(--cyan);
+      box-shadow: 0 0 0 1px rgba(34,211,238,0.08) inset;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .timeline {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      padding-left: 4px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: linear-gradient(180deg, rgba(34,211,238,0.25), rgba(129,140,248,0.08));
+    }
+    .timeline-item {
+      position: relative;
+      padding-left: 28px;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: 0;
+      top: 3px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #0c162a;
+      border: 3px solid var(--cyan);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.10);
+    }
+    .timeline-title { font-size: 13px; font-weight: 700; }
+    .timeline-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .timeline-body { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(8,16,29,0.22);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    thead th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      font-weight: 700;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-soft);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    .signal {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-soft);
+    }
+    .signal-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+    .signal-bars span {
+      display: block;
+      width: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+    }
+    .signal-bars span:nth-child(1) { height: 4px; }
+    .signal-bars span:nth-child(2) { height: 7px; }
+    .signal-bars span:nth-child(3) { height: 10px; }
+    .signal-bars span:nth-child(4) { height: 12px; }
+    .signal.good span { background: var(--green); }
+    .signal.fair span:nth-child(-n+3) { background: var(--amber); }
+    .signal.fair span:nth-child(4) { background: rgba(255,255,255,0.18); }
+
+    .stat-stack {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .mini-stat {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      min-height: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mini-stat-label {
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .mini-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+    .mini-stat-sub {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: auto;
+    }
+
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .check-item {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 13px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+    }
+    .check-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .check-icon.ok { color: var(--green); background: var(--green-bg); }
+    .check-icon.warn { color: var(--amber); background: var(--amber-bg); }
+    .check-icon.alert { color: var(--red); background: var(--red-bg); }
+    .check-title { font-size: 12px; font-weight: 700; }
+    .check-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .document-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .doc-item {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+    }
+    .doc-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(129,140,248,0.12);
+      color: var(--indigo);
+      font-size: 18px;
+      border: 1px solid rgba(129,140,248,0.18);
+    }
+    .doc-name { font-size: 12px; font-weight: 700; }
+    .doc-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .notes-box {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      color: var(--text-soft);
+      font-size: 12px;
+    }
+    .notes-box strong { color: var(--text); }
+    .notes-box p + p { margin-top: 8px; }
+
+    .footer {
+      height: 36px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+    .footer-spacer { flex: 1; }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(16,185,129,0.7);
+    }
+    .divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border-strong);
+    }
+
+    @media (max-width: 1360px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .shell { min-height: 100vh; height: auto; }
+      .sidebar { display: none; }
+      .topbar { flex-wrap: wrap; height: auto; padding: 14px 18px; }
+      .topbar-search { order: 3; max-width: none; width: 100%; margin-left: 0; }
+      .page { padding: 18px; }
+      .summary-grid,
+      .profile-grid,
+      .stat-stack { grid-template-columns: 1fr; }
+      .site-contact { grid-template-columns: 52px 1fr; }
+      .contact-actions { grid-column: 1 / -1; }
+      .footer { padding: 0 18px; flex-wrap: wrap; height: auto; min-height: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-logo">⚡</div>
+      <button class="nav-item" title="Dashboard">🏠<span class="nav-tooltip">Dashboard</span></button>
+      <button class="nav-item active" title="Customers">👥<span class="nav-tooltip">Customers</span></button>
+      <button class="nav-item" title="Schedule">📅<span class="nav-tooltip">Schedule</span></button>
+      <button class="nav-item" title="Monitoring">📡<span class="nav-badge"></span><span class="nav-tooltip">Monitoring</span></button>
+      <button class="nav-item" title="Compliance">🛡️<span class="nav-badge"></span><span class="nav-tooltip">Compliance</span></button>
+      <button class="nav-item" title="Reports">📊<span class="nav-tooltip">Reports</span></button>
+      <button class="nav-item" title="Equipment">🔧<span class="nav-tooltip">Equipment</span></button>
+      <div class="sidebar-spacer"></div>
+      <button class="nav-item" title="Settings">⚙️<span class="nav-tooltip">Settings</span></button>
+    </nav>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="crumbs" aria-label="Breadcrumb">
+          <span class="crumb">Customers</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb">Commercial</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">Shell Station 184</span>
+        </div>
+
+        <div class="topbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="search" placeholder="Search visits, reports, alerts…" aria-label="Search within customer" />
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-ghost">← Back</button>
+          <button class="btn btn-ghost">Edit</button>
+          <button class="btn btn-primary">＋ New Job</button>
+          <div class="avatar" title="Thomas B.">TB</div>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-main">
+            <div class="hero-title-row">
+              <h1 class="hero-title">Shell Station 184</h1>
+              <span class="pill pill-green"><span class="dot"></span>Active Account</span>
+              <span class="pill pill-violet">Premium+ Plan</span>
+              <span class="pill pill-cyan">Commercial</span>
+            </div>
+            <div class="hero-sub">1980 Woodward Ave, Birmingham, MI · Site since May 20, 2026 · Internal account ID: COM-0184</div>
+            <div class="pill-row">
+              <span class="pill pill-green"><span class="dot"></span>Compliance Green</span>
+              <span class="pill pill-amber">1 Open Exception</span>
+              <span class="pill pill-cyan">PT Series Online</span>
+              <span class="pill pill-red">Threshold Miss in August</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-ghost">Email Customer</button>
+            <button class="btn btn-ghost">Create Report</button>
+            <button class="btn btn-danger">Escalate</button>
+          </div>
+        </section>
+
+        <section class="summary-grid" aria-label="Customer summary metrics">
+          <article class="summary-card">
+            <div class="summary-label">Last PM Visit</div>
+            <div class="summary-value" style="color: var(--cyan);">Aug 14</div>
+            <div class="summary-meta">Semi-annual PM completed by Thomas</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Next Planned Visit</div>
+            <div class="summary-value" style="color: var(--indigo);">Feb 14</div>
+            <div class="summary-meta">Spring PM window · load bank review flagged</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Last Load Bank</div>
+            <div class="summary-value" style="color: var(--amber);">Mar 18</div>
+            <div class="summary-meta">Last triggered run met documentation standards</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Last Report Sent</div>
+            <div class="summary-value" style="color: var(--green);">Aug 31</div>
+            <div class="summary-meta">Monthly threshold verification issued</div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="left-col">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">🏢 Account Overview</div>
+                <div class="card-actions">
+                  <button class="btn-xs">Edit Profile</button>
+                  <button class="btn-xs">Open Files</button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="profile-grid">
+                  <div>
+                    <div class="site-contact">
+                      <div class="site-contact-avatar">👤</div>
+                      <div>
+                        <div class="contact-name">Danielle Brooks</div>
+                        <div class="contact-meta">Site Manager · Primary operational contact</div>
+                        <div class="contact-meta">(555) 555-0198 · manager@shell184.com</div>
+                      </div>
+                      <div class="contact-actions">
+                        <button class="btn-xs">Call</button>
+                        <button class="btn-xs">Email</button>
+                      </div>
+                    </div>
+
+                    <div class="kv-list">
+                      <div class="kv-label">Account Type</div>
+                      <div class="kv-value">Commercial Gas Station</div>
+
+                      <div class="kv-label">Plan</div>
+                      <div class="kv-value">Premium+ Monitoring &amp; Compliance Bundle</div>
+
+                      <div class="kv-label">Billing Cycle</div>
+                      <div class="kv-value">Annual service contract · Net 30 invoicing</div>
+
+                      <div class="kv-label">Region</div>
+                      <div class="kv-value">Southeast Michigan</div>
+
+                      <div class="kv-label">UST Related</div>
+                      <div class="kv-value"><span class="status-chip status-amber"><span class="status-dot"></span>Yes</span></div>
+
+                      <div class="kv-label">Monitoring Unit</div>
+                      <div class="kv-value kv-inline">
+                        <span>PT Series Cellular</span>
+                        <span class="status-chip status-cyan"><span class="status-dot"></span>Online</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="kv-list">
+                      <div class="kv-label">Generator</div>
+                      <div class="kv-value">Kohler 60kW Diesel</div>
+
+                      <div class="kv-label">Serial Number</div>
+                      <div class="kv-value">KH-60-D-184</div>
+
+                      <div class="kv-label">Fuel Type</div>
+                      <div class="kv-value">Diesel</div>
+
+                      <div class="kv-label">Transfer Switch</div>
+                      <div class="kv-value">Yes · ATS verified during Aug 14 service</div>
+
+                      <div class="kv-label">Install Date</div>
+                      <div class="kv-value">May 20, 2026</div>
+
+                      <div class="kv-label">Compliance Status</div>
+                      <div class="kv-value"><span class="status-chip status-green"><span class="status-dot"></span>Green</span></div>
+
+                      <div class="kv-label">Open Risk</div>
+                      <div class="kv-value"><span class="status-chip status-red"><span class="status-dot"></span>Threshold Miss</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📑 Customer Workspace</div>
+                <div class="card-actions">
+                  <div class="tabbar" role="tablist" aria-label="Customer detail tabs">
+                    <button class="tab active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+                    <button class="tab" data-tab="visits" role="tab" aria-selected="false">Visits</button>
+                    <button class="tab" data-tab="monitoring" role="tab" aria-selected="false">Monitoring</button>
+                    <button class="tab" data-tab="compliance" role="tab" aria-selected="false">Compliance</button>
+                    <button class="tab" data-tab="reports" role="tab" aria-selected="false">Reports</button>
+                    <button class="tab" data-tab="files" role="tab" aria-selected="false">Files</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <section class="tab-panel active" id="panel-overview" role="tabpanel">
+                  <ul class="timeline">
+                    <li class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div class="timeline-title">Monthly threshold verification completed</div>
+                      <div class="timeline-meta">Aug 31, 2026 · Compliance automation</div>
+                      <div class="timeline-body">Exercise runtime and outage separation were recorded successfully. August threshold miss was logged and load bank review was attached to the next service planning cycle.</div>
+                    </li>
+                    <li class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div class="timeline-title">Semi-annual PM service completed</div>
+                      <div class="timeline-meta">Aug 14, 2026 · Technician: Thomas</div>
+                      <div class="timeline-body">PM checklist closed out, ATS test passed, ATP microbial fuel test recorded, and all structured service data was stored for monthly and annual reporting.</div>
+                    </li>
+                    <li class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div class="timeline-title">Battery warning cleared from monitoring center</div>
+                      <div class="timeline-meta">Jul 01, 2026 · PT Series event</div>
+                      <div class="timeline-body">Low-voltage battery signal was reviewed and resolved after follow-up check. Customer record was updated and no additional escalation remained open.</div>
+                    </li>
+                    <li class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div class="timeline-title">Commercial account onboarded</div>
+                      <div class="timeline-meta">May 20, 2026 · New customer setup</div>
+                      <div class="timeline-body">Generator, monitoring unit, UST flags, EPA logging requirements, and annual compliance deliverables were captured during onboarding.</div>
+                    </li>
+                  </ul>
+                </section>
+
+                <section class="tab-panel" id="panel-visits" role="tabpanel">
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Visit Type</th>
+                          <th>Technician</th>
+                          <th>Status</th>
+                          <th>Notes</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>2026-08-14</td>
+                          <td>Semi-Annual PM</td>
+                          <td>Thomas</td>
+                          <td><span class="status-chip status-green">PASS</span></td>
+                          <td>ATS tested, fuel inspection logged, ATP test captured.</td>
+                          <td><button class="btn-xs">Open Report</button></td>
+                        </tr>
+                        <tr>
+                          <td>2026-03-18</td>
+                          <td>Triggered Load Bank</td>
+                          <td>Thomas</td>
+                          <td><span class="status-chip status-green">COMPLETE</span></td>
+                          <td>Threshold logic satisfied; evidence stored in annual packet.</td>
+                          <td><button class="btn-xs">View Test</button></td>
+                        </tr>
+                        <tr>
+                          <td>2025-11-10</td>
+                          <td>Quarterly Inspection</td>
+                          <td>Field Team</td>
+                          <td><span class="status-chip status-green">PASS</span></td>
+                          <td>Routine operational review. No issues found.</td>
+                          <td><button class="btn-xs">Open</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section class="tab-panel" id="panel-monitoring" role="tabpanel">
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Signal</th>
+                          <th>Last Heartbeat</th>
+                          <th>Last Exercise</th>
+                          <th>Runtime This Month</th>
+                          <th>Latest Event</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><span class="signal good"><span class="signal-bars"><span></span><span></span><span></span><span></span></span> Strong</span></td>
+                          <td>Today 07:42</td>
+                          <td>Aug 29, 2026</td>
+                          <td>42 hrs</td>
+                          <td>Threshold missed during monthly verification</td>
+                          <td><button class="btn-xs">Open Alert</button></td>
+                        </tr>
+                        <tr>
+                          <td><span class="signal fair"><span class="signal-bars"><span></span><span></span><span></span><span></span></span> Fair</span></td>
+                          <td>Yesterday 18:10</td>
+                          <td>Jul 31, 2026</td>
+                          <td>36 hrs</td>
+                          <td>Battery weakness warning resolved</td>
+                          <td><button class="btn-xs">Event Log</button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section class="tab-panel" id="panel-compliance" role="tabpanel">
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Requirement</th>
+                          <th>Status</th>
+                          <th>Last Updated</th>
+                          <th>Next Action</th>
+                          <th>Owner</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>EPA run-hour logging</td>
+                          <td><span class="status-chip status-green">OK</span></td>
+                          <td>Aug 31, 2026</td>
+                          <td>Monthly review</td>
+                          <td>Automation</td>
+                        </tr>
+                        <tr>
+                          <td>Exercise vs outage separation</td>
+                          <td><span class="status-chip status-green">OK</span></td>
+                          <td>Aug 31, 2026</td>
+                          <td>Auto from monitoring</td>
+                          <td>PT Series</td>
+                        </tr>
+                        <tr>
+                          <td>UST documentation review</td>
+                          <td><span class="status-chip status-amber">WARNING</span></td>
+                          <td>Aug 14, 2026</td>
+                          <td>Missing August upload</td>
+                          <td>Site Manager</td>
+                        </tr>
+                        <tr>
+                          <td>NFPA 110 monthly threshold</td>
+                          <td><span class="status-chip status-red">ALERT</span></td>
+                          <td>Aug 31, 2026</td>
+                          <td>Evaluate load bank need</td>
+                          <td>Thomas</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section class="tab-panel" id="panel-reports" role="tabpanel">
+                  <ul class="document-list">
+                    <li class="doc-item">
+                      <div class="doc-icon">📄</div>
+                      <div>
+                        <div class="doc-name">Monthly Generator Report — August 2026</div>
+                        <div class="doc-meta">Total runtime: 42 hrs · Compliance summary included · Sent Aug 31</div>
+                      </div>
+                      <button class="btn-xs">Download</button>
+                    </li>
+                    <li class="doc-item">
+                      <div class="doc-icon">📄</div>
+                      <div>
+                        <div class="doc-name">Semi-Annual PM Service Report</div>
+                        <div class="doc-meta">Visit date Aug 14, 2026 · Technician notes and checklist attached</div>
+                      </div>
+                      <button class="btn-xs">Open</button>
+                    </li>
+                    <li class="doc-item">
+                      <div class="doc-icon">📘</div>
+                      <div>
+                        <div class="doc-name">Annual Compliance Packet — 2026 Draft</div>
+                        <div class="doc-meta">Open warning: August UST document missing</div>
+                      </div>
+                      <button class="btn-xs">Preview</button>
+                    </li>
+                  </ul>
+                </section>
+
+                <section class="tab-panel" id="panel-files" role="tabpanel">
+                  <ul class="document-list">
+                    <li class="doc-item">
+                      <div class="doc-icon">🖼️</div>
+                      <div>
+                        <div class="doc-name">Generator serial plate photo</div>
+                        <div class="doc-meta">Uploaded during onboarding · 1.8 MB</div>
+                      </div>
+                      <button class="btn-xs">View</button>
+                    </li>
+                    <li class="doc-item">
+                      <div class="doc-icon">🧪</div>
+                      <div>
+                        <div class="doc-name">ATP microbial fuel test result</div>
+                        <div class="doc-meta">Captured Aug 14, 2026 · Linked to service report</div>
+                      </div>
+                      <button class="btn-xs">Open</button>
+                    </li>
+                    <li class="doc-item">
+                      <div class="doc-icon">📂</div>
+                      <div>
+                        <div class="doc-name">UST support documentation folder</div>
+                        <div class="doc-meta">1 missing upload flagged for follow-up</div>
+                      </div>
+                      <button class="btn-xs">Browse</button>
+                    </li>
+                  </ul>
+                </section>
+              </div>
+            </article>
+          </div>
+
+          <aside class="right-col">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📊 Service Summary</div>
+                <div class="card-actions"><button class="btn-xs">History →</button></div>
+              </div>
+              <div class="card-body">
+                <div class="stat-stack">
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Visits This Year</div>
+                    <div class="mini-stat-value" style="color: var(--cyan);">6</div>
+                    <div class="mini-stat-sub">4 preventive · 2 issue-driven</div>
+                  </div>
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Open Work Orders</div>
+                    <div class="mini-stat-value" style="color: var(--amber);">1</div>
+                    <div class="mini-stat-sub">Load bank review planning</div>
+                  </div>
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Reports Sent</div>
+                    <div class="mini-stat-value" style="color: var(--green);">9</div>
+                    <div class="mini-stat-sub">Monthly and annual included</div>
+                  </div>
+                  <div class="mini-stat">
+                    <div class="mini-stat-label">Compliance Exceptions</div>
+                    <div class="mini-stat-value" style="color: var(--red);">1</div>
+                    <div class="mini-stat-sub">UST upload missing for August</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">✅ Compliance Checklist</div>
+                <div class="card-actions"><button class="btn-xs">Export Packet</button></div>
+              </div>
+              <div class="card-body">
+                <ul class="checklist">
+                  <li class="check-item">
+                    <div class="check-icon ok">✓</div>
+                    <div>
+                      <div class="check-title">EPA run-hour logs current</div>
+                      <div class="check-sub">Auto-synced through Aug 31, 2026</div>
+                    </div>
+                    <span class="status-chip status-green">Current</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon ok">✓</div>
+                    <div>
+                      <div class="check-title">Exercise / outage classification ready</div>
+                      <div class="check-sub">Monitoring source mapped correctly</div>
+                    </div>
+                    <span class="status-chip status-green">Ready</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon warn">!</div>
+                    <div>
+                      <div class="check-title">UST documentation incomplete</div>
+                      <div class="check-sub">Customer manager needs August upload</div>
+                    </div>
+                    <span class="status-chip status-amber">Pending</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon alert">!</div>
+                    <div>
+                      <div class="check-title">Load bank decision review required</div>
+                      <div class="check-sub">Triggered by missed monthly threshold</div>
+                    </div>
+                    <span class="status-chip status-red">Open</span>
+                  </li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📝 Internal Notes</div>
+                <div class="card-actions"><button class="btn-xs">Add Note</button></div>
+              </div>
+              <div class="card-body">
+                <div class="notes-box">
+                  <p><strong>Recommendation:</strong> keep next spring PM as the preferred window for load bank work unless the customer has a documented outage event earlier.</p>
+                  <p><strong>Customer posture:</strong> responsive, values bundled documentation, prefers emailed reports plus an annual packet.</p>
+                  <p><strong>Renewal cue:</strong> position the contract around “always documented, always audit-ready” rather than just maintenance coverage.</p>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📎 Recent Documents</div>
+                <div class="card-actions"><button class="btn-xs">All Files →</button></div>
+              </div>
+              <div class="card-body">
+                <ul class="document-list">
+                  <li class="doc-item">
+                    <div class="doc-icon">📄</div>
+                    <div>
+                      <div class="doc-name">Threshold Verification Summary</div>
+                      <div class="doc-meta">Generated Aug 31 · Sent to site contact</div>
+                    </div>
+                    <button class="btn-xs">Open</button>
+                  </li>
+                  <li class="doc-item">
+                    <div class="doc-icon">📋</div>
+                    <div>
+                      <div class="doc-name">Service Visit Checklist</div>
+                      <div class="doc-meta">Semi-annual PM structured record</div>
+                    </div>
+                    <button class="btn-xs">View</button>
+                  </li>
+                </ul>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="live-dot"></div>
+        <span>Live monitoring link active</span>
+        <div class="divider"></div>
+        <span id="footer-time">08:42:17 AM</span>
+        <div class="footer-spacer"></div>
+        <span>Customer Detail Screen · MVP Monolith</span>
+        <div class="divider"></div>
+        <span>Generator Command Center</span>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const tabs = Array.from(document.querySelectorAll('.tab'));
+      const panels = Array.from(document.querySelectorAll('.tab-panel'));
+
+      function activateTab(tabName) {
+        tabs.forEach((tab) => {
+          const active = tab.dataset.tab === tabName;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panels.forEach((panel) => {
+          panel.classList.toggle('active', panel.id === `panel-${tabName}`);
+        });
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => activateTab(tab.dataset.tab));
+      });
+
+      const sideButtons = document.querySelectorAll('.nav-item');
+      sideButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          sideButtons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+      function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const footer = document.getElementById('footer-time');
+        if (footer) footer.textContent = time;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+    })();
+  </script>
+</body>
+</html>

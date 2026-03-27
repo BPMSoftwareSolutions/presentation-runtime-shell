@@ -73,8 +73,42 @@ async function seedDeck(store, path) {
     if (!store.getById(deck.id)) {
       store.create(deck);
     } else {
-      // Sync editIntent from contract into existing scenes where it's missing
+      // Sync contract scene metadata into existing decks when IDs align so
+      // route refactors do not leave stale localStorage pointers.
       const existing = store.getById(deck.id);
+      const existingIds = (existing.scenes || []).map((s) => s.id);
+      const contractIds = (deck.scenes || []).map((s) => s.id);
+      const sameSceneShape =
+        existingIds.length === contractIds.length &&
+        existingIds.every((id, idx) => id === contractIds[idx]);
+
+      if (sameSceneShape) {
+        (deck.scenes || []).forEach((contractScene) => {
+          const stored = existing.scenes.find((s) => s.id === contractScene.id);
+          if (!stored) return;
+
+          const patch = {};
+          if (stored.title !== contractScene.title) patch.title = contractScene.title;
+          if (stored.type !== contractScene.type) patch.type = contractScene.type;
+
+          const storedRoute = stored.content?.route || "";
+          const contractRoute = contractScene.content?.route || "";
+          if (storedRoute !== contractRoute) {
+            patch.content = {
+              ...(stored.content || {}),
+              route: contractRoute,
+              waitForReady: contractScene.content?.waitForReady ?? stored.content?.waitForReady ?? false,
+              reloadOnEnter: contractScene.content?.reloadOnEnter ?? stored.content?.reloadOnEnter ?? false,
+            };
+          }
+
+          if (Object.keys(patch).length) {
+            store.updateScene(deck.id, stored.id, patch);
+          }
+        });
+      }
+
+      // Sync editIntent from contract into existing scenes where it's missing
       (deck.scenes || []).forEach(contractScene => {
         if (!contractScene.editIntent) return;
         const stored = existing.scenes.find(s => s.id === contractScene.id);
