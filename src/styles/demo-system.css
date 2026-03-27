@@ -1,0 +1,295 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DEMO SYSTEM CSS - Global Animations & Interactions
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── NARRATION PANEL ──────────────────────────────────────────────── */
+#demo-narration {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 360px;
+  max-height: 240px;
+  z-index: 999;
+  background: rgba(5, 12, 24, 0.95);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 32px rgba(34, 211, 238, 0.15);
+  animation: demo-panel-in 0.5s ease-out;
+  overflow: hidden;
+}
+
+@keyframes demo-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.demo-narration-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  gap: 12px;
+}
+
+.demo-narration-text {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c7d2fe;
+  font-weight: 500;
+  min-height: 60px;
+  letter-spacing: -0.01em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-y: auto;
+  max-height: 100px;
+}
+
+.demo-narration-text::-webkit-scrollbar {
+  width: 4px;
+}
+
+.demo-narration-text::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.3);
+  border-radius: 2px;
+}
+
+/* ─── PROGRESS BAR ──────────────────────────────────────────────── */
+.demo-narration-progress {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.demo-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #22d3ee, #818cf8);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+}
+
+/* ─── CONTROLS ──────────────────────────────────────────────────── */
+.demo-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.demo-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.demo-skip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-skip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #c7d2fe;
+}
+
+.demo-next {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.8), rgba(129, 140, 248, 0.8));
+  color: #060f1e;
+  font-weight: 800;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.3);
+}
+
+.demo-next:hover {
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HIGHLIGHT SYSTEM
+   ═══════════════════════════════════════════════════════════════════ */
+
+.demo-highlight {
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.6),
+              0 0 24px rgba(34, 211, 238, 0.25),
+              inset 0 0 12px rgba(34, 211, 238, 0.08) !important;
+  animation: demo-pulse-glow 2s ease-in-out infinite;
+  outline: 2px solid rgba(34, 211, 238, 0.3);
+  outline-offset: 2px;
+}
+
+@keyframes demo-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.4),
+                0 0 24px rgba(34, 211, 238, 0.15),
+                inset 0 0 12px rgba(34, 211, 238, 0.04);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.8),
+                0 0 32px rgba(34, 211, 238, 0.35),
+                inset 0 0 12px rgba(34, 211, 238, 0.12);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENTRY ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes demo-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes demo-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes demo-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes demo-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── PULSE EFFECTS ─────────────────────────────────────────────── */
+
+@keyframes demo-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes demo-pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+/* ─── COUNT-UP ANIMATION ────────────────────────────────────────── */
+
+@keyframes demo-count-up {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCENE-SPECIFIC REVEAL PATTERNS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Stagger animations for card sequences */
+.demo-stagger-1 { animation: demo-slide-up 0.6s ease-out 0ms forwards; opacity: 0; }
+.demo-stagger-2 { animation: demo-slide-up 0.6s ease-out 80ms forwards; opacity: 0; }
+.demo-stagger-3 { animation: demo-slide-up 0.6s ease-out 160ms forwards; opacity: 0; }
+.demo-stagger-4 { animation: demo-slide-up 0.6s ease-out 240ms forwards; opacity: 0; }
+.demo-stagger-5 { animation: demo-slide-up 0.6s ease-out 320ms forwards; opacity: 0; }
+.demo-stagger-6 { animation: demo-slide-up 0.6s ease-out 400ms forwards; opacity: 0; }
+
+/* Micro-interactions */
+button:not(.demo-btn):not(.nav-item):hover {
+  filter: brightness(1.1);
+}
+
+.status-chip {
+  transition: all 0.3s ease;
+}
+
+.status-chip:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* ─── HERO ELEMENTS ─────────────────────────────────────────────── */
+
+.demo-hero-enter {
+  animation: demo-slide-up 0.7s ease-out;
+}
+
+.demo-metric-enter {
+  animation: demo-scale-in 0.5s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY: Demo Mode Visibility
+   ═══════════════════════════════════════════════════════════════════ */
+
+.demo-hidden {
+  display: none !important;
+}
+
+.demo-visible {
+  display: block !important;
+}
+
+/* ─── TRANSITION BETWEEN SCREENS ────────────────────────────────── */
+
+@keyframes demo-screen-fade-out {
+  to {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes demo-screen-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
