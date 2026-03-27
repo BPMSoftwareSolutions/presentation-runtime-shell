@@ -65,17 +65,7 @@ window.DEMO = {
   
   narrate(text) {
     const textEl = DEMO.narrationPanel.querySelector('.demo-narration-text');
-    textEl.textContent = '';
-    
-    let charIdx = 0;
-    const typeChar = () => {
-      if (charIdx < text.length) {
-        textEl.textContent += text[charIdx];
-        charIdx++;
-        setTimeout(typeChar, DEMO.narrationSpeed);
-      }
-    };
-    typeChar();
+    textEl.textContent = text;
   },
   
   // ─── HIGHLIGHT SYSTEM ──────────────────────────────

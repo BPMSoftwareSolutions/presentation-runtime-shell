@@ -1548,41 +1548,47 @@
         DEMO.pulse('.alert-item:nth-child(1)', 2);
       },
       
-      // Step 2: Animate metrics cards with count-up
+      // Step 2: Animate KPI cards with count-up
       function() {
         DEMO.narrate("The system is already analyzing the root cause.");
         
-        // Fade in KPI cards
-        const kpiCards = document.querySelectorAll('.kpi-card');
-        kpiCards.forEach((card, i) => {
-          DEMO.fadeIn(card, i * 80);
+        // Get the 4 KPI value elements
+        const kpiValues = document.querySelectorAll('.kpi-strip .kpi-value');
+        const targets = [3, 2, 1, 4]; // Today's Visits, Reports Due, Compliance Issues, Alerts
+        
+        // Reset to 0 and count up using requestAnimationFrame (MSP style)
+        kpiValues.forEach((el, i) => {
+          const targetNum = targets[i];
+          const startTime = performance.now() + (i * 150);
+          const duration = 1000;
+          
+          el.textContent = '0';
+          
+          const animate = (now) => {
+            if (now < startTime) {
+              requestAnimationFrame(animate);
+              return;
+            }
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Cubic easing
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(targetNum * eased);
+            el.textContent = current;
+            
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              el.textContent = targetNum;
+            }
+          };
+          requestAnimationFrame(animate);
         });
         
-        // Count up the KPI values after cards fade in
+        // Highlight compliance issue card
         setTimeout(() => {
-          const kpiValues = document.querySelectorAll('.kpi-card .kpi-value');
-          const targets = [3, 2, 1, 4]; // Today's Visits, Reports Due, Compliance Issues, Alerts
-          kpiValues.forEach((el, i) => {
-            if (targets[i]) {
-              el.textContent = '0';
-              DEMO.countUp(el, targets[i], 1200);
-            }
-          });
-        }, 150);
-        
-        // Also count up snapshot values
-        setTimeout(() => {
-          const snapValues = document.querySelectorAll('.snapshot-cell .snap-value');
-          const snapTargets = [8, 7, 18, 1]; // Active Plans, Units Online, Reports, Exceptions
-          snapValues.forEach((el, i) => {
-            if (snapTargets[i]) {
-              el.textContent = '0';
-              DEMO.countUp(el, snapTargets[i], 1200);
-            }
-          });
-        }, 300);
-        
-        DEMO.highlight('.kpi-red', { persistent: true, duration: 3000 });
+          DEMO.highlight('.kpi-red', { duration: 3500 });
+        }, 500);
       },
       
       // Step 3: Highlight "1 Compliance Issue"
