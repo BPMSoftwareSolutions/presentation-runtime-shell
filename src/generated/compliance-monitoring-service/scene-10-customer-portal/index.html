@@ -3,69 +3,491 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generator Customer Portal</title>
+  <title>My Generator — Customer Portal</title>
   <style>
-    :root{--bg:#08101d;--s:rgba(255,255,255,.035);--s2:rgba(255,255,255,.055);--b:rgba(255,255,255,.08);--t:#eef2ff;--m:#94a3b8;--g:#10b981;--a:#f59e0b;--c:#22d3ee;--font:Inter,ui-sans-serif,system-ui,sans-serif}
-    *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}body{overflow:hidden;background:linear-gradient(180deg,#08101d,#091321);font-family:var(--font);color:var(--t)}
-    .scene{height:100%;padding:18px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}.card{background:var(--s);border:1px solid var(--b);border-radius:12px;backdrop-filter:blur(8px)}
-    .hero{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}.hero h1{font-size:22px;letter-spacing:-.03em}.sub{font-size:12px;color:var(--m);margin-top:2px}
-    .status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g)}.dot{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 8px rgba(16,185,129,.7)}
-    .summary{padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kv{padding:8px;border:1px solid var(--b);border-radius:8px;background:var(--s2);font-size:12px}.kv b{display:block;font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.06em}
-    .main{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:10px}.panel{min-height:0;display:grid;grid-template-rows:auto 1fr}.ph{padding:10px 12px;border-bottom:1px solid var(--b);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--m);font-weight:700}.pb{padding:10px;overflow:auto}
-    .list{list-style:none;display:grid;gap:8px}.item{padding:9px;border:1px solid var(--b);border-radius:8px;background:var(--s2);font-size:12px;line-height:1.5}
-    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.1);color:var(--c)}
-    .foot{font-size:11px;color:var(--m);padding:0 4px}
+    :root {
+      --bg: #08101d;
+      --bg-elev: rgba(255,255,255,0.035);
+      --bg-elev-2: rgba(255,255,255,0.055);
+      --bg-elev-3: rgba(255,255,255,0.08);
+      --bg-card: rgba(12,22,42,0.82);
+      --text: #eef2ff;
+      --text-soft: #c7d2fe;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --green: #10b981;
+      --green-bg: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.12);
+      --cyan: #22d3ee;
+      --cyan-bg: rgba(34,211,238,0.10);
+      --indigo: #818cf8;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
+      --sidebar-w: 64px;
+      --header-h: 60px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 80% 60% at 80% -10%, rgba(34,211,238,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(167,139,250,0.10) 0%, transparent 55%),
+        linear-gradient(180deg, #08101d 0%, #091321 100%);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .shell {
+      display: flex;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0 20px;
+      gap: 6px;
+      background: rgba(5,12,24,0.72);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .sidebar-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 24px rgba(34,211,238,0.25);
+    }
+
+    .nav-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      color: var(--text-dim);
+      font-size: 17px;
+      position: relative;
+      border: none;
+      background: transparent;
+    }
+    .nav-item:hover { background: var(--bg-elev-2); color: var(--text-soft); }
+    .nav-item.active {
+      background: rgba(34,211,238,0.12);
+      color: var(--cyan);
+      box-shadow: 0 0 16px rgba(34,211,238,0.15);
+    }
+
+    .sidebar-spacer { flex: 1; }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-soft);
+      letter-spacing: -0.01em;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn-ghost {
+      background: var(--bg-elev-2);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg-elev-3); color: var(--text); }
+
+    .page {
+      flex: 1;
+      overflow: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 0;
+    }
+    .page::-webkit-scrollbar { width: 6px; }
+    .page::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(167,139,250,0.05));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+    .hero-main { display: flex; flex-direction: column; gap: 8px; }
+    .hero-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+    .hero-sub { font-size: 13px; color: var(--text-muted); }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(16,185,129,0.6);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .summary-card {
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .summary-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+    .summary-value { font-size: 15px; font-weight: 700; color: var(--text-soft); }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      min-height: 0;
+      flex: 1;
+    }
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .card-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+    .card-body { padding: 14px 18px; min-width: 0; min-height: 0; flex: 1; overflow: auto; }
+
+    .event-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .event-item {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .event-icon { font-size: 14px; flex-shrink: 0; }
+    .event-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .event-title { color: var(--text-soft); font-weight: 600; }
+    .event-time { color: var(--text-dim); font-size: 11px; }
+
+    .doc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .doc-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .doc-name { display: flex; align-items: center; gap: 8px; color: var(--text-soft); }
+    .doc-icon { font-size: 14px; }
+    .doc-link {
+      color: var(--cyan);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 11px;
+    }
+
+    .recommendation {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--amber-bg);
+      border-left: 3px solid var(--amber);
+      border-right: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-soft);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      height: 36px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      color: var(--text-dim);
+      font-size: 11px;
+    }
   </style>
 </head>
 <body>
-  <div class="scene">
-    <section class="card hero" data-focus-region="portal-header">
-      <div>
-        <h1>My Generator Status</h1>
-        <div class="sub">Customer: Carter Residence · Plan: Plus+ Monitoring</div>
-      </div>
-      <div class="status"><span class="dot"></span>Generator online</div>
-    </section>
+  <div class="shell">
+    <nav class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-logo">⚡</div>
+      <button class="nav-item active" title="Status">🏠</button>
+      <button class="nav-item" title="History">📋</button>
+      <button class="nav-item" title="Documents">📄</button>
+      <button class="nav-item" title="Support">💬</button>
+      <div class="sidebar-spacer"></div>
+      <button class="nav-item" title="Settings">⚙️</button>
+    </nav>
 
-    <section class="card summary" data-focus-region="portal-status-summary">
-      <div class="kv"><b>Last Check-in</b>Today 07:42</div>
-      <div class="kv"><b>Last Service</b>08/14/2026</div>
-      <div class="kv"><b>Next Planned Service</b>02/14/2027</div>
-      <div class="kv"><b>Current Recommendation</b><span style="color:#f59e0b">Battery replacement next visit</span></div>
-    </section>
+    <div class="main">
+      <header class="topbar">
+        <span class="topbar-title">My Generator Portal</span>
+        <button class="btn btn-ghost">View Account</button>
+      </header>
 
-    <section class="main">
-      <article class="card panel" data-focus-region="recent-events">
-        <header class="ph">Recent Events</header>
-        <div class="pb">
-          <ul class="list">
-            <li class="item">08/22 Battery weakness alert detected</li>
-            <li class="item">08/22 Alert cleared after follow-up check</li>
-            <li class="item">08/14 Semi-annual service completed</li>
-            <li class="item">07/01 Monitoring heartbeat verified</li>
-          </ul>
+      <main class="page">
+        <section class="hero" data-focus-region="status-hero">
+          <div class="hero-main">
+            <h1 class="hero-title">Generator Status</h1>
+            <p class="hero-sub">Carter Residence</p>
+          </div>
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>Online & Ready</span>
+          </div>
+        </section>
+
+        <section class="summary-grid" data-focus-region="key-metrics">
+          <div class="summary-card">
+            <div class="summary-label">Last Check-in</div>
+            <div class="summary-value">2 hours ago</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Last Service</div>
+            <div class="summary-value">14 days ago</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Next Planned</div>
+            <div class="summary-value">45 days</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Status</div>
+            <div class="summary-value" style="color: var(--green);">✓ Good</div>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="left-col">
+            <article class="card" data-focus-region="recent-events">
+              <header class="card-header">
+                <span class="card-title">Recent Events</span>
+              </header>
+              <div class="card-body">
+                <ul class="event-list">
+                  <li class="event-item">
+                    <span class="event-icon">✓</span>
+                    <div class="event-content">
+                      <span class="event-title">System Check Complete</span>
+                      <span class="event-time">Today at 14:32</span>
+                    </div>
+                  </li>
+                  <li class="event-item">
+                    <span class="event-icon">🔧</span>
+                    <div class="event-content">
+                      <span class="event-title">Service Visit Completed</span>
+                      <span class="event-time">August 10, 2026</span>
+                    </div>
+                  </li>
+                  <li class="event-item">
+                    <span class="event-icon">⚠️</span>
+                    <div class="event-content">
+                      <span class="event-title">Battery Weakness Alert</span>
+                      <span class="event-time">August 8, 2026</span>
+                    </div>
+                  </li>
+                  <li class="event-item">
+                    <span class="event-icon">📊</span>
+                    <div class="event-content">
+                      <span class="event-title">Monthly Report Generated</span>
+                      <span class="event-time">August 1, 2026</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </article>
+          </div>
+
+          <div class="right-col">
+            <article class="card" data-focus-region="documents">
+              <header class="card-header">
+                <span class="card-title">Documents & Resources</span>
+              </header>
+              <div class="card-body">
+                <ul class="doc-list" style="margin-bottom: 12px;">
+                  <li class="doc-item">
+                    <span class="doc-name">
+                      <span class="doc-icon">📄</span>
+                      August 2026 Status Report
+                    </span>
+                    <a class="doc-link">Download</a>
+                  </li>
+                  <li class="doc-item">
+                    <span class="doc-name">
+                      <span class="doc-icon">📋</span>
+                      Service Visit Notes
+                    </span>
+                    <a class="doc-link">View</a>
+                  </li>
+                  <li class="doc-item">
+                    <span class="doc-name">
+                      <span class="doc-icon">📊</span>
+                      Annual Compliance Report
+                    </span>
+                    <a class="doc-link">Download</a>
+                  </li>
+                  <li class="doc-item">
+                    <span class="doc-name">
+                      <span class="doc-icon">📖</span>
+                      User Guide & Manuals
+                    </span>
+                    <a class="doc-link">View</a>
+                  </li>
+                </ul>
+                <div class="recommendation" data-focus-region="recommendation">
+                  💡 <strong>Recommendation:</strong> Schedule battery replacement during next service visit. Current battery is operating within normal parameters but replacement is recommended for continued reliability.
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div style="margin-left: auto; display: flex; gap: 12px;">
+          <button class="btn btn-ghost">Download Report</button>
+          <button class="btn btn-ghost">Schedule Service</button>
         </div>
-      </article>
-
-      <article class="card panel" data-focus-region="documents-and-recommendations">
-        <header class="ph">Documents + Recommendations</header>
-        <div class="pb">
-          <ul class="list">
-            <li class="item">Latest service report is available for download</li>
-            <li class="item">Monthly status report is available for download</li>
-            <li class="item">Full service history is available in timeline view</li>
-            <li class="item">Recommendation: replace battery at next scheduled service window</li>
-          </ul>
-        </div>
-      </article>
-    </section>
-
-    <footer class="actions" data-focus-region="portal-actions">
-      <button class="btn">Download Service Report</button>
-      <button class="btn">Download Monthly Report</button>
-      <button class="btn">View Service History</button>
-    </footer>
-    <div class="foot">Customer-facing portal is intentionally reduced in complexity versus internal operations screens.</div>
+      </footer>
+    </div>
   </div>
 </body>
 </html>

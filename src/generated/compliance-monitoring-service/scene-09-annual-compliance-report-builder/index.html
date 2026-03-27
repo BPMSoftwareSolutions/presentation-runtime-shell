@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generator Command Center — Monthly Report Generator</title>
+  <title>Generator Command Center — Annual Compliance Report Builder</title>
   <style>
     :root {
       --bg: #08101d;
@@ -201,18 +201,19 @@
     .hero-title { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
     .hero-sub { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 
-    .pill {
+    .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 12px;
       font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid transparent;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(245,158,11,0.3);
       white-space: nowrap;
     }
-    .pill-cyan { background: var(--cyan-bg); color: var(--cyan); border-color: rgba(34,211,238,0.18); }
 
     .control-grid {
       display: grid;
@@ -235,7 +236,7 @@
 
     .content-grid {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
+      grid-template-columns: 0.85fr 1.15fr;
       gap: 14px;
       min-height: 0;
       flex: 1;
@@ -272,42 +273,62 @@
     .card-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
     .card-body { padding: 16px 18px; min-width: 0; min-height: 0; flex: 1; overflow: auto; }
 
-    .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .check-item {
-      display: grid;
-      grid-template-columns: 18px 1fr;
-      gap: 10px;
-      align-items: center;
-      padding: 12px 13px;
+    .source-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .source-item {
+      display: flex;
+      align-items: start;
+      gap: 9px;
+      padding: 10px 12px;
       border-radius: var(--radius-md);
-      border: 1px solid var(--border);
       background: var(--bg-elev-2);
+      border: 1px solid var(--border);
       font-size: 12px;
     }
-    .check-box {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      flex-shrink: 0;
-      background: var(--bg-elev-2);
-    }
-    .check-box.checked { background: var(--cyan-bg); border-color: var(--cyan); color: var(--cyan); }
+    .source-icon { font-size: 14px; flex-shrink: 0; }
+    .source-text { color: var(--text-soft); line-height: 1.4; }
 
-    .preview-box {
-      padding: 14px;
+    .section-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .section-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
       border-radius: var(--radius-md);
+      background: var(--bg-elev-2);
       border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      font-size: 12px;
+    }
+    .section-name { color: var(--text-soft); font-weight: 500; }
+    .section-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--green-bg);
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .warning-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--amber);
+      background: linear-gradient(90deg, var(--amber-bg) 0%, transparent 100%);
       color: var(--text-soft);
       font-size: 12px;
       line-height: 1.5;
-      margin-bottom: 10px;
-    }
+  }
 
     .footer {
       height: 36px;
@@ -343,70 +364,61 @@
         <div class="crumbs" aria-label="Breadcrumb">
           <span class="crumb">Reports</span>
           <span class="crumb-sep">›</span>
-          <span class="crumb current">Monthly Generator</span>
+          <span class="crumb current">Annual Compliance Builder</span>
         </div>
       </header>
 
       <main class="page">
         <section class="hero">
           <div class="hero-main">
-            <h1 class="hero-title">Monthly Report Generator</h1>
-            <p class="hero-sub">Assemble customer outputs from structured operations data</p>
-            <span class="pill pill-cyan">Controlled assembly</span>
+            <h1 class="hero-title">Annual Compliance Report</h1>
+            <p class="hero-sub">Executive-grade packet for audit readiness verification</p>
           </div>
+          <div class="status-badge">⚠ Ready with 1 warning</div>
         </section>
 
-        <section class="control-grid" data-focus-region="report-controls">
-          <div class="control-item">
-            <div class="control-label">Report Type</div>
-            <div class="control-value">Monthly Status Report</div>
-          </div>
+        <section class="control-grid" data-focus-region="report-config">
           <div class="control-item">
             <div class="control-label">Customer</div>
             <div class="control-value">Carter Residence</div>
           </div>
           <div class="control-item">
-            <div class="control-label">Period</div>
-            <div class="control-value">August 2026</div>
+            <div class="control-label">Audit Year</div>
+            <div class="control-value">2026</div>
+          </div>
+          <div class="control-item">
+            <div class="control-label">Status</div>
+            <div class="control-value">Assembled</div>
           </div>
         </section>
 
         <section class="content-grid">
           <div class="left-col">
-            <article class="card" data-focus-region="section-selection">
+            <article class="card" data-focus-region="data-sources">
               <header class="card-header">
-                <span class="card-title">Include Sections</span>
-                <span id="section-count" style="color: var(--text-dim); font-size: 12px;">4 selected</span>
+                <span class="card-title">Data Sources</span>
               </header>
               <div class="card-body">
-                <ul class="checklist">
-                  <li class="check-item">
-                    <span class="check-box checked">✓</span>
-                    <span>Service history</span>
+                <ul class="source-list">
+                  <li class="source-item">
+                    <span class="source-icon">📊</span>
+                    <span class="source-text">Service visits & fuel transfers (12 records)</span>
                   </li>
-                  <li class="check-item">
-                    <span class="check-box checked">✓</span>
-                    <span>Monitoring events</span>
+                  <li class="source-item">
+                    <span class="source-icon">🔔</span>
+                    <span class="source-text">Monitoring alerts & events (47 alerts)</span>
                   </li>
-                  <li class="check-item">
-                    <span class="check-box checked">✓</span>
-                    <span>Current generator status</span>
+                  <li class="source-item">
+                    <span class="source-icon">⏱️</span>
+                    <span class="source-text">Runtime & availability (8760 hours)</span>
                   </li>
-                  <li class="check-item">
-                    <span class="check-box checked">✓</span>
-                    <span>Fault summary</span>
+                  <li class="source-item">
+                    <span class="source-icon">🔧</span>
+                    <span class="source-text">Maintenance logs (9 entries)</span>
                   </li>
-                  <li class="check-item">
-                    <span class="check-box">☐</span>
-                    <span>Compliance section</span>
-                  </li>
-                  <li class="check-item">
-                    <span class="check-box">☐</span>
-                    <span>Fuel quality section</span>
-                  </li>
-                  <li class="check-item">
-                    <span class="check-box checked">✓</span>
-                    <span>Recommendations</span>
+                  <li class="source-item">
+                    <span class="source-icon">✅</span>
+                    <span class="source-text">Compliance checks (52 completed)</span>
                   </li>
                 </ul>
               </div>
@@ -414,15 +426,44 @@
           </div>
 
           <div class="right-col">
-            <article class="card" data-focus-region="preview-summary">
+            <article class="card" data-focus-region="report-sections">
               <header class="card-header">
-                <span class="card-title">Preview Summary</span>
+                <span class="card-title">Report Sections & Status</span>
               </header>
               <div class="card-body">
-                <div class="preview-box">Generator online and reporting normally.</div>
-                <div class="preview-box">1 battery weakness alert detected and resolved.</div>
-                <div class="preview-box">No outage events this period.</div>
-                <div class="preview-box">Recommendation: replace battery during next visit.</div>
+                <ul class="section-list" style="margin-bottom: 12px;">
+                  <li class="section-item">
+                    <span class="section-name">Executive Summary</span>
+                    <span class="section-status">✓ Complete</span>
+                  </li>
+                  <li class="section-item">
+                    <span class="section-name">Asset Details & Specifications</span>
+                    <span class="section-status">✓ Complete</span>
+                  </li>
+                  <li class="section-item">
+                    <span class="section-name">Operational Performance</span>
+                    <span class="section-status">✓ Complete</span>
+                  </li>
+                  <li class="section-item">
+                    <span class="section-name">Maintenance & Service History</span>
+                    <span class="section-status">✓ Complete</span>
+                  </li>
+                  <li class="section-item">
+                    <span class="section-name">Fault Analysis</span>
+                    <span class="section-status">✓ Complete</span>
+                  </li>
+                  <li class="section-item">
+                    <span class="section-name">Regulatory Compliance Status</span>
+                    <span class="section-status">✓ Complete</span>
+                  </li>
+                  <li class="section-item">
+                    <span class="section-name">Recommendations & Action Plan</span>
+                    <span class="section-status">⚠ Warning</span>
+                  </li>
+                </ul>
+                <div class="warning-box">
+                  ⚠️ Battery degradation detected. Recommend replacement during next service visit.
+                </div>
               </div>
             </article>
           </div>
@@ -431,9 +472,9 @@
 
       <footer class="footer">
         <div style="margin-left: auto; display: flex; gap: 12px;">
-          <button class="btn btn-ghost">Generate PDF</button>
-          <button class="btn btn-ghost">Email to Customer</button>
-          <button class="btn btn-primary">Save to Files</button>
+          <button class="btn btn-ghost">Preview PDF</button>
+          <button class="btn btn-ghost">Export as PDF</button>
+          <button class="btn btn-primary">Send to Customer</button>
         </div>
       </footer>
     </div>
