@@ -3,109 +3,1366 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generator Command Center — Monitoring Center</title>
+  <title>Generator Command Center — Monitoring / Alert Triage</title>
   <style>
     :root {
-      --bg:#08101d; --surface:rgba(255,255,255,.035); --surface-2:rgba(255,255,255,.055); --border:rgba(255,255,255,.08);
-      --text:#eef2ff; --muted:#94a3b8; --dim:#64748b; --green:#10b981; --amber:#f59e0b; --red:#ef4444; --violet:#a78bfa; --cyan:#22d3ee;
+      --bg: #08101d;
+      --bg-elev: rgba(255,255,255,0.035);
+      --bg-elev-2: rgba(255,255,255,0.055);
+      --bg-elev-3: rgba(255,255,255,0.08);
+      --bg-card: rgba(12,22,42,0.82);
+      --text: #eef2ff;
+      --text-soft: #c7d2fe;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.13);
+      --green: #10b981;
+      --green-bg: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245,158,11,0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.12);
+      --violet: #a78bfa;
+      --violet-bg: rgba(167,139,250,0.12);
+      --indigo: #818cf8;
+      --cyan: #22d3ee;
+      --cyan-bg: rgba(34,211,238,0.10);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.18);
+      --sidebar-w: 64px;
+      --header-h: 60px;
       --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
     }
-    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%}
-    body{overflow:hidden;font-family:var(--font);color:var(--text);background:linear-gradient(180deg,#08101d,#091321)}
-    .scene{height:100%;padding:18px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(8px)}
-    .hero{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-    h1{font-size:22px;letter-spacing:-.03em}.sub{font-size:12px;color:var(--muted);margin-top:2px}
-    .badge{font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid rgba(34,211,238,.35);color:var(--cyan)}
-    .filters{padding:10px;display:flex;gap:8px;flex-wrap:wrap}
-    .chip{font-size:11px;padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:var(--muted);cursor:pointer;background:var(--surface-2)}
-    .chip.active{color:var(--cyan);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.1)}
-    .main{min-height:0;display:grid;grid-template-columns:1.1fr .9fr;gap:10px}
-    .panel{min-height:0;display:grid;grid-template-rows:auto 1fr}
-    .ph{padding:10px 12px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;display:flex;justify-content:space-between}
-    .pb{padding:10px;overflow:auto}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{padding:9px;border-bottom:1px solid var(--border);text-align:left} th{font-size:11px;color:var(--muted);text-transform:uppercase}
-    tbody tr{cursor:pointer} tbody tr:hover{background:var(--surface-2)} tbody tr.active{background:rgba(34,211,238,.08)}
-    .s{font-weight:700;font-size:11px;text-transform:uppercase}
-    .s.alert{color:var(--red)} .s.online{color:var(--green)} .s.offline{color:var(--dim)}
-    .stack{display:grid;gap:10px}
-    .box{padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);font-size:12px;line-height:1.5}
-    .box h3{font-size:12px;margin-bottom:6px}
-    .actions{display:flex;justify-content:flex-end;gap:8px}
-    .btn{font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text)}
-    .btn.pri{color:var(--cyan);border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.1)}
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 80% 60% at 80% -10%, rgba(34,211,238,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(167,139,250,0.10) 0%, transparent 55%),
+        linear-gradient(180deg, #08101d 0%, #091321 100%);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .shell {
+      display: flex;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0 20px;
+      gap: 6px;
+      background: rgba(5,12,24,0.72);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .sidebar-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 24px rgba(34,211,238,0.25);
+    }
+
+    .nav-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      color: var(--text-dim);
+      font-size: 17px;
+      position: relative;
+      border: none;
+      background: transparent;
+    }
+    .nav-item:hover { background: var(--bg-elev-2); color: var(--text-soft); }
+    .nav-item.active {
+      background: rgba(34,211,238,0.12);
+      color: var(--cyan);
+      box-shadow: 0 0 16px rgba(34,211,238,0.15);
+    }
+    .nav-item .nav-badge {
+      position: absolute;
+      top: 5px; right: 5px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      border: 2px solid var(--bg);
+    }
+    .nav-tooltip {
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(10,20,40,0.95);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100;
+    }
+    .nav-item:hover .nav-tooltip { opacity: 1; }
+    .sidebar-spacer { flex: 1; }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .crumb { color: var(--text-muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .crumb.current { color: var(--text); font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+    .crumb-sep { color: var(--text-dim); }
+
+    .topbar-search {
+      margin-left: auto;
+      flex: 1;
+      max-width: 340px;
+      position: relative;
+    }
+    .topbar-search input {
+      width: 100%;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 7px 12px 7px 34px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .topbar-search input::placeholder { color: var(--text-dim); }
+    .topbar-search input:focus {
+      border-color: rgba(34,211,238,0.35);
+      background: var(--bg-elev-3);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn-ghost {
+      background: var(--bg-elev-2);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg-elev-3); color: var(--text); }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(34,211,238,0.9), rgba(129,140,248,0.9));
+      color: #060f1e;
+      font-weight: 700;
+      box-shadow: 0 0 18px rgba(34,211,238,0.22);
+    }
+    .btn-primary:hover { box-shadow: 0 0 26px rgba(34,211,238,0.35); transform: translateY(-1px); }
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.20);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.18); }
+    .btn-success {
+      background: rgba(16,185,129,0.14);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,0.20);
+    }
+    .btn-success:hover { background: rgba(16,185,129,0.20); }
+    .btn-xs {
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text-muted);
+      transition: all 0.12s;
+    }
+    .btn-xs:hover { background: var(--bg-elev-3); color: var(--text-soft); border-color: var(--border-strong); }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .page {
+      flex: 1;
+      overflow: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .page::-webkit-scrollbar { width: 6px; }
+    .page::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr auto;
+      gap: 18px;
+      align-items: center;
+    }
+    .hero-main { display: flex; flex-direction: column; gap: 10px; }
+    .hero-title-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .hero-title { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+    .hero-sub { font-size: 13px; color: var(--text-muted); }
+    .hero-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+    .pill-row, .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pill-green  { background: var(--green-bg);  color: var(--green);  border-color: rgba(16,185,129,0.18); }
+    .pill-amber  { background: var(--amber-bg);  color: var(--amber);  border-color: rgba(245,158,11,0.18); }
+    .pill-red    { background: var(--red-bg);    color: var(--red);    border-color: rgba(239,68,68,0.18); }
+    .pill-violet { background: var(--violet-bg); color: var(--violet); border-color: rgba(167,139,250,0.18); }
+    .pill-cyan   { background: var(--cyan-bg);   color: var(--cyan);   border-color: rgba(34,211,238,0.18); }
+
+    .filter-chip {
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text-muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip:hover { background: var(--bg-elev-3); color: var(--text-soft); }
+    .filter-chip.active {
+      background: rgba(34,211,238,0.10);
+      color: var(--cyan);
+      border-color: rgba(34,211,238,0.22);
+      box-shadow: inset 0 0 0 1px rgba(34,211,238,0.08);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 104px;
+      position: relative;
+      overflow: hidden;
+    }
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .summary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+    .summary-value { font-size: 26px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
+    .summary-meta { font-size: 12px; color: var(--text-muted); margin-top: auto; }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(380px, 0.95fr);
+      gap: 14px;
+      min-height: 0;
+    }
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+    .card-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .card-body { padding: 16px 18px; min-width: 0; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(8,16,29,0.22);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 820px; }
+    thead th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      font-weight: 700;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.025);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-soft);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { cursor: pointer; transition: background 0.12s ease, box-shadow 0.12s ease; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    tbody tr.selected {
+      background: rgba(34,211,238,0.08);
+      box-shadow: inset 0 0 0 1px rgba(34,211,238,0.16);
+    }
+
+    .site-cell { display: flex; align-items: center; gap: 10px; }
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.alert { background: var(--red); box-shadow: 0 0 8px rgba(239,68,68,0.8); }
+    .status-dot.warning { background: var(--amber); box-shadow: 0 0 8px rgba(245,158,11,0.6); }
+    .status-dot.online { background: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.7); }
+    .status-dot.offline { background: #64748b; }
+
+    .severity-chip, .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .severity-high, .status-red { background: var(--red-bg); color: var(--red); border-color: rgba(239,68,68,0.20); }
+    .severity-medium, .status-amber { background: var(--amber-bg); color: var(--amber); border-color: rgba(245,158,11,0.20); }
+    .severity-low, .status-violet { background: var(--violet-bg); color: var(--violet); border-color: rgba(167,139,250,0.20); }
+    .status-green { background: var(--green-bg); color: var(--green); border-color: rgba(16,185,129,0.20); }
+    .status-cyan { background: var(--cyan-bg); color: var(--cyan); border-color: rgba(34,211,238,0.20); }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .detail-box {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      min-height: 84px;
+    }
+    .detail-label {
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .detail-value { font-size: 13px; color: var(--text-soft); font-weight: 600; }
+    .detail-value strong { color: var(--text); }
+
+    .section-stack { display: flex; flex-direction: column; gap: 16px; }
+    .subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .subhead-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+    .subhead-meta { font-size: 11px; color: var(--text-dim); }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    .task-card {
+      position: relative;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .task-card:hover { background: var(--bg-elev-3); border-color: var(--border-strong); }
+    .task-card.selected {
+      border-color: rgba(34,211,238,0.28);
+      background: rgba(34,211,238,0.10);
+      box-shadow: inset 0 0 0 1px rgba(34,211,238,0.08);
+    }
+    .task-card input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .task-title { font-size: 13px; font-weight: 700; }
+    .task-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+      color: var(--text);
+      border-radius: var(--radius-md);
+      padding: 12px 13px;
+      font: inherit;
+      outline: none;
+      min-height: 102px;
+      resize: vertical;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .textarea::placeholder { color: var(--text-dim); }
+    .textarea:focus {
+      border-color: rgba(34,211,238,0.35);
+      background: var(--bg-elev-3);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.10);
+    }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .action-row .left, .action-row .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .timeline {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      padding-left: 4px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: linear-gradient(180deg, rgba(34,211,238,0.25), rgba(129,140,248,0.08));
+    }
+    .timeline-item {
+      position: relative;
+      padding-left: 28px;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: 0;
+      top: 3px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #0c162a;
+      border: 3px solid var(--cyan);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.10);
+    }
+    .timeline-title { font-size: 13px; font-weight: 700; }
+    .timeline-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .timeline-body { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .check-item {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 13px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elev-2);
+    }
+    .check-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .check-icon.ok { color: var(--green); background: var(--green-bg); }
+    .check-icon.warn { color: var(--amber); background: var(--amber-bg); }
+    .check-icon.alert { color: var(--red); background: var(--red-bg); }
+    .check-title { font-size: 12px; font-weight: 700; }
+    .check-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .summary-box {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      color: var(--text-soft);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .summary-box strong { color: var(--text); }
+    .summary-row { display: flex; justify-content: space-between; gap: 12px; }
+    .summary-key { color: var(--text-dim); }
+    .summary-value-right { color: var(--text); font-weight: 700; text-align: right; }
+
+    .footer {
+      height: 36px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(5,12,24,0.60);
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+    .footer-spacer { flex: 1; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.7); }
+    .divider { width: 1px; height: 16px; background: var(--border-strong); }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 52px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(10, 20, 40, 0.96);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-card);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.18s ease;
+      z-index: 20;
+      max-width: 300px;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 1360px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .shell { min-height: 100vh; height: auto; }
+      .sidebar { display: none; }
+      .topbar { flex-wrap: wrap; height: auto; padding: 14px 18px; }
+      .topbar-search { order: 3; max-width: none; width: 100%; margin-left: 0; }
+      .page { padding: 18px; }
+      .summary-grid, .detail-grid, .task-grid { grid-template-columns: 1fr; }
+      .footer { padding: 0 18px; flex-wrap: wrap; height: auto; min-height: 36px; }
+    }
   </style>
 </head>
 <body>
-  <div class="scene">
-    <section class="card hero" data-focus-region="monitoring-title">
-      <div>
-        <h1>Monitoring Center</h1>
-        <div class="sub">Live telemetry triage across residential and commercial units</div>
-      </div>
-      <div class="badge">4 open alerts</div>
-    </section>
+  <div class="shell">
+    <nav class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-logo">⚡</div>
+      <button class="nav-item" title="Dashboard">🏠<span class="nav-tooltip">Dashboard</span></button>
+      <button class="nav-item" title="Customers">👥<span class="nav-tooltip">Customers</span></button>
+      <button class="nav-item" title="Schedule">📅<span class="nav-tooltip">Schedule</span></button>
+      <button class="nav-item active" title="Monitoring">📡<span class="nav-badge"></span><span class="nav-tooltip">Monitoring</span></button>
+      <button class="nav-item" title="Compliance">🛡️<span class="nav-badge"></span><span class="nav-tooltip">Compliance</span></button>
+      <button class="nav-item" title="Reports">📊<span class="nav-tooltip">Reports</span></button>
+      <button class="nav-item" title="Equipment">🔧<span class="nav-tooltip">Equipment</span></button>
+      <div class="sidebar-spacer"></div>
+      <button class="nav-item" title="Settings">⚙️<span class="nav-tooltip">Settings</span></button>
+    </nav>
 
-    <section class="card filters" data-focus-region="filters">
-      <button class="chip active">All</button><button class="chip">Residential</button><button class="chip">Commercial</button>
-      <button class="chip">Open Alerts</button><button class="chip">Battery</button><button class="chip">Fault</button><button class="chip">Offline</button>
-    </section>
-
-    <section class="main">
-      <article class="card panel" data-focus-region="unit-list">
-        <header class="ph"><span>Unit / Site</span><span>Action Queue</span></header>
-        <div class="pb">
-          <table>
-            <thead><tr><th>Unit / Site</th><th>Status</th><th>Last Event</th><th>Action</th></tr></thead>
-            <tbody id="rows">
-              <tr class="active" data-site="Shell Station 184" data-risk="Load bank test may be required at next service interval"><td>Shell Station 184</td><td><span class="s alert">ALERT</span></td><td>Threshold missed</td><td>Open</td></tr>
-              <tr data-site="Carter Residence" data-risk="Battery replacement should be scheduled within 30 days"><td>Carter Residence</td><td><span class="s alert">ALERT</span></td><td>Battery weakness</td><td>Open</td></tr>
-              <tr data-site="BP Station 12" data-risk="No immediate risk; monitor heartbeat consistency"><td>BP Station 12</td><td><span class="s online">ONLINE</span></td><td>Normal heartbeat</td><td>View</td></tr>
-              <tr data-site="Kroger Backup Unit" data-risk="Extended offline period may hide fault events"><td>Kroger Backup Unit</td><td><span class="s offline">OFFLINE</span></td><td>No signal for 14 hrs</td><td>Open</td></tr>
-            </tbody>
-          </table>
+    <div class="main">
+      <header class="topbar">
+        <div class="crumbs" aria-label="Breadcrumb">
+          <span class="crumb">Monitoring</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb">Alert Triage</span>
+          <span class="crumb-sep">›</span>
+          <span class="crumb current">Monitoring Center</span>
         </div>
-      </article>
 
-      <article class="card panel" data-focus-region="selected-alert-detail">
-        <header class="ph"><span id="detail-title">Selected Alert: Shell Station 184</span><span>Detail + Actions</span></header>
-        <div class="pb">
-          <div class="stack">
-            <div class="box"><h3>Alert Type</h3>Monthly exercise threshold not met (triggered 2026-08-31 07:15)</div>
-            <div class="box"><h3>Risk</h3><span id="risk-text">Load bank test may be required at next service interval</span></div>
-            <div class="box" data-focus-region="suggested-actions"><h3>Suggested Actions</h3>☑ Create compliance task<br/>☑ Flag customer record<br/>☑ Include note in monthly report<br/>☐ Schedule load bank evaluation</div>
-            <div class="box"><h3>Operator Note</h3>Attach this alert to the next service planning cycle and keep it visible in the account timeline.</div>
+        <div class="topbar-search">
+          <span class="search-icon">🔍</span>
+          <input id="global-search" type="search" placeholder="Search sites, units, events…" aria-label="Search alerts" />
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" id="refresh-btn">↻ Refresh</button>
+          <button class="btn btn-primary" id="new-work-order-btn">＋ New Work Order</button>
+          <div class="avatar" title="Thomas B.">TB</div>
+        </div>
+      </header>
+
+      <main class="page">
+        <section class="hero">
+          <div class="hero-main">
+            <div class="hero-title-row">
+              <h1 class="hero-title">Monitoring / Alert Triage</h1>
+              <span class="pill pill-cyan"><span class="dot"></span>Live Queue</span>
+              <span class="pill pill-violet">Ops + Compliance</span>
+            </div>
+            <div class="hero-sub">Review live unit signals, triage exceptions, create follow-up work, and feed notes into customer and compliance workflows.</div>
+            <div class="filter-row" id="filter-row">
+              <button class="filter-chip active" data-filter="all">All</button>
+              <button class="filter-chip" data-filter="residential">Residential</button>
+              <button class="filter-chip" data-filter="commercial">Commercial</button>
+              <button class="filter-chip" data-filter="open">Open Alerts</button>
+              <button class="filter-chip" data-filter="battery">Battery</button>
+              <button class="filter-chip" data-filter="fault">Fault</button>
+              <button class="filter-chip" data-filter="offline">Offline</button>
+            </div>
           </div>
-        </div>
-      </article>
-    </section>
+          <div class="hero-actions">
+            <button class="btn btn-ghost" id="export-view-btn">Export View</button>
+            <button class="btn btn-danger" id="bulk-escalate-btn">Bulk Escalate</button>
+          </div>
+        </section>
 
-    <footer class="actions" data-focus-region="resolve-actions">
-      <button class="btn">Resolve</button>
-      <button class="btn">Escalate</button>
-      <button class="btn pri">Create Work Order</button>
-    </footer>
+        <section class="summary-grid" aria-label="Monitoring summary metrics">
+          <article class="summary-card">
+            <div class="summary-label">Open Alerts</div>
+            <div class="summary-value" style="color: var(--red);" id="metric-open">4</div>
+            <div class="summary-meta">2 high · 1 warning · 1 offline</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Commercial Units</div>
+            <div class="summary-value" style="color: var(--violet);" id="metric-commercial">3</div>
+            <div class="summary-meta">Monitoring-linked compliance workflow</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Residential Units</div>
+            <div class="summary-value" style="color: var(--cyan);" id="metric-residential">3</div>
+            <div class="summary-meta">Plus+ and follow-up coverage</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">Resolved Today</div>
+            <div class="summary-value" style="color: var(--green);" id="metric-resolved">2</div>
+            <div class="summary-meta">Battery + heartbeat exceptions closed</div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <div class="left-col">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📡 Alert Queue</div>
+                <div class="card-actions">
+                  <span class="status-chip status-cyan" id="queue-count">6 visible</span>
+                  <button class="btn-xs" id="clear-search-btn">Clear Search</button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="table-wrap">
+                  <table aria-label="Alert queue table">
+                    <thead>
+                      <tr>
+                        <th>Unit / Site</th>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Last Event</th>
+                        <th>Plan</th>
+                        <th>Customer</th>
+                        <th>Owner</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="alert-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">🕒 Recent Triage Activity</div>
+                <div class="card-actions"><button class="btn-xs">View Audit Log</button></div>
+              </div>
+              <div class="card-body">
+                <ul class="timeline" id="activity-timeline">
+                  <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-title">Battery weakness alert resolved</div>
+                    <div class="timeline-meta">Today 08:06 · Carter Residence · Sarah</div>
+                    <div class="timeline-body">Customer record updated, next planned visit kept in place, and monthly status report note appended automatically.</div>
+                  </li>
+                  <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-title">Threshold miss escalated for compliance review</div>
+                    <div class="timeline-meta">Today 07:42 · Shell Station 184 · Thomas</div>
+                    <div class="timeline-body">Load bank evaluation task opened and commercial customer profile flagged for follow-up during next PM cycle.</div>
+                  </li>
+                  <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-title">Offline event acknowledged</div>
+                    <div class="timeline-meta">Yesterday 18:20 · Kroger Backup Unit · Mia</div>
+                    <div class="timeline-body">Connectivity loss was logged, compliance packet note created, and work order draft staged for field review.</div>
+                  </li>
+                </ul>
+              </div>
+            </article>
+          </div>
+
+          <aside class="right-col">
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">⚠️ Selected Alert</div>
+                <div class="card-actions">
+                  <span class="status-chip status-red" id="selected-badge">High</span>
+                  <button class="btn-xs" id="copy-summary-btn">Copy Summary</button>
+                </div>
+              </div>
+              <div class="card-body section-stack">
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title" id="selected-site">Shell Station 184</div>
+                    <div class="subhead-meta" id="selected-time">Triggered 2026-08-31 07:15</div>
+                  </div>
+                  <div class="detail-grid">
+                    <div class="detail-box">
+                      <div class="detail-label">Monitoring Unit</div>
+                      <div class="detail-value" id="detail-unit">PT Series Cellular</div>
+                    </div>
+                    <div class="detail-box">
+                      <div class="detail-label">Customer Context</div>
+                      <div class="detail-value" id="detail-customer">Commercial · Premium+</div>
+                    </div>
+                    <div class="detail-box">
+                      <div class="detail-label">Alert Type</div>
+                      <div class="detail-value" id="detail-type"><strong>Monthly exercise threshold not met</strong></div>
+                    </div>
+                    <div class="detail-box">
+                      <div class="detail-label">Risk</div>
+                      <div class="detail-value" id="detail-risk">Load bank test may be required at next service interval.</div>
+                    </div>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Suggested Actions</div>
+                    <div class="subhead-meta">Select one or more downstream actions</div>
+                  </div>
+                  <div class="task-grid" id="task-grid">
+                    <label class="task-card selected"><input type="checkbox" checked value="Create compliance task" /><div class="task-title">Create compliance task</div><div class="task-sub">Attach exception to compliance tracker and annual packet.</div></label>
+                    <label class="task-card selected"><input type="checkbox" checked value="Flag customer record" /><div class="task-title">Flag customer record</div><div class="task-sub">Push risk indicator into customer detail and service planning.</div></label>
+                    <label class="task-card selected"><input type="checkbox" checked value="Include note in monthly report" /><div class="task-title">Include note in monthly report</div><div class="task-sub">Carry issue into customer-facing operational summary.</div></label>
+                    <label class="task-card"><input type="checkbox" value="Schedule load bank evaluation" /><div class="task-title">Schedule load bank evaluation</div><div class="task-sub">Open follow-up for next PM window or immediate dispatch.</div></label>
+                  </div>
+                </section>
+
+                <section>
+                  <div class="subhead">
+                    <div class="subhead-title">Triage Notes</div>
+                    <div class="subhead-meta">Saved with work order and customer timeline</div>
+                  </div>
+                  <textarea class="textarea" id="triage-notes">Threshold miss logged. Load bank evaluation should be added to next service cycle and monthly compliance summary should note the exception.</textarea>
+                </section>
+
+                <section>
+                  <div class="action-row">
+                    <div class="left">
+                      <button class="btn btn-success" id="resolve-btn">Resolve</button>
+                      <button class="btn btn-danger" id="escalate-btn">Escalate</button>
+                    </div>
+                    <div class="right">
+                      <button class="btn btn-ghost" id="flag-btn">Flag Customer</button>
+                      <button class="btn btn-primary" id="work-order-btn">Create Work Order</button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">🧩 Context + Automation Preview</div>
+                <div class="card-actions"><button class="btn-xs">Open Customer</button></div>
+              </div>
+              <div class="card-body">
+                <ul class="checklist">
+                  <li class="check-item">
+                    <div class="check-icon ok">✓</div>
+                    <div>
+                      <div class="check-title">Monitoring event linked to customer record</div>
+                      <div class="check-sub" id="ctx-record">Shell Station 184 will receive a timeline entry and active exception badge.</div>
+                    </div>
+                    <span class="status-chip status-cyan">Linked</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon warn">!</div>
+                    <div>
+                      <div class="check-title">Compliance impact</div>
+                      <div class="check-sub" id="ctx-compliance">NFPA threshold and annual packet should reflect the August miss.</div>
+                    </div>
+                    <span class="status-chip status-amber">Review</span>
+                  </li>
+                  <li class="check-item">
+                    <div class="check-icon ok">✓</div>
+                    <div>
+                      <div class="check-title">Report carry-forward</div>
+                      <div class="check-sub" id="ctx-report">Monthly summary and customer-facing report note can be auto-generated.</div>
+                    </div>
+                    <span class="status-chip status-green">Ready</span>
+                  </li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header">
+                <div class="card-title">📝 Generated Summary</div>
+                <div class="card-actions"><button class="btn-xs" id="regenerate-summary-btn">Regenerate</button></div>
+              </div>
+              <div class="card-body">
+                <div class="summary-box" id="generated-summary">
+                  <div class="summary-row"><span class="summary-key">Site</span><span class="summary-value-right">Shell Station 184</span></div>
+                  <div class="summary-row"><span class="summary-key">Alert</span><span class="summary-value-right">Threshold missed</span></div>
+                  <div class="summary-row"><span class="summary-key">Severity</span><span class="summary-value-right">High</span></div>
+                  <div class="summary-row"><span class="summary-key">Customer</span><span class="summary-value-right">Commercial · Premium+</span></div>
+                  <div class="summary-row"><span class="summary-key">Next Action</span><span class="summary-value-right" id="summary-action">Create compliance task, flag record, include in report</span></div>
+                </div>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="live-dot"></div>
+        <span>Monitoring stream active</span>
+        <div class="divider"></div>
+        <span id="footer-time">08:42:17 AM</span>
+        <div class="footer-spacer"></div>
+        <span>Monitoring / Alert Triage Screen · MVP Monolith</span>
+        <div class="divider"></div>
+        <span>Generator Command Center</span>
+      </footer>
+    </div>
   </div>
 
+  <div class="toast" id="toast"></div>
+
   <script>
-    (function(){
-      const rows = Array.from(document.querySelectorAll('#rows tr'));
-      const chips = Array.from(document.querySelectorAll('.chip'));
-      const title = document.getElementById('detail-title');
-      const risk = document.getElementById('risk-text');
+    (function () {
+      const alerts = [
+        {
+          id: 'a1',
+          site: 'Shell Station 184',
+          siteType: 'commercial',
+          status: 'alert',
+          alertType: 'Threshold missed',
+          detailType: 'Monthly exercise threshold not met',
+          severity: 'high',
+          lastEvent: '2026-08-31 07:15',
+          plan: 'Premium+',
+          owner: 'Thomas',
+          monitoringUnit: 'PT Series Cellular',
+          risk: 'Load bank test may be required at next service interval.',
+          customerLabel: 'Commercial · Premium+',
+          categoryTags: ['open', 'fault'],
+          rowAction: 'Open',
+          notes: 'Threshold miss logged. Load bank evaluation should be added to next service cycle and monthly compliance summary should note the exception.',
+          complianceContext: 'NFPA threshold and annual packet should reflect the August miss.',
+          reportContext: 'Monthly summary and customer-facing report note can be auto-generated.',
+          tasks: ['Create compliance task', 'Flag customer record', 'Include note in monthly report']
+        },
+        {
+          id: 'a2',
+          site: 'Carter Residence',
+          siteType: 'residential',
+          status: 'warning',
+          alertType: 'Battery',
+          detailType: 'Battery weakness detected',
+          severity: 'medium',
+          lastEvent: '2026-08-30 14:42',
+          plan: 'Plus+ Monitoring',
+          owner: 'Sarah',
+          monitoringUnit: 'PT Series',
+          risk: 'Battery replacement should be scheduled within 30 days to preserve standby readiness.',
+          customerLabel: 'Residential · Plus+ Monitoring',
+          categoryTags: ['open', 'battery'],
+          rowAction: 'Open',
+          notes: 'Customer should be contacted and battery replacement folded into the next planned service visit.',
+          complianceContext: 'No commercial compliance packet impact, but service follow-up should remain visible on account.',
+          reportContext: 'Monthly status report should note the warning and planned replacement.',
+          tasks: ['Flag customer record', 'Include note in monthly report']
+        },
+        {
+          id: 'a3',
+          site: 'BP Station 12',
+          siteType: 'commercial',
+          status: 'online',
+          alertType: 'Normal heartbeat',
+          detailType: 'Heartbeat reporting normally',
+          severity: 'low',
+          lastEvent: '2026-08-31 07:40',
+          plan: 'Standard',
+          owner: 'Automation',
+          monitoringUnit: 'PT Series Cellular',
+          risk: 'No immediate risk. Unit is online and heartbeat is current.',
+          customerLabel: 'Commercial · Standard',
+          categoryTags: [],
+          rowAction: 'View',
+          notes: 'No action needed. Keep current monitoring cadence.',
+          complianceContext: 'Heartbeat supports routine monitoring evidence but no exception has been created.',
+          reportContext: 'Can be included as a green status line in monthly summary.',
+          tasks: []
+        },
+        {
+          id: 'a4',
+          site: 'Kroger Backup Unit',
+          siteType: 'commercial',
+          status: 'offline',
+          alertType: 'Offline',
+          detailType: 'No signal for 14 hours',
+          severity: 'high',
+          lastEvent: '2026-08-31 01:10',
+          plan: 'Essential',
+          owner: 'Mia',
+          monitoringUnit: 'PT Series Cellular',
+          risk: 'Loss of telemetry may hide runtime or fault events until connectivity is restored.',
+          customerLabel: 'Commercial · Essential',
+          categoryTags: ['open', 'offline'],
+          rowAction: 'Open',
+          notes: 'Connectivity issue needs investigation. Consider work order if signal does not recover by next review window.',
+          complianceContext: 'Commercial account should carry an evidence gap note if monitoring logs are incomplete.',
+          reportContext: 'Monthly operational report should mention the connectivity interruption.',
+          tasks: ['Create compliance task', 'Include note in monthly report']
+        },
+        {
+          id: 'a5',
+          site: 'Johnson Residence',
+          siteType: 'residential',
+          status: 'online',
+          alertType: 'Exercise complete',
+          detailType: 'Exercise completed normally',
+          severity: 'low',
+          lastEvent: '2026-08-29 06:10',
+          plan: 'Annual',
+          owner: 'Automation',
+          monitoringUnit: 'PT Series',
+          risk: 'No issue. Unit exercised successfully and requires no follow-up.',
+          customerLabel: 'Residential · Annual',
+          categoryTags: [],
+          rowAction: 'View',
+          notes: 'Exercise run closed automatically.',
+          complianceContext: 'No commercial compliance impact.',
+          reportContext: 'Optional line item for monthly status reporting.',
+          tasks: []
+        },
+        {
+          id: 'a6',
+          site: 'Oak Pharmacy',
+          siteType: 'commercial',
+          status: 'warning',
+          alertType: 'Fault',
+          detailType: 'Coolant level low',
+          severity: 'medium',
+          lastEvent: '2026-08-30 18:03',
+          plan: 'Standard',
+          owner: 'Field Team',
+          monitoringUnit: 'PT Series',
+          risk: 'Extended operation could reduce reliability if coolant issue is not checked during next visit.',
+          customerLabel: 'Commercial · Standard',
+          categoryTags: ['open', 'fault'],
+          rowAction: 'Open',
+          notes: 'Flag for top-off and visual verification during next scheduled visit.',
+          complianceContext: 'No direct threshold issue, but commercial maintenance log should capture resolution.',
+          reportContext: 'Monthly report should note the warning and service plan response.',
+          tasks: ['Flag customer record', 'Include note in monthly report']
+        }
+      ];
 
-      rows.forEach(r => r.addEventListener('click', () => {
-        rows.forEach(x => x.classList.remove('active'));
-        r.classList.add('active');
-        title.textContent = `Selected Alert: ${r.dataset.site}`;
-        risk.textContent = r.dataset.risk;
-      }));
+      const taskDefinitions = [
+        {
+          title: 'Create compliance task',
+          description: 'Attach exception to compliance tracker and annual packet.'
+        },
+        {
+          title: 'Flag customer record',
+          description: 'Push risk indicator into customer detail and service planning.'
+        },
+        {
+          title: 'Include note in monthly report',
+          description: 'Carry issue into customer-facing operational summary.'
+        },
+        {
+          title: 'Schedule load bank evaluation',
+          description: 'Open follow-up for next PM window or immediate dispatch.'
+        }
+      ];
 
-      chips.forEach(c => c.addEventListener('click', () => {
-        chips.forEach(x => x.classList.remove('active'));
-        c.classList.add('active');
-      }));
+      let currentFilter = 'all';
+      let selectedId = 'a1';
+
+      const tableBody = document.getElementById('alert-table-body');
+      const searchInput = document.getElementById('global-search');
+      const queueCount = document.getElementById('queue-count');
+      const toast = document.getElementById('toast');
+      const notesEl = document.getElementById('triage-notes');
+      const taskGrid = document.getElementById('task-grid');
+
+      function badgeClass(severity) {
+        if (severity === 'high') return 'severity-high';
+        if (severity === 'medium') return 'severity-medium';
+        return 'severity-low';
+      }
+
+      function statusDotClass(status) {
+        if (status === 'alert') return 'alert';
+        if (status === 'warning') return 'warning';
+        if (status === 'offline') return 'offline';
+        return 'online';
+      }
+
+      function matchesFilter(alert) {
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'residential' || currentFilter === 'commercial') return alert.siteType === currentFilter;
+        if (currentFilter === 'open') return alert.categoryTags.includes('open');
+        return alert.categoryTags.includes(currentFilter);
+      }
+
+      function matchesSearch(alert) {
+        const q = searchInput.value.trim().toLowerCase();
+        if (!q) return true;
+        const haystack = [alert.site, alert.alertType, alert.detailType, alert.plan, alert.owner, alert.customerLabel].join(' ').toLowerCase();
+        return haystack.includes(q);
+      }
+
+      function visibleAlerts() {
+        return alerts.filter(a => matchesFilter(a) && matchesSearch(a));
+      }
+
+      function renderTable() {
+        const visible = visibleAlerts();
+        queueCount.textContent = `${visible.length} visible`;
+
+        if (!visible.some(a => a.id === selectedId) && visible[0]) {
+          selectedId = visible[0].id;
+        }
+
+        tableBody.innerHTML = visible.map(alert => `
+          <tr data-id="${alert.id}" class="${alert.id === selectedId ? 'selected' : ''}">
+            <td>
+              <div class="site-cell">
+                <span class="status-dot ${statusDotClass(alert.status)}"></span>
+                <div>
+                  <div style="font-weight:700;">${alert.site}</div>
+                  <div style="font-size:11px;color:var(--text-dim);">${alert.monitoringUnit}</div>
+                </div>
+              </div>
+            </td>
+            <td>${alert.detailType}</td>
+            <td><span class="severity-chip ${badgeClass(alert.severity)}">${alert.severity}</span></td>
+            <td>${alert.lastEvent}</td>
+            <td>${alert.plan}</td>
+            <td>${alert.customerLabel}</td>
+            <td>${alert.owner}</td>
+            <td><button class="btn-xs">${alert.rowAction}</button></td>
+          </tr>
+        `).join('');
+
+        Array.from(tableBody.querySelectorAll('tr')).forEach(row => {
+          row.addEventListener('click', () => {
+            selectedId = row.dataset.id;
+            renderTable();
+            renderSelected();
+          });
+        });
+      }
+
+      function renderTaskCards(selectedTasks) {
+        taskGrid.innerHTML = taskDefinitions.map(task => `
+          <label class="task-card ${selectedTasks.includes(task.title) ? 'selected' : ''}">
+            <input type="checkbox" value="${task.title}" ${selectedTasks.includes(task.title) ? 'checked' : ''} />
+            <div class="task-title">${task.title}</div>
+            <div class="task-sub">${task.description}</div>
+          </label>
+        `).join('');
+
+        Array.from(taskGrid.querySelectorAll('.task-card')).forEach(card => {
+          const input = card.querySelector('input');
+          input.addEventListener('change', () => {
+            card.classList.toggle('selected', input.checked);
+            renderGeneratedSummary();
+          });
+        });
+      }
+
+      function selectedAlert() {
+        return alerts.find(a => a.id === selectedId) || alerts[0];
+      }
+
+      function renderSelected() {
+        const alert = selectedAlert();
+        document.getElementById('selected-site').textContent = alert.site;
+        document.getElementById('selected-time').textContent = `Triggered ${alert.lastEvent}`;
+        document.getElementById('detail-unit').textContent = alert.monitoringUnit;
+        document.getElementById('detail-customer').textContent = alert.customerLabel;
+        document.getElementById('detail-type').innerHTML = `<strong>${alert.detailType}</strong>`;
+        document.getElementById('detail-risk').textContent = alert.risk;
+        document.getElementById('selected-badge').className = `status-chip ${alert.severity === 'high' ? 'status-red' : alert.severity === 'medium' ? 'status-amber' : 'status-violet'}`;
+        document.getElementById('selected-badge').textContent = alert.severity;
+        document.getElementById('ctx-record').textContent = `${alert.site} will receive a timeline entry and active exception badge.`;
+        document.getElementById('ctx-compliance').textContent = alert.complianceContext;
+        document.getElementById('ctx-report').textContent = alert.reportContext;
+        notesEl.value = alert.notes;
+        renderTaskCards(alert.tasks);
+        renderGeneratedSummary();
+      }
+
+      function selectedTaskValues() {
+        return Array.from(taskGrid.querySelectorAll('input:checked')).map(input => input.value);
+      }
+
+      function renderGeneratedSummary() {
+        const alert = selectedAlert();
+        const tasks = selectedTaskValues();
+        const actionText = tasks.length ? tasks.join(', ') : 'No downstream action selected';
+        document.getElementById('generated-summary').innerHTML = `
+          <div class="summary-row"><span class="summary-key">Site</span><span class="summary-value-right">${alert.site}</span></div>
+          <div class="summary-row"><span class="summary-key">Alert</span><span class="summary-value-right">${alert.alertType}</span></div>
+          <div class="summary-row"><span class="summary-key">Severity</span><span class="summary-value-right">${alert.severity}</span></div>
+          <div class="summary-row"><span class="summary-key">Customer</span><span class="summary-value-right">${alert.customerLabel}</span></div>
+          <div class="summary-row"><span class="summary-key">Next Action</span><span class="summary-value-right">${actionText}</span></div>
+        `;
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      function updateFooterClock() {
+        const now = new Date();
+        document.getElementById('footer-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+
+      document.getElementById('filter-row').addEventListener('click', (event) => {
+        const btn = event.target.closest('.filter-chip');
+        if (!btn) return;
+        currentFilter = btn.dataset.filter;
+        Array.from(document.querySelectorAll('.filter-chip')).forEach(chip => chip.classList.toggle('active', chip === btn));
+        renderTable();
+        renderSelected();
+      });
+
+      searchInput.addEventListener('input', () => {
+        renderTable();
+        renderSelected();
+      });
+
+      document.getElementById('clear-search-btn').addEventListener('click', () => {
+        searchInput.value = '';
+        renderTable();
+        renderSelected();
+      });
+
+      document.getElementById('resolve-btn').addEventListener('click', () => {
+        showToast(`Resolved ${selectedAlert().site} and saved triage notes.`);
+      });
+
+      document.getElementById('escalate-btn').addEventListener('click', () => {
+        showToast(`Escalated ${selectedAlert().site} for manual review.`);
+      });
+
+      document.getElementById('flag-btn').addEventListener('click', () => {
+        showToast(`Customer record flagged for ${selectedAlert().site}.`);
+      });
+
+      document.getElementById('work-order-btn').addEventListener('click', () => {
+        showToast(`Work order created for ${selectedAlert().site}.`);
+      });
+
+      document.getElementById('new-work-order-btn').addEventListener('click', () => {
+        showToast('Blank work order draft opened.');
+      });
+
+      document.getElementById('copy-summary-btn').addEventListener('click', async () => {
+        const text = document.getElementById('generated-summary').innerText.replace(/\n+/g, '\n');
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('Summary copied to clipboard.');
+        } catch (e) {
+          showToast('Summary ready to copy.');
+        }
+      });
+
+      document.getElementById('bulk-escalate-btn').addEventListener('click', () => {
+        showToast('Bulk escalate review staged for visible alerts.');
+      });
+
+      document.getElementById('export-view-btn').addEventListener('click', () => {
+        showToast('Current filtered view exported.');
+      });
+
+      document.getElementById('refresh-btn').addEventListener('click', () => {
+        showToast('Monitoring feed refreshed.');
+      });
+
+      document.getElementById('regenerate-summary-btn').addEventListener('click', renderGeneratedSummary);
+
+      updateFooterClock();
+      setInterval(updateFooterClock, 1000);
+      renderTable();
+      renderSelected();
     })();
   </script>
 </body>
