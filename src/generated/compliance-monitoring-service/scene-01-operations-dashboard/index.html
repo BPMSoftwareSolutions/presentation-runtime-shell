@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operations Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: #08101d; color: #eef2ff; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .scene { height: 100%; padding: 24px; display: grid; grid-template-rows: auto auto 1fr; gap: 14px; }
+    .card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; }
+    .header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .title { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+    .pill { font-size: 11px; color: #22d3ee; border: 1px solid rgba(34,211,238,.35); border-radius: 999px; padding: 4px 9px; }
+    .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+    .kpi { padding: 12px; }
+    .kpi .l { color: #94a3b8; font-size: 11px; text-transform: uppercase; }
+    .kpi .v { font-size: 28px; font-weight: 800; margin-top: 2px; }
+    .main { display: grid; grid-template-columns: 1.1fr 1fr .9fr; gap: 10px; min-height: 0; }
+    .section { padding: 10px; min-height: 0; display: flex; flex-direction: column; }
+    .h { font-size: 12px; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; }
+    ul { list-style: none; display: grid; gap: 8px; }
+    li { padding: 9px; border-radius: 8px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); font-size: 12px; }
+    .row { display: flex; justify-content: space-between; gap: 8px; }
+    .low { color: #a78bfa; } .med { color: #f59e0b; } .high { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="card header">
+      <div class="title">Generator Command Center</div>
+      <div class="pill">Today: 3 visits · 2 reports due · 1 compliance issue · 4 alerts</div>
+    </div>
+
+    <div class="kpis">
+      <div class="card kpi"><div class="l">Active Plans</div><div class="v" style="color:#22d3ee">12</div></div>
+      <div class="card kpi"><div class="l">Units Online</div><div class="v" style="color:#10b981">7</div></div>
+      <div class="card kpi"><div class="l">Reports this Month</div><div class="v" style="color:#818cf8">18</div></div>
+      <div class="card kpi"><div class="l">Exceptions</div><div class="v" style="color:#ef4444">2</div></div>
+    </div>
+
+    <div class="main">
+      <div class="card section">
+        <div class="h">Schedule</div>
+        <ul>
+          <li><div class="row"><span>08:00 Johnson Residence</span><span>Annual PM</span></div></li>
+          <li><div class="row"><span>10:30 Oak Pharmacy</span><span>Standard</span></div></li>
+          <li><div class="row"><span>13:00 BP Station 12</span><span>Premium+</span></div></li>
+        </ul>
+      </div>
+      <div class="card section">
+        <div class="h">Alerts / Tasks</div>
+        <ul>
+          <li><strong class="high">HIGH</strong> Shell Station 184 — threshold missed</li>
+          <li><strong class="med">MED</strong> Carter Residence — battery weakness</li>
+          <li><strong class="low">LOW</strong> Kroger Backup Unit — report due in 9 days</li>
+        </ul>
+      </div>
+      <div class="card section">
+        <div class="h">Customer Snapshot</div>
+        <ul>
+          <li class="row"><span>Residential</span><strong>08</strong></li>
+          <li class="row"><span>Commercial</span><strong>04</strong></li>
+          <li class="row"><span>Monitored Units</span><strong>07</strong></li>
+          <li class="row"><span>Open Repair Issues</span><strong>03</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Load Bank Decision Engine</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+    .scene{height:100%;padding:22px;display:grid;grid-template-rows:auto auto 1fr auto;gap:10px}
+    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+    .title{font-size:22px;font-weight:800}
+    .meta{font-size:12px;color:#94a3b8}
+    table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}th{font-size:11px;color:#94a3b8;text-transform:uppercase}
+    .yes{color:#10b981}.no{color:#ef4444}
+    .result{display:grid;grid-template-columns:1fr 1fr;gap:8px}.b{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.02);font-size:12px}
+    .actions{display:flex;justify-content:flex-end;gap:8px}.btn{padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.14);font-size:12px}.pri{color:#22d3ee;border-color:rgba(34,211,238,.3)}
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="card title">Load Bank Decision Engine</div>
+    <div class="card meta">Customer: Shell Station 184 · Plan: Standard · Annual Review Window: Jan–Dec 2026</div>
+    <div class="card" style="overflow:auto">
+      <table>
+        <thead><tr><th>Month</th><th>Exercise Run Met 30% Threshold?</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Jan</td><td class="yes">YES</td><td>Monitoring / manual log</td></tr>
+          <tr><td>Feb</td><td class="yes">YES</td><td>Monitoring / manual log</td></tr>
+          <tr><td>Mar</td><td class="yes">YES</td><td>Monitoring / manual log</td></tr>
+          <tr><td>Apr</td><td class="no">NO</td><td>Monitoring / manual log</td></tr>
+          <tr><td>May</td><td class="yes">YES</td><td>Monitoring / manual log</td></tr>
+          <tr><td>Jun</td><td class="yes">YES</td><td>Monitoring / manual log</td></tr>
+          <tr><td>Jul</td><td class="yes">YES</td><td>Monitoring / manual log</td></tr>
+          <tr><td>Aug</td><td class="no">NO</td><td>Monitoring / manual log</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card result">
+      <div class="b">Monthly threshold missed: <strong class="no">YES</strong></div>
+      <div class="b">Trigger annual load bank requirement: <strong class="no">YES</strong></div>
+      <div class="b">Recommended timing: <strong>Next spring PM visit</strong></div>
+      <div class="b">Estimated charge: <strong>$275 add-on</strong></div>
+    </div>
+    <div class="actions"><div class="btn">Create Task</div><div class="btn">Add to Report</div><div class="btn pri">Confirm Decision</div></div>
+  </div>
+</body>
+</html>
