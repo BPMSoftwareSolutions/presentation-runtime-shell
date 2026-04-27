@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Closing</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--green:#10b981;--violet:#a78bfa;--muted:#94a3b8;--dim:#475569;--border:rgba(255,255,255,.08)}
+
+.scene{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;position:relative}
+
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:56px 56px}
+.orb-1{position:absolute;width:700px;height:700px;border-radius:50%;filter:blur(140px);background:radial-gradient(circle,rgba(16,185,129,.07),transparent 70%);top:-160px;right:-120px;pointer-events:none}
+.orb-2{position:absolute;width:600px;height:600px;border-radius:50%;filter:blur(120px);background:radial-gradient(circle,rgba(139,92,246,.09),transparent 70%);bottom:-120px;left:-100px;pointer-events:none}
+
+/* Product phrase */
+.phrase{position:relative;z-index:1;text-align:center;max-width:680px;font-size:34px;font-weight:700;line-height:1.3;letter-spacing:-.02em;margin-bottom:48px}
+.phrase-accent{color:var(--green)}
+
+/* Principles */
+.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;width:100%;max-width:760px;position:relative;z-index:1;margin-bottom:40px}
+.principle{padding:20px 22px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.025)}
+.p-num{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--violet);margin-bottom:10px}
+.p-head{font-size:14px;font-weight:600;color:#eef2ff;margin-bottom:6px;line-height:1.4}
+.p-body{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* Live tag */
+.live-row{display:flex;align-items:center;gap:8px;position:relative;z-index:1}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.live-label{font-size:11px;text-transform:uppercase;letter-spacing:.22em;color:var(--green)}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <div class="phrase" data-reveal>
+    Loga is the <span class="phrase-accent">perception layer</span><br>for AI Engine reality-in-motion.
+  </div>
+
+  <div class="principles">
+    <div class="principle" data-reveal>
+      <div class="p-num">Principle 01</div>
+      <div class="p-head">Time is the primary dimension.</div>
+      <div class="p-body">Everything else — projects, workflows, evidence — is a projection of when it became true.</div>
+    </div>
+    <div class="principle" data-reveal>
+      <div class="p-num">Principle 02</div>
+      <div class="p-head">The screen is a lens, not a container.</div>
+      <div class="p-body">Every click narrows focus. Views replace themselves. The operator never stacks context below the fold.</div>
+    </div>
+    <div class="principle" data-reveal>
+      <div class="p-num">Principle 03</div>
+      <div class="p-head">The operator never scrolls to find NOW.</div>
+      <div class="p-body">Active state is always center-stage. If it requires scrolling to discover, the system has failed.</div>
+    </div>
+  </div>
+
+  <div class="live-row" data-reveal>
+    <div class="live-dot"></div>
+    <div class="live-label">Reality-in-Motion</div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('[data-reveal]').forEach((e,i) =>
+  e.style.animationDelay = `${0.12 + i * 0.18}s`
+);
+</script>
+</body></html>

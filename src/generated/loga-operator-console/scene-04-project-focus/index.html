@@ -1,0 +1,165 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Focus</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--green:#10b981;--violet:#a78bfa;--muted:#94a3b8;--dim:#475569;--border:rgba(255,255,255,.08);--surface:rgba(255,255,255,.03)}
+
+.scene{height:100%;display:grid;grid-template-rows:auto auto auto 1fr auto;padding:28px;gap:0}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);margin-bottom:18px}
+.bc-link{color:var(--violet);cursor:default}
+
+/* Project header */
+.proj-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.proj-left{display:flex;flex-direction:column;gap:6px}
+.proj-title{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.proj-stage-row{display:flex;align-items:center;gap:7px;font-size:13px}
+.stage-k{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim)}
+.stage-v{color:var(--muted)}
+.scope-chip{padding:5px 12px;border-radius:999px;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.06);font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:.12em}
+
+/* Active item */
+.active-item{border:1px solid rgba(16,185,129,.22);border-radius:18px;background:rgba(16,185,129,.035);padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden}
+.active-item::after{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,rgba(16,185,129,.6) 40%,rgba(16,185,129,.6) 60%,transparent);animation:scan 3s ease-in-out infinite}
+@keyframes scan{0%{transform:translateX(-100%);opacity:0}35%{opacity:1}65%{opacity:1}100%{transform:translateX(100%);opacity:0}}
+
+.active-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--green);margin-bottom:8px}
+.active-title{font-size:17px;font-weight:600;margin-bottom:16px}
+.active-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.afield{display:flex;flex-direction:column;gap:5px}
+.af-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim)}
+.af-value{font-size:14px;font-weight:600;color:#eef2ff}
+.af-value.timer{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);font-size:22px;letter-spacing:.02em}
+.af-value.healthy{color:var(--green)}
+.af-value.note{font-size:12px;font-weight:400;color:var(--muted);line-height:1.5}
+
+/* Playback stepper */
+.playback{margin-bottom:20px}
+.playback-label{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--dim);margin-bottom:14px}
+.stepper{display:flex;align-items:flex-start;gap:0}
+.step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+/* connector lines between steps */
+.step:not(:last-child)::after{content:'';position:absolute;top:16px;left:calc(50% + 18px);right:calc(-50% + 18px);height:1px;z-index:0}
+.step.done:not(:last-child)::after{background:rgba(16,185,129,.35)}
+.step.active:not(:last-child)::after{background:var(--border)}
+.step.pending:not(:last-child)::after{background:var(--border)}
+
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid;display:grid;place-items:center;font-size:13px;background:#08101d;position:relative;z-index:1}
+.step.done .step-circle{border-color:rgba(16,185,129,.5);color:var(--green)}
+.step.active .step-circle{border-color:var(--green);color:var(--green);animation:pulse-ring 2s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.25)}50%{box-shadow:0 0 0 7px rgba(16,185,129,0)}}
+.step.pending .step-circle{border-color:var(--border);color:var(--dim)}
+
+.step-label{font-size:11px;margin-top:7px;color:var(--muted);text-align:center;line-height:1.4;max-width:70px}
+.step.active .step-label{color:var(--green)}
+.step.pending .step-label{color:var(--dim)}
+
+.step-sub{font-size:10px;color:var(--green);margin-top:3px;font-family:ui-monospace,monospace;text-align:center}
+
+/* Upcoming */
+.upcoming-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.upcoming-label{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--dim);margin-bottom:10px;grid-column:1/-1}
+.up-item{display:flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid var(--border);border-radius:11px;background:var(--surface)}
+.up-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0}
+.up-text{font-size:12px;color:var(--muted)}
+
+[data-reveal]{opacity:0;transform:translateY(10px);animation:reveal .5s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+
+  <div class="breadcrumb" data-reveal>
+    <span class="bc-link">← Loga</span>
+    <span>/</span>
+    <span>Resume Generator</span>
+  </div>
+
+  <div class="proj-header" data-reveal>
+    <div class="proj-left">
+      <div class="proj-title">Resume Generator</div>
+      <div class="proj-stage-row">
+        <span class="stage-k">Stage</span>
+        <span class="stage-v">Narrative Synthesis</span>
+      </div>
+    </div>
+    <div class="scope-chip">Now</div>
+  </div>
+
+  <div class="active-item" data-reveal>
+    <div class="active-eyebrow">● Active Item</div>
+    <div class="active-title">Generate tailored resume narrative</div>
+    <div class="active-grid">
+      <div class="afield">
+        <div class="af-label">Time in state</div>
+        <div class="af-value timer" id="timer">12m 14s</div>
+      </div>
+      <div class="afield">
+        <div class="af-label">Staleness</div>
+        <div class="af-value healthy">Healthy</div>
+      </div>
+      <div class="afield">
+        <div class="af-label">Next closure</div>
+        <div class="af-value note">Draft generated and evidence linked</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="playback" data-reveal>
+    <div class="playback-label">Workflow Playback</div>
+    <div class="stepper">
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <div class="step-label">Intake</div>
+      </div>
+      <div class="step done">
+        <div class="step-circle">✓</div>
+        <div class="step-label">Parse</div>
+      </div>
+      <div class="step active">
+        <div class="step-circle">●</div>
+        <div class="step-label">Synthesize</div>
+        <div class="step-sub" id="step-timer">12m 14s</div>
+      </div>
+      <div class="step pending">
+        <div class="step-circle">○</div>
+        <div class="step-label">Format</div>
+      </div>
+      <div class="step pending">
+        <div class="step-circle">○</div>
+        <div class="step-label">Review</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="upcoming-grid" data-reveal>
+    <div class="upcoming-label">Upcoming</div>
+    <div class="up-item"><div class="up-dot"></div><div class="up-text">Format resume artifact</div></div>
+    <div class="up-item"><div class="up-dot"></div><div class="up-text">Run quality checks</div></div>
+    <div class="up-item"><div class="up-dot"></div><div class="up-text">Prepare export packet</div></div>
+    <div class="up-item"><div class="up-dot"></div><div class="up-text">Publish final artifact</div></div>
+  </div>
+
+</div>
+<script>
+document.querySelectorAll('[data-reveal]').forEach((e,i) =>
+  e.style.animationDelay = `${0.06 + i * 0.12}s`
+);
+
+let secs = 12 * 60 + 14;
+function fmt(s) {
+  return `${Math.floor(s / 60)}m ${(s % 60).toString().padStart(2, '0')}s`;
+}
+const t1 = document.getElementById('timer');
+const t2 = document.getElementById('step-timer');
+setInterval(() => {
+  secs++;
+  t1.textContent = fmt(secs);
+  t2.textContent = fmt(secs);
+}, 1000);
+</script>
+</body></html>

@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflow Playback</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--green:#10b981;--violet:#a78bfa;--muted:#94a3b8;--dim:#475569;--border:rgba(255,255,255,.08);--surface:rgba(255,255,255,.03)}
+
+.scene{height:100%;display:grid;grid-template-rows:auto auto 1fr auto;padding:28px;gap:0}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+.bc-link{color:var(--violet);cursor:default}
+.run-badge{padding:5px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:11px;color:var(--dim);font-family:ui-monospace,monospace}
+
+/* Movements overview bar */
+.movements-bar{display:flex;gap:2px;height:38px;margin-bottom:20px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.02);border:1px solid var(--border)}
+.mov-seg{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;transition:background .3s}
+.mov-seg.done{background:rgba(16,185,129,.07);color:var(--green)}
+.mov-seg.active-seg{background:rgba(16,185,129,.1);color:var(--green);border-top:1px solid rgba(16,185,129,.25);border-bottom:1px solid rgba(16,185,129,.25)}
+.mov-seg.pending{color:var(--dim)}
+.mov-check{font-size:11px}
+
+/* Current movement detail */
+.movement-detail{border:1px solid rgba(16,185,129,.2);border-radius:18px;background:rgba(16,185,129,.025);padding:20px 24px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.mov-header{display:flex;justify-content:space-between;align-items:center}
+.mov-name{font-size:16px;font-weight:600}
+.mov-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green)}
+.mov-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* Beats */
+.beats{display:flex;flex-direction:column;gap:9px}
+.beat{display:grid;grid-template-columns:30px 1fr auto;gap:11px;align-items:center;padding:12px 14px;border-radius:13px;background:rgba(255,255,255,.025)}
+.beat.beat-active{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15)}
+.beat.beat-done{opacity:.72}
+.beat.beat-pending{opacity:.55}
+
+.beat-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.beat-icon.done{background:rgba(16,185,129,.1);color:var(--green)}
+.beat-icon.active{background:rgba(16,185,129,.14);color:var(--green);animation:pulse-icon 2s ease-in-out infinite}
+@keyframes pulse-icon{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.3)}50%{box-shadow:0 0 0 6px rgba(16,185,129,0)}}
+.beat-icon.pending{background:rgba(255,255,255,.04);color:var(--dim)}
+
+.beat-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.beat-title{font-size:13px;font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.beat-active .beat-title{color:#eef2ff}
+.beat-done .beat-title{color:var(--muted)}
+.beat-pending .beat-title{color:var(--dim)}
+.beat-intent{font-size:11px;color:var(--dim);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.beat-active .beat-intent{color:var(--muted)}
+
+.beat-time{font-size:12px;text-align:right;font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace;white-space:nowrap}
+.beat-active .beat-time{color:var(--green);font-weight:600}
+.beat-done .beat-time{color:var(--muted)}
+.beat-pending .beat-time{color:var(--dim)}
+
+/* Operator intent block */
+.intent-block{padding:14px 18px;border-radius:13px;background:rgba(139,92,246,.05);border:1px solid rgba(139,92,246,.14)}
+.intent-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--violet);margin-bottom:5px}
+.intent-text{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* Bottom row */
+.bottom-row{display:flex;justify-content:flex-end;align-items:center;padding-top:14px}
+.evidence-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:12px;color:var(--muted);cursor:default}
+.evidence-btn:hover{border-color:rgba(167,139,250,.3);color:var(--violet)}
+
+[data-reveal]{opacity:0;transform:translateY(10px);animation:reveal .5s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+
+  <div class="header" data-reveal>
+    <div class="breadcrumb">
+      <span class="bc-link">← Resume Generator</span>
+      <span>/</span>
+      <span>Workflow Run</span>
+    </div>
+    <div class="run-badge">run-2026-04-27-001</div>
+  </div>
+
+  <!-- Movements overview bar -->
+  <div class="movements-bar" data-reveal>
+    <div class="mov-seg done"><span class="mov-check">✓</span> Data Intake</div>
+    <div class="mov-seg active-seg"><span class="mov-check">●</span> Content Synthesis</div>
+    <div class="mov-seg pending">Quality Review</div>
+    <div class="mov-seg pending">Delivery</div>
+  </div>
+
+  <!-- Current movement: Content Synthesis -->
+  <div class="movement-detail" data-reveal>
+    <div class="mov-header">
+      <div class="mov-name">Content Synthesis</div>
+      <div class="mov-status"><div class="mov-dot"></div> Running</div>
+    </div>
+
+    <div class="beats">
+      <div class="beat beat-done" data-reveal>
+        <div class="beat-icon done">✓</div>
+        <div class="beat-body">
+          <div class="beat-title">generate_narrative</div>
+          <div class="beat-intent">Base narrative constructed from source profile data.</div>
+        </div>
+        <div class="beat-time">4m 31s</div>
+      </div>
+
+      <div class="beat beat-active" data-reveal>
+        <div class="beat-icon active">●</div>
+        <div class="beat-body">
+          <div class="beat-title">synthesize_tailored_content</div>
+          <div class="beat-intent">Converting experience data into a narrative for the target role.</div>
+        </div>
+        <div class="beat-time" id="beat-timer">12m 14s</div>
+      </div>
+
+      <div class="beat beat-pending" data-reveal>
+        <div class="beat-icon pending">○</div>
+        <div class="beat-body">
+          <div class="beat-title">render_audio_segments</div>
+          <div class="beat-intent">Convert prepared text segments into audio artifacts.</div>
+        </div>
+        <div class="beat-time">—</div>
+      </div>
+    </div>
+
+    <div class="intent-block" data-reveal>
+      <div class="intent-eyebrow">Operator Intent</div>
+      <div class="intent-text">We are synthesizing a tailored narrative and waiting for artifact completion. Expected duration: minutes. Evidence will be required before closing this step.</div>
+    </div>
+  </div>
+
+  <div class="bottom-row" data-reveal>
+    <div class="evidence-btn">📎 &nbsp;Open Evidence Drawer</div>
+  </div>
+
+</div>
+<script>
+document.querySelectorAll('[data-reveal]').forEach((e,i) =>
+  e.style.animationDelay = `${0.06 + i * 0.1}s`
+);
+
+let secs = 12 * 60 + 14;
+const bt = document.getElementById('beat-timer');
+setInterval(() => {
+  secs++;
+  bt.textContent = `${Math.floor(secs / 60)}m ${(secs % 60).toString().padStart(2, '0')}s`;
+}, 1000);
+</script>
+</body></html>

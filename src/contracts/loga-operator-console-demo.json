@@ -1,0 +1,149 @@
+{
+  "id": "loga-operator-console-demo",
+  "title": "Loga: Operator Console",
+  "status": "ready",
+  "theme": {
+    "shell": "dark",
+    "accent": "violet",
+    "presenterPosition": "left"
+  },
+  "settings": {
+    "typingSpeedMs": 20,
+    "playbackMode": "interactive",
+    "betweenScenesMs": 1600,
+    "waitForIframeReadyTimeoutMs": 8000,
+    "startDelayMs": 0,
+    "endCardDurationMs": 0
+  },
+  "scenes": [
+    {
+      "id": "loga-01",
+      "title": "Title Card",
+      "type": "title",
+      "editIntent": "Cinematic opener for Loga. Establish brand identity with the product phrase front and center. Three pillars: Time-Centered, Focus-Driven, Always Alive. Sets up the contrast with the wrong model in scene 02.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "This is Loga.", "pauseMs": 800 },
+          { "text": " Not a dashboard.", "pauseMs": 600 },
+          { "text": " A perception system for AI Engine reality-in-motion.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-01-title/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "loga-02",
+      "title": "The Wrong Model",
+      "type": "narrative",
+      "editIntent": "Show the old model: stacked scrollable panels, stale badges everywhere, the operator hunting for what's happening right now. Visually cluttered left panel vs. the named problem on the right. Sets up the reveal in scene 03.",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Every dashboard starts the same way.", "pauseMs": 700 },
+          { "text": " A list you scroll through.", "pauseMs": 600 },
+          { "text": " Projects, workflows, statuses — none of which tell you what's happening right now.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-02-problem/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "loga-03",
+      "title": "Operator Home: Now",
+      "type": "framework",
+      "editIntent": "The hero scene. Loga defaults to Now. One live workflow is center-stage with a ticking timer, staleness band, and next expected closure. Recent signals feed on the right. Active projects sorted by last activity below. Nothing is buried. The timer ticks in real-time.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Loga defaults to now.", "pauseMs": 700 },
+          { "text": " The live workflow is center-stage.", "pauseMs": 600 },
+          { "text": " The timer is ticking.", "pauseMs": 600 },
+          { "text": " No hunting. No scrolling.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-03-operator-home/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "loga-04",
+      "title": "Project Focus",
+      "type": "framework",
+      "editIntent": "Operator drills into the active project. The screen replaces itself — no stacking. Project: Resume Generator. Active item front and center with ticking timer. Workflow playback stepper below: Intake ✓ → Parse ✓ → Synthesize ● (pulsing) → Format ○ → Review ○. Upcoming items are visible but secondary.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Click into a project.", "pauseMs": 700 },
+          { "text": " The screen replaces itself with a focused lens.", "pauseMs": 600 },
+          { "text": " Active item front and center.", "pauseMs": 500 },
+          { "text": " Timer ticking.", "pauseMs": 500 },
+          { "text": " Next closure explicit.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-04-project-focus/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "loga-05",
+      "title": "Workflow Playback",
+      "type": "chart",
+      "editIntent": "Zoom into the workflow run at beat level. Movements bar at top (Data Intake ✓, Content Synthesis ●, Quality Review ○, Delivery ○). Current movement expanded: completed beat (generate_narrative, 4m 31s), active beat pulsing (synthesize_tailored_content, ticking), pending beat (render_audio_segments). Operator intent block below the active beat. Evidence drawer button.",
+      "presenter": {
+        "mode": "reveal",
+        "blocks": [
+          { "text": "Every workflow run becomes a playable timeline.", "pauseMs": 700 },
+          { "text": " Completed beats are archived.", "pauseMs": 500 },
+          { "text": " The active beat pulses.", "pauseMs": 600 },
+          { "text": " Evidence is one click away.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-05-workflow-playback/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "loga-06",
+      "title": "Time Scope: Today",
+      "type": "narrative",
+      "editIntent": "Show the time scope selector switching from Now to Today. The entire surface reorients to show today's operational picture: summary metrics (3 workflows completed, 2 projects advanced, 1 code sync, 14 evidence items), and a timeline of today's events. Contrast with the Now view.",
+      "presenter": {
+        "mode": "thinking",
+        "blocks": [
+          { "text": "Change the time scope.", "pauseMs": 700 },
+          { "text": " The entire surface reorients.", "pauseMs": 600 },
+          { "text": " Today's picture: three workflows completed, two projects advanced, one code sync.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-06-time-scope-today/index.html"
+      },
+      "advance": { "type": "manual" }
+    },
+    {
+      "id": "loga-07",
+      "title": "Closing",
+      "type": "closing",
+      "editIntent": "Close with the product phrase large and centered. Three principle cards below: Time is the primary dimension / The screen is a lens not a container / The operator never scrolls to find NOW. Live dot at bottom. Dark background with orbs. Sets up the question: what does this look like in your system?",
+      "presenter": {
+        "mode": "impact",
+        "blocks": [
+          { "text": "Loga is not a dashboard wall.", "pauseMs": 700 },
+          { "text": " It is a perception system for AI Engine reality-in-motion.", "pauseMs": 0 }
+        ]
+      },
+      "content": {
+        "route": "./src/generated/loga-operator-console/scene-07-closing/index.html"
+      },
+      "advance": { "type": "manual" }
+    }
+  ]
+}

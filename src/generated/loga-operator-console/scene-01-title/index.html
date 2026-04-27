@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loga</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--green:#10b981;--violet:#a78bfa;--muted:#94a3b8;--dim:#475569;--border:rgba(255,255,255,.08)}
+
+.scene{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:48px}
+
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:56px 56px}
+.orb-1{position:absolute;width:600px;height:600px;border-radius:50%;filter:blur(130px);background:radial-gradient(circle,rgba(16,185,129,.09),transparent 70%);top:-120px;right:-80px;pointer-events:none}
+.orb-2{position:absolute;width:500px;height:500px;border-radius:50%;filter:blur(110px);background:radial-gradient(circle,rgba(139,92,246,.12),transparent 70%);bottom:-100px;left:-80px;pointer-events:none}
+
+.brand{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0}
+
+.live-row{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.live-label{font-size:11px;text-transform:uppercase;letter-spacing:.22em;color:var(--green)}
+
+.wordmark{font-size:104px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;line-height:1;color:#eef2ff;margin-bottom:20px}
+
+.subtitle{font-size:17px;color:var(--muted);letter-spacing:.025em;line-height:1.7;text-align:center;max-width:440px;margin-bottom:52px}
+
+.pillars{display:flex;gap:20px;position:relative;z-index:1}
+.pillar{padding:16px 22px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03);text-align:center;min-width:148px}
+.pillar-label{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--dim);margin-bottom:6px}
+.pillar-value{font-size:14px;font-weight:600;color:var(--violet)}
+
+[data-reveal]{opacity:0;transform:translateY(14px);animation:reveal .55s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="grid"></div>
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <div class="brand">
+    <div class="live-row" data-reveal>
+      <div class="live-dot"></div>
+      <div class="live-label">Perception Layer</div>
+    </div>
+    <div class="wordmark" data-reveal>LOGA</div>
+    <div class="subtitle" data-reveal>Perception System for<br>AI Engine Reality-in-Motion</div>
+
+    <div class="pillars">
+      <div class="pillar" data-reveal>
+        <div class="pillar-label">Dimension</div>
+        <div class="pillar-value">Time-Centered</div>
+      </div>
+      <div class="pillar" data-reveal>
+        <div class="pillar-label">Navigation</div>
+        <div class="pillar-value">Focus-Driven</div>
+      </div>
+      <div class="pillar" data-reveal>
+        <div class="pillar-label">Interface</div>
+        <div class="pillar-value">Always Alive</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('[data-reveal]').forEach((e,i) =>
+  e.style.animationDelay = `${0.1 + i * 0.2}s`
+);
+</script>
+</body></html>

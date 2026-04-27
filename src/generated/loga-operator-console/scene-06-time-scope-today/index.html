@@ -1,0 +1,193 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Scope: Today</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--green:#10b981;--violet:#a78bfa;--indigo:#818cf8;--amber:#f59e0b;--muted:#94a3b8;--dim:#475569;--border:rgba(255,255,255,.08);--surface:rgba(255,255,255,.03)}
+
+.scene{height:100%;display:grid;grid-template-rows:auto auto 1fr;padding:28px;gap:0}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.brand{font-size:20px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.time-scope{display:flex;gap:5px}
+.scope-pill{padding:6px 13px;border-radius:999px;font-size:12px;border:1px solid var(--border);color:var(--muted);cursor:default}
+.scope-pill.active{border-color:rgba(129,140,248,.4);background:rgba(129,140,248,.08);color:var(--indigo);font-weight:500}
+
+/* Summary metrics row */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.summary-card{padding:16px 18px;border:1px solid var(--border);border-radius:16px;background:var(--surface);display:flex;flex-direction:column;gap:7px}
+.s-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim)}
+.s-value{font-size:28px;font-weight:800;line-height:1}
+.s-green{color:var(--green)}
+.s-violet{color:var(--violet)}
+.s-amber{color:var(--amber)}
+.s-white{color:#eef2ff}
+.s-sub{font-size:11px;color:var(--dim)}
+
+/* Timeline */
+.timeline{border:1px solid var(--border);border-radius:18px;background:var(--surface);padding:20px 24px;overflow:hidden}
+.tl-header{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--dim);margin-bottom:16px}
+.tl-list{display:flex;flex-direction:column;gap:0}
+.tl-entry{display:grid;grid-template-columns:64px 16px 1fr;gap:12px;align-items:flex-start;padding:10px 0}
+.tl-entry:not(:last-child){border-bottom:1px solid rgba(255,255,255,.04)}
+
+.tl-time{font-size:12px;color:var(--dim);font-family:ui-monospace,monospace;padding-top:2px;text-align:right}
+
+.tl-dot-col{display:flex;flex-direction:column;align-items:center;gap:0;position:relative;padding-top:4px}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tl-line{width:1px;flex:1;min-height:20px;margin-top:4px}
+.d-wf{background:rgba(16,185,129,.7)}
+.d-code{background:rgba(129,140,248,.7)}
+.d-audio{background:rgba(167,139,250,.7)}
+.d-proj{background:rgba(245,158,11,.7)}
+.l-wf{background:rgba(16,185,129,.12)}
+.l-code{background:rgba(129,140,248,.12)}
+.l-audio{background:rgba(167,139,250,.12)}
+.l-proj{background:rgba(245,158,11,.12)}
+
+.tl-body{padding-top:2px}
+.tl-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.tl-summary{font-size:11px;color:var(--muted);line-height:1.5}
+.tl-tag{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:999px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;background:rgba(255,255,255,.05);color:var(--dim)}
+
+[data-reveal]{opacity:0;transform:translateY(10px);animation:reveal .5s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+
+  <!-- Header: time scope changed to Today -->
+  <div class="header" data-reveal>
+    <div class="brand">Loga</div>
+    <div class="time-scope">
+      <div class="scope-pill">Now</div>
+      <div class="scope-pill">Last 5m</div>
+      <div class="scope-pill">Last hour</div>
+      <div class="scope-pill active">Today</div>
+      <div class="scope-pill">This week</div>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary" data-reveal>
+    <div class="summary-card">
+      <div class="s-label">Workflows completed</div>
+      <div class="s-value s-green" id="c-wf">0</div>
+      <div class="s-sub">across 3 projects</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Projects advanced</div>
+      <div class="s-value s-violet" id="c-proj">0</div>
+      <div class="s-sub">with active roadmap items</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Code syncs</div>
+      <div class="s-value s-amber" id="c-sync">0</div>
+      <div class="s-sub">symbols refreshed</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">Evidence created</div>
+      <div class="s-value s-white" id="c-ev">0</div>
+      <div class="s-sub">across all workflows</div>
+    </div>
+  </div>
+
+  <!-- Activity timeline -->
+  <div class="timeline" data-reveal>
+    <div class="tl-header">Today's Activity — April 27, 2026</div>
+    <div class="tl-list">
+
+      <div class="tl-entry">
+        <div class="tl-time">14:02</div>
+        <div class="tl-dot-col">
+          <div class="tl-dot d-wf"></div>
+          <div class="tl-line l-wf"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-title">Resume Generator workflow started</div>
+          <div class="tl-summary">Narrative synthesis phase initiated. Currently running at 12m+.</div>
+          <span class="tl-tag">workflow · live</span>
+        </div>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-time">13:47</div>
+        <div class="tl-dot-col">
+          <div class="tl-dot d-audio"></div>
+          <div class="tl-line l-audio"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-title">Audio Pipeline workflow completed</div>
+          <div class="tl-summary">3 audio segments rendered and archived as artifacts.</div>
+          <span class="tl-tag">workflow</span>
+        </div>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-time">13:31</div>
+        <div class="tl-dot-col">
+          <div class="tl-dot d-code"></div>
+          <div class="tl-line l-code"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-title">Codebase shape sync completed</div>
+          <div class="tl-summary">Files and symbols refreshed from CI/CD into SQL-backed codebase memory.</div>
+          <span class="tl-tag">ci/cd</span>
+        </div>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-time">11:18</div>
+        <div class="tl-dot-col">
+          <div class="tl-dot d-proj"></div>
+          <div class="tl-line l-proj"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-title">Codebase Refactor roadmap advanced</div>
+          <div class="tl-summary">Implementation item "Extract API surface" moved to complete.</div>
+          <span class="tl-tag">project</span>
+        </div>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-time">09:52</div>
+        <div class="tl-dot-col">
+          <div class="tl-dot d-wf"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-title">Analytics Report workflow completed</div>
+          <div class="tl-summary">Weekly metrics compiled and exported as evidence artifact.</div>
+          <span class="tl-tag">workflow</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<script>
+document.querySelectorAll('[data-reveal]').forEach((e,i) =>
+  e.style.animationDelay = `${0.06 + i * 0.12}s`
+);
+
+function countUp(id, target, dur, delay) {
+  const el = document.getElementById(id);
+  const t0 = performance.now() + delay;
+  (function step(now) {
+    if (now < t0) { requestAnimationFrame(step); return; }
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(e * target);
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target;
+  })(performance.now());
+}
+countUp('c-wf',   3, 900,  500);
+countUp('c-proj', 2, 900,  600);
+countUp('c-sync', 1, 700,  700);
+countUp('c-ev',  14, 1100, 550);
+</script>
+</body></html>

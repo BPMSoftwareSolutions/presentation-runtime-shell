@@ -6,5 +6,6 @@
   "./src/contracts/resume-demo-deck.json",
   "./src/contracts/fleetops-demo.json",
   "./src/contracts/mortgage-audit-demo.json",
-  "./src/contracts/compliance-monitoring-service-demo.json"
+  "./src/contracts/compliance-monitoring-service-demo.json",
+  "./src/contracts/loga-operator-console-demo.json"
 ]

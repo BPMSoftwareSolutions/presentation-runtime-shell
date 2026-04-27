@@ -1,0 +1,231 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operator Home: Now</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#08101d;color:#eef2ff;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+:root{--green:#10b981;--violet:#a78bfa;--amber:#f59e0b;--muted:#94a3b8;--dim:#475569;--border:rgba(255,255,255,.08);--surface:rgba(255,255,255,.03)}
+
+.scene{height:100%;display:grid;grid-template-rows:auto 1fr;padding:28px;gap:20px}
+
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:20px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.time-scope{display:flex;gap:5px}
+.scope-pill{padding:6px 13px;border-radius:999px;font-size:12px;border:1px solid var(--border);color:var(--muted);cursor:default}
+.scope-pill.active{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.07);color:var(--green);font-weight:500}
+
+/* Body grid */
+.body{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;min-height:0}
+
+/* Left column */
+.left{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0}
+
+/* LIVE NOW */
+.live-now{display:flex;flex-direction:column;gap:12px}
+.section-row{display:flex;align-items:center;gap:8px}
+.section-label{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--dim)}
+.live-badge{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.18)}
+.live-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+.live-badge-text{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--green)}
+
+/* Workflow card — the hero */
+.wf-card{border:1px solid rgba(16,185,129,.22);border-radius:18px;background:rgba(16,185,129,.035);padding:20px 22px;display:flex;flex-direction:column;gap:13px;position:relative;overflow:hidden}
+.wf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent 0%,rgba(16,185,129,.5) 40%,rgba(16,185,129,.5) 60%,transparent 100%);animation:slide 3s ease-in-out infinite}
+@keyframes slide{0%{opacity:0;transform:translateX(-100%)}40%{opacity:1}60%{opacity:1}100%{opacity:0;transform:translateX(100%)}}
+
+.wf-top{display:flex;justify-content:space-between;align-items:flex-start}
+.wf-name{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.freshness-chip{padding:3px 10px;border-radius:999px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:var(--green);display:flex;align-items:center;gap:5px}
+.f-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+
+.step-block{display:flex;flex-direction:column;gap:3px}
+.step-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim)}
+.step-name{font-size:13px;color:var(--muted)}
+
+.timer-row{display:flex;align-items:center;gap:10px}
+.timer{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--green);letter-spacing:.02em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.health-chip{padding:3px 9px;border-radius:6px;font-size:10px;text-transform:uppercase;letter-spacing:.14em;background:rgba(16,185,129,.08);color:var(--green);border:1px solid rgba(16,185,129,.18)}
+
+.wf-meta{display:flex;flex-direction:column;gap:5px}
+.meta-row{display:flex;gap:6px;align-items:baseline;font-size:12px}
+.meta-k{color:var(--dim);min-width:90px}
+.meta-v{color:var(--muted)}
+.meta-v.live{color:var(--green)}
+
+.wf-actions{display:flex;gap:7px;padding-top:2px}
+.btn{padding:7px 14px;border-radius:9px;font-size:12px;font-weight:500;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);cursor:default}
+.btn-primary{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.07);color:var(--green)}
+
+/* Active projects card */
+.projects-card{border:1px solid var(--border);border-radius:18px;background:var(--surface);padding:18px 20px;overflow:hidden}
+.card-header{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--dim);margin-bottom:12px}
+.proj-list{display:flex;flex-direction:column;gap:8px}
+.proj-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.025)}
+.proj-info{display:flex;flex-direction:column;gap:2px}
+.proj-name{font-size:13px;font-weight:500}
+.proj-act{font-size:11px;color:var(--dim)}
+.band{font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:2px 8px;border-radius:999px}
+.band-live{background:rgba(16,185,129,.1);color:var(--green)}
+.band-recent{background:rgba(245,158,11,.1);color:var(--amber)}
+.band-today{background:rgba(255,255,255,.05);color:var(--muted)}
+
+/* Right column: signals */
+.right{display:flex;flex-direction:column;gap:14px;min-height:0}
+.signals-card{border:1px solid var(--border);border-radius:18px;background:var(--surface);padding:18px 20px;flex:1;overflow:hidden}
+.sig-list{display:flex;flex-direction:column;gap:8px}
+.sig-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.025)}
+.sig-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px;flex-shrink:0}
+.ic-code{background:rgba(129,140,248,.1)}
+.ic-audio{background:rgba(167,139,250,.1)}
+.ic-roadmap{background:rgba(16,185,129,.1)}
+.sig-body{min-width:0}
+.sig-title{font-size:13px;color:#eef2ff}
+.sig-time{font-size:11px;color:var(--dim);margin-top:2px;line-height:1.4}
+
+[data-reveal]{opacity:0;transform:translateY(10px);animation:reveal .5s ease forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="scene">
+
+  <!-- Header -->
+  <div class="header" data-reveal>
+    <div class="brand">
+      <div class="live-dot"></div>
+      Loga
+    </div>
+    <div class="time-scope">
+      <div class="scope-pill active">Now</div>
+      <div class="scope-pill">Last 5m</div>
+      <div class="scope-pill">Last hour</div>
+      <div class="scope-pill">Today</div>
+      <div class="scope-pill">This week</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <!-- Left -->
+    <div class="left">
+      <div class="live-now">
+        <div class="section-row" data-reveal>
+          <span class="section-label">Live Now</span>
+          <div class="live-badge">
+            <div class="live-badge-dot"></div>
+            <span class="live-badge-text">Active</span>
+          </div>
+        </div>
+
+        <div class="wf-card" data-reveal>
+          <div class="wf-top">
+            <div class="wf-name">Resume Generator</div>
+            <div class="freshness-chip"><div class="f-dot"></div> Live</div>
+          </div>
+          <div class="step-block">
+            <div class="step-eyebrow">Current Step</div>
+            <div class="step-name">Synthesizing tailored narrative</div>
+          </div>
+          <div class="timer-row">
+            <div class="timer" id="timer">12m 14s</div>
+            <div class="health-chip">Healthy</div>
+          </div>
+          <div class="wf-meta">
+            <div class="meta-row">
+              <span class="meta-k">Last activity</span>
+              <span class="meta-v live">38s ago</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-k">Next closure</span>
+              <span class="meta-v">Draft resume artifact ready for review</span>
+            </div>
+          </div>
+          <div class="wf-actions">
+            <div class="btn btn-primary">Open Workflow</div>
+            <div class="btn">Open Project</div>
+            <div class="btn">Evidence</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="projects-card" data-reveal>
+        <div class="card-header">Active Projects — sorted by last activity</div>
+        <div class="proj-list">
+          <div class="proj-row">
+            <div class="proj-info">
+              <div class="proj-name">Resume Generator</div>
+              <div class="proj-act">Activity 38s ago · Narrative synthesis</div>
+            </div>
+            <div class="band band-live">Live</div>
+          </div>
+          <div class="proj-row">
+            <div class="proj-info">
+              <div class="proj-name">Audio Pipeline</div>
+              <div class="proj-act">Activity 4m ago · Render completed</div>
+            </div>
+            <div class="band band-recent">Recent</div>
+          </div>
+          <div class="proj-row">
+            <div class="proj-info">
+              <div class="proj-name">Codebase Refactor</div>
+              <div class="proj-act">Activity 7m ago · Shape sync updated</div>
+            </div>
+            <div class="band band-today">Today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: signals -->
+    <div class="right">
+      <div class="signals-card" data-reveal>
+        <div class="card-header">Recent Signals</div>
+        <div class="sig-list">
+          <div class="sig-row">
+            <div class="sig-icon ic-code">⌨</div>
+            <div class="sig-body">
+              <div class="sig-title">Codebase shape sync completed</div>
+              <div class="sig-time">2m ago · Files and symbols refreshed from CI/CD</div>
+            </div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-icon ic-audio">♪</div>
+            <div class="sig-body">
+              <div class="sig-title">Audio render completed</div>
+              <div class="sig-time">4m ago · 3 audio segments created and archived</div>
+            </div>
+          </div>
+          <div class="sig-row">
+            <div class="sig-icon ic-roadmap">→</div>
+            <div class="sig-body">
+              <div class="sig-title">Roadmap item advanced</div>
+              <div class="sig-time">7m ago · Resume Generator · Narrative synthesis stage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('[data-reveal]').forEach((e,i) =>
+  e.style.animationDelay = `${0.06 + i * 0.1}s`
+);
+
+// Ticking timer
+let secs = 12 * 60 + 14;
+const timerEl = document.getElementById('timer');
+setInterval(() => {
+  secs++;
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  timerEl.textContent = `${m}m ${s.toString().padStart(2, '0')}s`;
+}, 1000);
+</script>
+</body></html>
