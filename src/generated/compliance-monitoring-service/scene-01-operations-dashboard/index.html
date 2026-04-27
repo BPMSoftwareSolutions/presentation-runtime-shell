@@ -1532,6 +1532,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════
      DEMO ENGINE INTEGRATION — Scene 1 Pilot
      ═══════════════════════════════════════════════════════════════════ -->
+<script src="../../core/demo-cursor.js"></script>
 <script src="../../core/demo-engine.js"></script>
 <script>
   // ─── Scene 1: Operations Dashboard Demo Flow
@@ -1539,81 +1540,77 @@
   // Story: Every signal is captured. Nothing is missed.
   
   const scene01DemoFlow = {
-    intro: "Every signal is captured. Nothing is missed.",
+    intro: "This is where the business runs each morning. The system consolidates schedule, alerts, reports due, and compliance exceptions into one queue.",
     steps: [
-      // Step 1: Highlight compliance issue in alerts
+      // Step 1: KPI Inspection — Cursor hovers over KPI cards
       function() {
-        DEMO.narrate("A compliance signal has been triggered.\nShell Station 184 — threshold deviation.");
-        DEMO.highlight('.alert-item:nth-child(1)', { duration: 3500 });
-        DEMO.pulse('.alert-item:nth-child(1)', 2);
-      },
-      
-      // Step 2: Animate KPI cards with count-up
-      function() {
-        DEMO.narrate("The system is already analyzing the root cause.");
+        DEMO.narrate("These four numbers run the business.\nToday's visits scheduled, reports due, compliance issues, and active alerts.\nThe system consolidates what matters into one view.");
         
-        // Get the 4 KPI value elements
-        const kpiValues = document.querySelectorAll('.kpi-strip .kpi-value');
-        const targets = [3, 2, 1, 4]; // Today's Visits, Reports Due, Compliance Issues, Alerts
+        // Show cursor
+        DEMO.showCursor();
         
-        // Reset to 0 and count up using requestAnimationFrame (MSP style)
-        kpiValues.forEach((el, i) => {
-          const targetNum = targets[i];
-          const startTime = performance.now() + (i * 150);
-          const duration = 1000;
-          
-          el.textContent = '0';
-          
-          const animate = (now) => {
-            if (now < startTime) {
-              requestAnimationFrame(animate);
-              return;
-            }
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            // Cubic easing
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const current = Math.floor(targetNum * eased);
-            el.textContent = current;
-            
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            } else {
-              el.textContent = targetNum;
-            }
-          };
-          requestAnimationFrame(animate);
-        });
-        
-        // Highlight compliance issue card
-        setTimeout(() => {
-          DEMO.highlight('.kpi-red', { duration: 3500 });
-        }, 500);
-      },
-      
-      // Step 3: Highlight "1 Compliance Issue"
-      function() {
-        DEMO.narrate("1 Compliance Issue detected across your fleet.\nAutomated response: Load bank testing recommended within 30 days.");
-        const compCard = Array.from(document.querySelectorAll('.summary-card'))
-          .find(c => c.textContent.includes('Compliance Issues'));
-        if (compCard) {
-          DEMO.highlight(compCard, { duration: 3500 });
-          DEMO.pulse(compCard, 2);
+        // Move cursor to first KPI card
+        const kpi1 = document.querySelector('.kpi-strip .kpi-card:nth-child(1)');
+        if (kpi1) {
+          DEMO.moveCursorToElement(kpi1, 600);
+          setTimeout(() => {
+            DEMO.hoverCursorOn('.kpi-strip .kpi-card:nth-child(1)', 1200);
+            DEMO.highlight('.kpi-strip .kpi-card:nth-child(1)', { duration: 1500 });
+          }, 700);
         }
       },
       
-      // Step 4: Show alert action
+      // Step 2: Alert Discovery — Highlight compliance alert
       function() {
-        DEMO.narrate("All affected locations are auto-flagged for priority scheduling.");
-        const actionBtn = document.querySelector('.alert-item:nth-child(1) .btn-primary');
+        DEMO.narrate("A compliance signal has been triggered.\nOne location flagged for threshold deviation.\nThe system requires context before action.");
+        
+        const alertItem = document.querySelector('.alert-item:nth-child(1)');
+        if (alertItem) {
+          DEMO.moveCursorToElement(alertItem, 1200, () => {
+            DEMO.hoverCursorOn('.alert-item:nth-child(1)', 2000);
+          });
+          setTimeout(() => {
+            DEMO.highlight('.alert-item:nth-child(1)', { duration: 3500 });
+            DEMO.pulse('.alert-item:nth-child(1)', 2);
+          }, 1500);
+        }
+      },
+      
+      // Step 3: Signal Acknowledgment — Focus investigate button
+      function() {
+        DEMO.narrate("The operator opens the full context: customer history, prior findings, previous actions.\nNo manual context reconstruction needed.");
+        
+        const actionBtn = document.querySelector('.alert-item:nth-child(1) .btn-primary') || 
+                         document.querySelector('.alert-item:nth-child(1) button');
         if (actionBtn) {
-          DEMO.highlight('.alert-item:nth-child(1)', { persistent: true, duration: 3000 });
+          DEMO.moveCursorToElement(actionBtn, 1000, () => {
+            setTimeout(() => {
+              DEMO.clickCursor();
+              DEMO.highlight(actionBtn, { duration: 2500 });
+            }, 200);
+          });
         }
       },
       
-      // Step 5: Intelligence moment
+      // Step 4: Highlight compliance risk
       function() {
-        DEMO.narrate("This is compliance automation:\nSignal → Context → Intelligence → Action.\nNo manual work required.");
+        DEMO.narrate("The red card shows: 1 active compliance issue.\nThe system prioritized it. It'll drive the next action.");
+        
+        const kpiRed = document.querySelector('.kpi-red');
+        if (kpiRed) {
+          DEMO.moveCursorToElement(kpiRed, 1200);
+          setTimeout(() => {
+            DEMO.hoverCursorOn('.kpi-red', 2000);
+            DEMO.highlight('.kpi-red', { duration: 3500 });
+            DEMO.pulse('.kpi-red', 2);
+          }, 1500);
+        }
+      },
+      
+      // Step 5: Intelligence moment — Hide cursor, show full loop
+      function() {
+        DEMO.narrate("One compliance signal. Connected to customer context. Converted to operational action.\nSignal → Context → Intelligence → Action.\nThat's the loop that scales.");
+        DEMO.hideCursor();
       }
     ]
   };

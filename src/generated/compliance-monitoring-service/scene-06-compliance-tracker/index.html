@@ -1500,6 +1500,99 @@
   });
 </script>
 
-
+<!-- ═══════════════════════════════════════════════════════════════════
+     DEMO ENGINE INTEGRATION — Compliance Tracker (INTERPRET)
+     ═══════════════════════════════════════════════════════════════════ -->
+<script src="../../core/demo-cursor.js"></script>
+<script src="../../core/demo-engine.js"></script>
+<script>
+  // ─── Scene 6: Compliance Tracker Demo Flow
+  // Demo Role: "Interpret" — Risk Interpretation
+  // Story: Compliance obligations tracked continuously, gaps identified automatically
+  
+  const scene06DemoFlow = {
+    intro: "This is where the business transforms from maintenance to a defensible compliance platform. The system tracks obligations continuously and shows what's satisfied, what's missing, and what action is next.",
+    steps: [
+      // Step 1: Table scan with cursor movement
+      function() {
+        DEMO.narrate("These are the compliance obligations: EPA run-hour logging, UST documentation, NFPA thresholds, annual certification requirements.");
+        DEMO.showCursor();
+        
+        const headers = document.querySelectorAll('.req-table thead th');
+        if (headers.length > 0) {
+          DEMO.moveCursorToElement(headers[0], 500);
+          let delay = 800;
+          for (let i = 1; i < Math.min(headers.length, 4); i++) {
+            setTimeout(() => {
+              DEMO.moveCursorToElement(headers[i], 600);
+            }, delay);
+            delay += 800;
+          }
+        }
+      },
+      
+      // Step 2: Row inspection with highlights
+      function() {
+        DEMO.narrate("The system shows current status for each obligation across all sites. Nothing falls through the cracks.");
+        
+        const rows = document.querySelectorAll('.req-table tbody tr');
+        if (rows.length > 0) {
+          rows.forEach((row, i) => {
+            setTimeout(() => {
+              DEMO.moveCursorToElement(row, 600);
+              DEMO.highlight(row, { duration: 1200 });
+            }, i * 1000);
+          });
+        }
+      },
+      
+      // Step 3: Threshold alert focus
+      function() {
+        DEMO.narrate("When a threshold is exceeded, the system flags it automatically. No waiting for audits to find problems.");
+        
+        const alertRows = document.querySelectorAll('.req-table tbody tr');
+        if (alertRows.length > 0) {
+          alertRows.forEach((row, i) => {
+            if (row.textContent.includes('Alert')) {
+              DEMO.moveCursorToElement(row, 800);
+              setTimeout(() => {
+                DEMO.highlight(row, { duration: 2000 });
+                DEMO.pulse(row, 2);
+              }, 1000);
+            }
+          });
+        }
+      },
+      
+      // Step 4: Risk badges and trends
+      function() {
+        DEMO.narrate("Trends show the direction of change. The system recommends action before the problem becomes acute.");
+        
+        const badges = document.querySelectorAll('.status-badge');
+        if (badges.length > 0) {
+          badges.forEach((badge, i) => {
+            setTimeout(() => {
+              DEMO.moveCursorToElement(badge, 500);
+              DEMO.hoverCursorOn(badge, 800);
+            }, i * 600);
+          });
+        }
+      },
+      
+      // Step 5: Portfolio view
+      function() {
+        DEMO.narrate("At 1,000 sites, this view shows compliance posture across the entire portfolio. Regulatory risk is visible and manageable.");
+        DEMO.hideCursor();
+      }
+    ]
+  };
+  
+  // Initialize demo when DOM is ready
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      DEMO.init('scene-06-compliance-tracker', scene06DemoFlow);
+    }, 500);
+  });
+</script>
 
 </body></html>

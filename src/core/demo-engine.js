@@ -183,5 +183,54 @@ window.DEMO = {
   resume() {
     DEMO.auto = true;
     DEMO.scheduleNext();
+  },
+  
+  // ─── CURSOR INTEGRATION ────────────────────────────
+  moveCursorToElement(selector, duration = 1000, callback) {
+    const el = typeof selector === 'string' 
+      ? document.querySelector(selector)
+      : selector;
+    if (!el) {
+      if (callback) callback();
+      return;
+    }
+    
+    const rect = el.getBoundingClientRect();
+    const targetX = rect.left + rect.width / 2;
+    const targetY = rect.top + rect.height / 2;
+    
+    const currentPos = DEMO_CURSOR.getPosition();
+    const path = [
+      currentPos,
+      {
+        x: currentPos.x + (targetX - currentPos.x) * 0.25,
+        y: currentPos.y + (targetY - currentPos.y) * 0.25
+      },
+      {
+        x: currentPos.x + (targetX - currentPos.x) * 0.75,
+        y: currentPos.y + (targetY - currentPos.y) * 0.75
+      },
+      { x: targetX, y: targetY }
+    ];
+    
+    DEMO_CURSOR.moveCursor(path, duration, callback);
+  },
+  
+  clickCursor() {
+    const pos = DEMO_CURSOR.getPosition();
+    DEMO_CURSOR.click(pos.x, pos.y);
+  },
+  
+  hoverCursorOn(selector, duration = 800) {
+    DEMO_CURSOR.hover(selector, duration);
+  },
+  
+  showCursor() {
+    DEMO_CURSOR.show();
+  },
+  
+  hideCursor() {
+    DEMO_CURSOR.hide();
   }
 };
+
